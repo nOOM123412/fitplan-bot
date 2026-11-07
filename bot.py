@@ -13,7 +13,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 
 # ================= НАСТРОЙКИ =================
-TOKEN = "-"
+TOKEN = "8718686711:AAHX4NrsVn4CfhHhMJr6Z5hsuBdvIvdfjQ"
 WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech"
 ADMIN_ID = 7714111634
 OPERATOR = "@sai_helper"
@@ -56,7 +56,7 @@ async def api_save_user(request):
         db[user_id] = {
             "name": data.get("name", "User"),
             "balance": 0,
-            "sub_until": int(time.time()) + (3 * 24 * 60 * 60),
+            "sub_until": 0,  # Пробного периода нет, пока пользователь не купит
             "referred_by": data.get("referred_by"),
             "ref_count": 0,
             "ref_earned": 0
@@ -102,20 +102,53 @@ def get_main_menu():
 
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
-    await message.answer("Привет! Это <b>FitPlan</b>.\n\nТвой личный тренер и дневник питания. У тебя есть <b>3 дня бесплатного доступа</b>!", reply_markup=get_main_menu())
+    await message.answer("Привет! Это <b>FitPlan</b>.\n\nТвой личный тренер и дневник питания.", reply_markup=get_main_menu())
 
 @dp.callback_query(F.data == "menu_sub")
 async def cb_sub_info(callback: CallbackQuery):
     db = load_db()
     uid = str(callback.from_user.id)
     balance = db.get(uid, {}).get("balance", 0)
-    text = (f"💳 <b>Твоя подписка</b>\n\nБаланс: <b>{balance} ₽</b>\n\n"
-            f"Стоимость подписки на 1 месяц:\n<s>999 ₽</s> <b>499 ₽</b> (-50% 🎉)\n\n"
-            f"Пополнение баланса и покупка подписки происходят внутри приложения.")
+    sub_until = db.get(uid, {}).get("sub_until", 0)
+    
+    now = int(time.time())
+    status = "❌ Не активна"
+    if sub_until > now:
+        days = (sub_until - now) // 86400
+        status = f"✅ Активна ({days} дн.)"
+    
+    text = (
+        f"💳 <b>Твоя подписка</b>\n\n"
+        f"Баланс: <b>{balance} ₽</b>\n"
+        f"Статус: <b>{status}</b>\n\n"
+        f"Стоимость подписки на 1 месяц:\n"
+        f"<s>999 ₽</s> <b>499 ₽</b> (-50% 🎉)\n\n"
+    )
     kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💳 Оплатить с баланса", callback_data="pay_sub")],
+        [InlineKeyboardButton(text="👨‍💻 Оператор", url=f"https://t.me/{OPERATOR.replace('@','')}")],
         [InlineKeyboardButton(text="⬅️ Назад", callback_data="menu_main")]
     ])
     await callback.message.edit_text(text, reply_markup=kb)
+
+@dp.callback_query(F.data == "pay_sub")
+async def cb_pay_sub(callback: CallbackQuery):
+    db = load_db()
+    uid = str(callback.from_user.id)
+    
+    if uid not in db:
+        return await callback.answer("Ошибка: пользователь не найден", show_alert=True)
+    
+    if db[uid]['balance'] < 499:
+        return await callback.answer("Недостаточно средств на балансе!", show_alert=True)
+    
+    db[uid]['balance'] -= 499
+    current_until = max(db[uid]['sub_until'], int(time.time()))
+    db[uid]['sub_until'] = current_until + (30 * 24 * 60 * 60)
+    save_db(db)
+    
+    await callback.answer("Подписка оплачена!", show_alert=True)
+    await cb_sub_info(callback)
 
 @dp.callback_query(F.data == "menu_ref")
 async def cb_ref_info(callback: CallbackQuery):
@@ -136,7 +169,7 @@ async def cb_ref_info(callback: CallbackQuery):
 
 @dp.callback_query(F.data == "menu_main")
 async def cb_main_menu(callback: CallbackQuery):
-    text = "Привет! Это <b>FitPlan</b>.\n\nТвой личный тренер и дневник питания. У тебя есть <b>3 дня бесплатного доступа</b>!"
+    text = "Привет! Это <b>FitPlan</b>.\n\nТвой личный тренер и дневник питания."
     await callback.message.edit_text(text, reply_markup=get_main_menu())
 
 # ================= АДМИН =================
@@ -149,7 +182,6 @@ async def cmd_admin(message: types.Message):
     if message.from_user.id != ADMIN_ID: return await message.answer("⛔ Нет доступа.")
     kb = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💰 Начислить баланс", callback_data="admin_add_balance")],
-        [InlineKeyboardButton(text="👑 Выдать подписку", callback_data="admin_give_sub")]
     ])
     await message.answer("👑 <b>Админ-панель</b>\nВыбери действие:", reply_markup=kb)
 
@@ -183,10 +215,6 @@ async def process_admin_amount(message: Message, state: FSMContext):
         else: await message.answer("❌ Пользователь не найден.")
     except ValueError: await message.answer("❌ Введи число.")
     finally: await state.clear()
-
-@dp.callback_query(F.data == "admin_give_sub")
-async def cb_admin_sub(callback: CallbackQuery):
-    await callback.message.edit_text("Функция в разработке. Используй начисление баланса.")
 
 # ================= ЗАПУСК =================
 async def main():
