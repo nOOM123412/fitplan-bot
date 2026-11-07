@@ -1,19 +1,45 @@
+import os
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
-from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton, LabeledPrice, PreCheckoutQuery
+from aiogram.types import WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.client.default import DefaultBotProperties
+from aiohttp import web
 
-# Твой токен от @BotFather
-TOKEN = "ТВОЙ_ТОКЕН_ЗДЕСЬ"
-# Ссылка на твой index.html (загрузи его на GitHub Pages или Vercel)
+# ================= НАСТРОЙКИ =================
+# Токен жестко вписан, чтобы избежать ошибок с переменными
+TOKEN = "-"
+# Ссылка на твой домен BotHost
 WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech"
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
 dp = Dispatcher()
 
+# ================= ВЕБ-СЕРВЕР =================
+async def handle_index(request):
+    """Отдаёт главную страницу Mini App"""
+    return web.FileResponse('./public/index.html')
+
+async def handle_static(request):
+    """Отдаёт статические файлы (plans.json и т.д.)"""
+    filename = request.match_info['filename']
+    return web.FileResponse(f'./public/{filename}')
+
+async def start_web_server():
+    """Запускает веб-сервер на порту 3000"""
+    app = web.Application()
+    app.router.add_get('/', handle_index)
+    app.router.add_get('/{filename}', handle_static)
+    
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, '0.0.0.0', 3000)
+    await site.start()
+    logging.info("✅ Веб-сервер запущен на порту 3000")
+
+# ================= ХЕНДЛЕРЫ БОТА =================
 @dp.message(Command("start"))
 async def cmd_start(message: types.Message):
     kb = InlineKeyboardMarkup(inline_keyboard=[
@@ -25,29 +51,11 @@ async def cmd_start(message: types.Message):
         reply_markup=kb
     )
 
-# Обработка платежей (Telegram Stars)
-@dp.message(Command("pay"))
-async def cmd_pay(message: types.Message):
-    # 50 звезд за подписку
-    await bot.send_invoice(
-        chat_id=message.chat.id,
-        title="FitPlan Premium",
-        description="Доступ к расширенным планам и закрытому чату",
-        payload="premium_subscription_1month",
-        provider_token="", # Для звезд оставляем пустым
-        currency="XTR", # Telegram Stars
-        prices=[LabeledPrice(label="Premium", amount=50)]
-    )
-
-@dp.pre_checkout_query()
-async def pre_checkout(pre_checkout_q: PreCheckoutQuery):
-    await bot.answer_pre_checkout_query(pre_checkout_q.id, ok=True)
-
-@dp.message(F.successful_payment)
-async def successful_payment(message: types.Message):
-    await message.answer(f"Оплата прошла успешно! Спасибо за поддержку 🚀")
-
+# ================= ЗАПУСК =================
 async def main():
+    # Сначала запускаем веб-сервер, чтобы он слушал порт 3000
+    await start_web_server()
+    # Затем запускаем бота
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
