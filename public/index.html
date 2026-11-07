@@ -7,13 +7,8 @@
 <meta name="theme-color" content="#F4F1EC">
 <title>FitPlan</title>
 <style>
-/* Стили оставляем те же, что и в прошлом сообщении, плюс добавляем стили для новых элементов */
-:root{
-  --bg1:#F4F1EC; --glass:rgba(255,255,255,.55); --glass-strong:rgba(255,255,255,.85);
-  --border:rgba(255,255,255,.7); --text:#2E2A26; --muted:#8A8279; --accent:#7FB69D;
-  --accent-deep:#5E9A7E; --peach:#F7D9C4; --lav:#E4DDF3; --shadow:0 8px 32px rgba(62,58,54,.08);
-  --radius:24px; --radius-sm:16px; --ease:cubic-bezier(.22,1,.36,1);
-}
+/* БАЗА */
+:root{ --bg1:#F4F1EC; --glass:rgba(255,255,255,.55); --glass-strong:rgba(255,255,255,.85); --border:rgba(255,255,255,.7); --text:#2E2A26; --muted:#8A8279; --accent:#7FB69D; --accent-deep:#5E9A7E; --peach:#F7D9C4; --lav:#E4DDF3; --shadow:0 8px 32px rgba(62,58,54,.08); --radius:24px; --radius-sm:16px; --ease:cubic-bezier(.22,1,.36,1); }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0;}
 html,body{height:100%;}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif; background:var(--bg1); color:var(--text); overflow-x:hidden; -webkit-font-smoothing:antialiased;}
@@ -151,12 +146,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 .food-macros-row .input-wrap input{text-align:center;}
 .modal .btn {flex: none; width: 100%; margin-top: 8px; padding: 15px;}
 .modal .btn.secondary {width: auto;}
-
-/* Новые стили для экрана подписки */
-.sub-info-box { text-align: center; padding: 20px; background: rgba(127,182,157,.1); border-radius: 16px; margin-bottom: 20px; }
-.sub-price { font-size: 32px; font-weight: 800; color: var(--accent-deep); }
-.sub-old-price { font-size: 16px; text-decoration: line-through; color: var(--muted); margin-left: 8px; }
-.sub-badge { background: var(--peach); color: #d35400; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 8px; margin-left: 8px; vertical-align: middle; }
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -164,7 +153,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 
 <div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 
-<!-- ОНБОРДИНГ -->
 <div id="onboarding">
   <div class="ob-progress">
     <div class="dot active" data-dot="0"></div><div class="dot" data-dot="1"></div><div class="dot" data-dot="2"></div><div class="dot" data-dot="3"></div>
@@ -218,9 +206,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
   </div>
 </div>
 
-<!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
 <div id="mainApp" class="app">
-  <!-- ГЛАВНАЯ -->
   <section id="home" class="screen active">
     <div class="header"><div><h1 id="greetName">Привет 👋</h1><div class="sub" id="todayWorkout">Сегодня — отдых</div></div><div class="avatar" id="avatarInitial" onclick="switchTab('profile')">A</div></div>
     <div class="card glass card-clickable" onclick="switchTab('food')">
@@ -245,7 +231,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     </div>
   </section>
 
-  <!-- ПЛАН -->
   <section id="plan" class="screen">
     <div class="header"><div><h1>План</h1><div class="sub">Выбери тренировку на каждый день</div></div></div>
     <div class="card glass">
@@ -254,7 +239,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     </div>
   </section>
 
-  <!-- ПИТАНИЕ -->
   <section id="food" class="screen">
     <div class="header"><div><h1>Питание</h1><div class="sub">Дневник</div></div></div>
     <div class="card glass" id="foodListCard">
@@ -264,7 +248,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     <button class="btn" onclick="openFoodModal()">+ Добавить приём пищи</button>
   </section>
 
-  <!-- ДРУЗЬЯ -->
   <section id="friends" class="screen">
     <div class="header"><div><h1>Друзья</h1><div class="sub">Твой ID: <span id="myId" style="font-weight:700; color:var(--accent-deep);"></span></div></div></div>
     <div class="card glass">
@@ -284,7 +267,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     </div>
   </section>
 
-  <!-- ПРОФИЛЬ -->
   <section id="profile" class="screen">
     <div class="header"><div><h1>Профиль</h1><div class="sub">Твои данные</div></div></div>
     <div class="card glass">
@@ -301,51 +283,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     </div>
   </section>
 
-  <!-- ПОДПИСКА -->
-  <section id="subscription" class="screen">
-    <div class="header"><div><h1>Подписка</h1><div class="sub">Управление тарифом</div></div></div>
-    
-    <div class="card glass">
-      <div class="sub-info-box">
-        <div style="font-size:14px; color:var(--muted); margin-bottom:8px;">Твой баланс</div>
-        <div style="font-size:36px; font-weight:800; color:var(--text);" id="subBalance">0 ₽</div>
-        <div style="font-size:13px; color:var(--muted); margin-top:8px;" id="subStatus">Пробный период</div>
-      </div>
-
-      <div style="text-align:center; margin-bottom:20px;">
-        <div class="sub-price">499 ₽ <span class="sub-old-price">999 ₽</span> <span class="sub-badge">-50%</span></div>
-        <div style="font-size:13px; color:var(--muted);">за 1 месяц доступа</div>
-      </div>
-
-      <button class="btn" onclick="buySub()" style="margin-bottom:12px;">Купить подписку</button>
-      <button class="btn secondary" style="width:100%;" onclick="showToast('Напиши оператору: @sai_helper')">Пополнить баланс</button>
-    </div>
-  </section>
-
-  <!-- РЕФЕРАЛЬНАЯ СИСТЕМА -->
-  <section id="referral" class="screen">
-    <div class="header"><div><h1>Рефералка</h1><div class="sub">Приглашай и зарабатывай</div></div></div>
-    
-    <div class="card glass">
-      <div style="text-align:center; padding:20px 0;">
-        <div style="font-size:13px; color:var(--muted); margin-bottom:8px;">Твой заработок</div>
-        <div style="font-size:36px; font-weight:800; color:var(--accent-deep);" id="refEarned">0 ₽</div>
-        <div style="font-size:13px; color:var(--muted); margin-top:8px;">Приглашено: <span id="refCount" style="font-weight:700; color:var(--text);">0</span> чел.</div>
-      </div>
-
-      <div style="background:rgba(127,182,157,.1); border-radius:16px; padding:16px; margin-bottom:20px; text-align:center;">
-        <div style="font-size:13px; font-weight:600; margin-bottom:8px;">Твоя ссылка:</div>
-        <div style="font-size:12px; word-break:break-all; color:var(--accent-deep); font-weight:700;" id="refLink">Загрузка...</div>
-      </div>
-
-      <button class="btn" onclick="copyRefLink()">Скопировать ссылку</button>
-      <div style="font-size:12px; color:var(--muted); text-align:center; margin-top:12px; line-height:1.4;">
-        Ты получаешь <b>10%</b> с каждого пополнения друга.
-      </div>
-    </div>
-  </section>
-
-  <!-- ТАББАР -->
   <nav class="tabbar">
     <div class="tabbar-inner">
       <button class="tab active" data-screen="home"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>Главная</button>
@@ -357,7 +294,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
   </nav>
 </div>
 
-<!-- МОДАЛКИ (без изменений, как в прошлом коде) -->
 <div class="modal-overlay" id="foodModal">
   <div class="modal">
     <h3>Добавить продукт</h3>
@@ -394,99 +330,14 @@ let friends = [];
 let obStep = 0;
 let editGenderValue = 'male';
 
-// Данные для сервера
-let serverUser = null;
-const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
-const SERVER_URL = window.location.origin;
-
-/* ================= ЗАГРУЗКА JSON ================= */
 async function loadPlans() {
   try {
     const response = await fetch('./plans.json');
     if(!response.ok) throw new Error('Network response was not ok');
     TRAINING_DB = await response.json();
-  } catch (error) {
-    console.error('Ошибка загрузки планов:', error);
-  }
+  } catch (error) { console.error('Ошибка загрузки планов:', error); }
 }
 
-/* ================= API СЕРВЕРА ================= */
-async function fetchUser() {
-  try {
-    const res = await fetch(`${SERVER_URL}/api/user?id=${USER_ID}`);
-    if(res.ok) {
-      serverUser = await res.json();
-      updateSubUI();
-      updateRefUI();
-    } else {
-      // Пользователь еще не создан на сервере, создадим при онбординге
-    }
-  } catch(e) { console.error('API Error', e); }
-}
-
-async function saveUserToServer(refId = null) {
-  try {
-    const body = { id: USER_ID, name: user.name };
-    if(refId) body.referred_by = refId;
-    await fetch(`${SERVER_URL}/api/save`, {
-      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
-    });
-    await fetchUser();
-  } catch(e) { console.error(e); }
-}
-
-async function buySub() {
-  if(!serverUser) return toast('Ошибка: данные не загружены');
-  if(serverUser.balance < 499) return toast('Недостаточно средств. Пополните баланс!');
-  
-  try {
-    const res = await fetch(`${SERVER_URL}/api/buy_sub`, {
-      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({id: USER_ID})
-    });
-    const data = await res.json();
-    if(data.status === 'ok') {
-      serverUser.balance = data.new_balance;
-      serverUser.sub_until = data.sub_until;
-      updateSubUI();
-      toast('Подписка успешно продлена!');
-    } else {
-      toast('Ошибка: ' + data.error);
-    }
-  } catch(e) { console.error(e); toast('Ошибка сервера'); }
-}
-
-/* ================= UI ПОДПИСОК ================= */
-function updateSubUI() {
-  if(!serverUser) return;
-  document.getElementById('subBalance').textContent = serverUser.balance + ' ₽';
-  
-  const now = Math.floor(Date.now() / 1000);
-  const until = serverUser.sub_until || 0;
-  let status = 'Пробный период';
-  
-  if(until > now) {
-    const days = Math.ceil((until - now) / 86400);
-    status = `Активна (${days} дн.)`;
-  } else {
-    status = 'Истекла';
-  }
-  document.getElementById('subStatus').textContent = status;
-}
-
-function updateRefUI() {
-  if(!serverUser) return;
-  document.getElementById('refEarned').textContent = serverUser.ref_earned + ' ₽';
-  document.getElementById('refCount').textContent = serverUser.ref_count || 0;
-  const botUsername = 'FitPlan_Robot'; // Замени на реальное имя бота
-  document.getElementById('refLink').textContent = `https://t.me/${botUsername}?start=ref_${USER_ID}`;
-}
-
-function copyRefLink() {
-  const text = document.getElementById('refLink').textContent;
-  navigator.clipboard.writeText(text).then(() => toast('Ссылка скопирована!'));
-}
-
-/* ================= LOCALSTORAGE ================= */
 function saveToLocal(){
   localStorage.setItem('fitplan_user', JSON.stringify(user));
   localStorage.setItem('fitplan_foods', JSON.stringify(todayFoods));
@@ -509,40 +360,306 @@ function loadFromLocal(){
   return !!u;
 }
 
-/* ================= ОНБОРДИНГ (без изменений) ================= */
-// ... (вставить код онбординга из предыдущего сообщения) ...
+/* ================= ОНБОРДИНГ ================= */
+const steps = document.querySelectorAll('.ob-step');
+const dots = document.querySelectorAll('.dot');
+const btnNext = document.getElementById('btnNext');
+const btnBack = document.getElementById('btnBack');
 
-/* ================= ИНИЦИАЛИЗАЦИЯ ================= */
+function hideKeyboard() {
+  document.activeElement.blur();
+  if (window.Telegram?.WebApp?.HapticFeedback) {
+    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+  }
+}
+
+function showStep(i){
+  hideKeyboard();
+  steps.forEach((s,idx)=> s.classList.toggle('active', idx===i));
+  dots.forEach((d,idx)=>{ d.classList.toggle('active', idx===i); d.classList.toggle('done', idx<i); });
+  btnBack.classList.toggle('hidden', i===0);
+  btnNext.textContent = i===steps.length-1 ? 'Начать 🚀' : 'Далее';
+  if(i===steps.length-1) calcNutrition();
+  btnNext.disabled = !validateStep(i);
+  btnNext.style.opacity = btnNext.disabled ? .4 : 1;
+}
+
+function validateStep(i){
+  if(i===0) return document.getElementById('inpName').value.trim().length>0;
+  if(i===1) return +document.getElementById('inpWeight').value>0 && +document.getElementById('inpHeight').value>0;
+  if(i===2) return !!document.querySelector('.goal-card.selected');
+  return true;
+}
+
+['inpName','inpAge','inpWeight','inpHeight'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', ()=>{ btnNext.disabled = !validateStep(obStep); btnNext.style.opacity = btnNext.disabled ? .4 : 1; });
+});
+
+document.querySelectorAll('#genderSeg button').forEach(b=>{
+  b.addEventListener('click', ()=>{ document.querySelectorAll('#genderSeg button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); user.gender = b.dataset.gender; });
+});
+
+document.querySelectorAll('#activityList .level').forEach(l=>{
+  l.addEventListener('click', ()=>{ document.querySelectorAll('#activityList .level').forEach(x=>x.classList.remove('selected')); l.classList.add('selected'); user.activity = +l.dataset.act; });
+});
+
+document.querySelectorAll('.goal-card').forEach(c=>{
+  c.addEventListener('click', ()=>{ document.querySelectorAll('.goal-card').forEach(x=>x.classList.remove('selected')); c.classList.add('selected'); user.goal = c.dataset.goal; btnNext.disabled = false; btnNext.style.opacity = 1; });
+});
+
+btnNext.addEventListener('click', ()=>{
+  hideKeyboard();
+  if(!validateStep(obStep)) return;
+  if(obStep===0){ user.name = document.getElementById('inpName').value.trim(); user.age = +document.getElementById('inpAge').value || 16; }
+  if(obStep===1){ user.weight = +document.getElementById('inpWeight').value; user.height = +document.getElementById('inpHeight').value; }
+  if(obStep < steps.length-1){ obStep++; showStep(obStep); } else { finishOnboarding(); }
+});
+
+btnBack.addEventListener('click', ()=>{ hideKeyboard(); if(obStep>0){ obStep--; showStep(obStep); } });
+
+function calcNutrition(){
+  const {weight,height,age,gender,activity,goal} = user;
+  let bmr = gender==='male' ? 10*weight + 6.25*height - 5*age + 5 : 10*weight + 6.25*height - 5*age - 161;
+  let tdee = bmr * activity;
+  let kcal = tdee;
+  if(goal==='lose') kcal = tdee - 400;
+  if(goal==='gain') kcal = tdee + 300;
+  const protein = Math.round(weight * 1.8);
+  const fat = Math.round(weight * 0.9);
+  const carbs = Math.round((kcal - protein*4 - fat*9) / 4);
+  
+  document.getElementById('calcKcal').textContent = Math.round(kcal);
+  document.getElementById('calcP').textContent = protein + ' г';
+  document.getElementById('calcF').textContent = fat + ' г';
+  document.getElementById('calcC').textContent = carbs + ' г';
+  
+  user.kcal = Math.round(kcal);
+  user.protein = protein; user.fat = fat; user.carbs = carbs;
+}
+
+function finishOnboarding(){
+  if(!user.uniqueId) user.uniqueId = Math.floor(100000 + Math.random() * 900000).toString();
+  saveToLocal();
+  document.getElementById('onboarding').classList.add('hidden');
+  setTimeout(()=>{
+    document.getElementById('onboarding').style.display='none';
+    const app = document.getElementById('mainApp');
+    app.classList.add('visible'); app.style.display='block';
+    requestAnimationFrame(()=> app.style.opacity=1);
+    initMainApp();
+  }, 500);
+}
+
+function initMainApp(){
+  const goalNames = {lose:'Похудение', gain:'Набор массы', tone:'Тонус', strength:'Сила'};
+  document.getElementById('greetName').textContent = 'Привет, ' + user.name + ' 👋';
+  document.getElementById('avatarInitial').textContent = user.name.charAt(0).toUpperCase();
+  document.getElementById('profName').textContent = user.name;
+  document.getElementById('profAge').textContent = user.age + ' лет';
+  document.getElementById('profGender').textContent = user.gender === 'male' ? 'Парень' : 'Девушка';
+  document.getElementById('profWeight').textContent = user.weight + ' кг';
+  document.getElementById('profHeight').textContent = user.height + ' см';
+  document.getElementById('profGoal').textContent = goalNames[user.goal];
+  document.getElementById('profKcal').textContent = user.kcal + ' ккал';
+  document.getElementById('myId').textContent = user.uniqueId;
+  
+  updateHomeMacros(); renderWeekPlans(); renderStreak(); renderFoodList(); renderFriends();
+}
+
+function updateHomeMacros(){
+  const eatenKcal = todayFoods.reduce((s,f)=> s+f.kcal, 0);
+  const eatenP = todayFoods.reduce((s,f)=> s+f.p, 0);
+  const eatenF = todayFoods.reduce((s,f)=> s+f.f, 0);
+  const eatenC = todayFoods.reduce((s,f)=> s+f.c, 0);
+  const left = Math.max(0, user.kcal - eatenKcal);
+  const pct = user.kcal > 0 ? Math.min(100, Math.round(eatenKcal / user.kcal * 100)) : 0;
+  
+  document.getElementById('kcalRing').style.setProperty('--p', pct + '%');
+  document.getElementById('kcalLeft').textContent = left;
+  document.getElementById('kcalEaten').innerHTML = eatenKcal + ' <small>/ ' + user.kcal + '</small>';
+  document.getElementById('kcalTarget').textContent = user.kcal;
+  document.getElementById('macroP').textContent = eatenP + ' г';
+  document.getElementById('macroF').textContent = eatenF + ' г';
+  document.getElementById('macroC').textContent = eatenC + ' г';
+  saveToLocal();
+}
+
+function renderWeekPlans(){
+  const grid = document.getElementById('weekGrid');
+  grid.innerHTML = '';
+  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  if(Object.keys(TRAINING_DB).length === 0) { grid.innerHTML = '<div class="empty"><p>Загрузка планов...</p></div>'; return; }
+  days.forEach(day=>{
+    const selected = weekPlans[day];
+    const dayOptions = TRAINING_DB[day] || [];
+    const div = document.createElement('div');
+    div.className = 'plan-card' + (selected ? ' open' : '');
+    div.innerHTML = `
+      <div class="plan-header" onclick="togglePlan('${day}')">
+        <span class="plan-day">${day}</span>
+        <span class="plan-title">${selected ? selected.name : 'Выбрать тренировку'}</span>
+        <svg class="plan-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+      <div class="plan-details">
+        <p>${selected ? selected.desc : 'Нажми, чтобы выбрать вариант из списка.'}</p>
+        ${selected ? '<p style="color:var(--text);font-weight:600;font-size:13px;">Упражнения:</p><ul style="padding-left:16px;font-size:13px;color:var(--muted);margin-bottom:12px;">' + selected.exercises.map(e=>'<li>'+e+'</li>').join('') + '</ul>' : ''}
+        <div class="plan-options">${dayOptions.map(opt=>`<div class="plan-opt ${selected && selected.name===opt.name?'selected':''}" onclick="selectPlan('${day}','${opt.name}')">${opt.name}</div>`).join('')}</div>
+      </div>`;
+    grid.appendChild(div);
+  });
+  updateTodayWorkout();
+}
+
+function togglePlan(day){
+  const cards = document.querySelectorAll('.plan-card');
+  const idx = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].indexOf(day);
+  if(idx >= 0 && cards[idx]) cards[idx].classList.toggle('open');
+}
+
+function selectPlan(day, planName){
+  const found = TRAINING_DB[day].find(o=>o.name===planName);
+  if(found) weekPlans[day] = found;
+  renderWeekPlans(); saveToLocal(); toast('План на ' + day + ' обновлён');
+}
+
+function updateTodayWorkout(){
+  const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const todayIdx = new Date().getDay();
+  const todayName = days[todayIdx];
+  const plan = weekPlans[todayName];
+  const sub = document.getElementById('todayWorkout');
+  const content = document.getElementById('todayPlanContent');
+  if(plan){
+    sub.textContent = 'Сегодня — ' + plan.name;
+    content.innerHTML = `<div class="ex"><span class="ex-name">${plan.name}</span><span class="ex-sets">${plan.exercises.length} упр.</span></div>`;
+    const btn = document.createElement('button'); btn.className = 'btn'; btn.style.marginTop = '16px'; btn.textContent = 'Завершить тренировку';
+    btn.onclick = ()=>{ const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1; streakDone[dayIdx] = true; renderStreak(); saveToLocal(); toast('Тренировка засчитана! 💪'); };
+    content.appendChild(btn);
+  } else {
+    sub.textContent = 'Сегодня — отдых'; content.innerHTML = '<p class="muted">План не выбран. Перейди в раздел «План».</p>';
+  }
+}
+
+function renderStreak(){
+  const container = document.getElementById('streakContainer');
+  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  container.innerHTML = days.map((d,i)=>`<div class="day ${streakDone[i]?'done':''}">${d}</div>`).join('');
+}
+
+function openFoodModal(){ document.getElementById('foodModal').classList.add('show'); }
+function closeFoodModal(){ document.getElementById('foodModal').classList.remove('show'); }
+function addFood(){
+  const name = document.getElementById('foodName').value.trim();
+  const kcal100 = +document.getElementById('foodKcal').value || 0;
+  const p100 = +document.getElementById('foodP').value || 0;
+  const f100 = +document.getElementById('foodF').value || 0;
+  const c100 = +document.getElementById('foodC').value || 0;
+  const weight = +document.getElementById('foodWeight').value || 100;
+  if(!name || kcal100 <= 0) { toast('Заполни название и ккал'); return; }
+  const ratio = weight / 100;
+  todayFoods.push({ name, kcal: Math.round(kcal100 * ratio), p: Math.round(p100*ratio), f: Math.round(f100*ratio), c: Math.round(c100*ratio), weight });
+  updateHomeMacros(); renderFoodList(); closeFoodModal(); toast('Продукт добавлен');
+  ['foodName','foodKcal','foodP','foodF','foodC','foodWeight'].forEach(id=> document.getElementById(id).value='');
+}
+
+function renderFoodList(){
+  const container = document.getElementById('foodItems');
+  if(todayFoods.length === 0){
+    container.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg><p>Ты пока ничего не добавил.<br>Добавь продукт, и я посчитаю КБЖУ.</p></div>';
+  } else {
+    container.innerHTML = todayFoods.map(f=>`<div class="ex"><span class="ex-name">${f.name} <span style="font-size:12px;color:var(--muted);">${f.weight}г</span></span><span class="ex-sets">${f.kcal} ккал</span></div>`).join('');
+  }
+}
+
+let searchType = 'id';
+function switchSearch(type){
+  searchType = type;
+  document.querySelectorAll('#searchSeg button').forEach((b, i) => b.classList.toggle('active', (type==='id' && i===0) || (type==='tg' && i===1)));
+  document.getElementById('friendSearchInput').placeholder = type === 'id' ? 'Введи 6 цифр...' : 'Введи @username...';
+}
+
+function findFriend(){
+  const val = document.getElementById('friendSearchInput').value.trim();
+  if(!val) return toast('Введи данные для поиска');
+  if(friends.find(f => f.id === val || f.tg === val)) return toast('Этот друг уже добавлен');
+  const fakeNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Сергей', 'Екатерина'];
+  const randomName = fakeNames[Math.floor(Math.random() * fakeNames.length)];
+  const randomStreak = Math.floor(Math.random() * 7);
+  friends.push({ id: searchType === 'id' ? val : Math.floor(100000 + Math.random()*900000).toString(), tg: searchType === 'tg' ? val : '', name: randomName, streak: randomStreak });
+  saveToLocal(); renderFriends(); document.getElementById('friendSearchInput').value = ''; toast('Друг добавлен!');
+}
+
+function renderFriends(){
+  const container = document.getElementById('friendsContainer');
+  if(friends.length === 0){
+    container.innerHTML = '<div class="empty" style="padding:16px 0;"><p>Пока никого нет. Добавь друга по ID или юзернейму.</p></div>';
+  } else {
+    container.innerHTML = friends.map((f, i) => `
+      <div class="rank" style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid rgba(46,42,38,.06);">
+        <div style="width:32px; height:32px; border-radius:10px; background:var(--accent); display:grid; place-items:center; font-weight:800; color:#fff; font-size:14px;">${f.name.charAt(0).toUpperCase()}</div>
+        <div style="flex:1; font-size:15px; font-weight:600;">${f.name}</div>
+        <div style="font-size:14px; font-weight:700; color:var(--accent-deep);">${f.streak} дн.</div>
+        <div style="cursor:pointer; color:var(--muted); padding:4px;" onclick="removeFriend(${i})">✕</div>
+      </div>`).join('');
+  }
+}
+
+function removeFriend(index) { friends.splice(index, 1); saveToLocal(); renderFriends(); toast('Друг удален'); }
+
+function openEditProfile(){
+  document.getElementById('editName').value = user.name;
+  document.getElementById('editAge').value = user.age;
+  document.getElementById('editWeight').value = user.weight;
+  document.getElementById('editHeight').value = user.height;
+  editGenderValue = user.gender;
+  document.querySelectorAll('#editGenderSeg button').forEach(b => b.classList.toggle('active', b.dataset.gender === editGenderValue));
+  document.getElementById('editProfileModal').classList.add('show');
+}
+
+function setEditGender(gender) {
+  editGenderValue = gender;
+  document.querySelectorAll('#editGenderSeg button').forEach(b => b.classList.toggle('active', b.dataset.gender === gender));
+}
+
+function closeEditProfile(){ document.getElementById('editProfileModal').classList.remove('show'); }
+
+function saveProfile(){
+  const n = document.getElementById('editName').value.trim();
+  const a = +document.getElementById('editAge').value;
+  const w = +document.getElementById('editWeight').value;
+  const h = +document.getElementById('editHeight').value;
+  if(n) user.name = n;
+  if(a) user.age = a;
+  if(w) user.weight = w;
+  if(h) user.height = h;
+  user.gender = editGenderValue;
+  calcNutrition(); saveToLocal(); initMainApp(); closeEditProfile(); toast('Профиль обновлён');
+}
+
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.screen===name));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active', s.id===name));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+document.querySelectorAll('.tab').forEach(tab=>{ tab.addEventListener('click', ()=> switchTab(tab.dataset.screen)); });
+
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
 async function startApp() {
   await loadPlans();
-  await fetchUser(); // Загружаем данные с сервера при старте
-
-  // Проверяем реферальный параметр
-  const urlParams = new URLSearchParams(window.location.search);
-  const refId = urlParams.get('ref');
-
   if(loadFromLocal()){
-    // Если локально есть профиль, просто показываем приложение
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     document.getElementById('mainApp').style.opacity = 1;
     document.getElementById('mainApp').classList.add('visible');
     initMainApp();
-  } else {
-    // Если профиля нет, показываем онбординг
-    showStep(0);
-  }
+  } else { showStep(0); }
 }
-
-// Перехватываем завершение онбординга, чтобы отправить данные на сервер
-const oldFinishOnboarding = finishOnboarding;
-finishOnboarding = function() {
-  oldFinishOnboarding(); // Вызываем старую логику
-  const urlParams = new URLSearchParams(window.location.search);
-  const refId = urlParams.get('ref');
-  saveUserToServer(refId); // Сохраняем на сервер с рефом
-};
-
 startApp();
 </script>
 </body>
