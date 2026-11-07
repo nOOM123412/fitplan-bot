@@ -2,37 +2,67 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#F4F1EC">
 <title>FitPlan</title>
 <style>
 /* БАЗА */
-:root{ --bg1:#F4F1EC; --glass:rgba(255,255,255,.55); --glass-strong:rgba(255,255,255,.85); --border:rgba(255,255,255,.7); --text:#2E2A26; --muted:#8A8279; --accent:#7FB69D; --accent-deep:#5E9A7E; --peach:#F7D9C4; --lav:#E4DDF3; --shadow:0 8px 32px rgba(62,58,54,.08); --radius:24px; --radius-sm:16px; --ease:cubic-bezier(.22,1,.36,1); }
+:root{
+  --bg1:#F4F1EC; --glass:rgba(255,255,255,.55); --glass-strong:rgba(255,255,255,.85);
+  --border:rgba(255,255,255,.7); --text:#2E2A26; --muted:#8A8279; --accent:#7FB69D;
+  --accent-deep:#5E9A7E; --peach:#F7D9C4; --lav:#E4DDF3; --shadow:0 8px 32px rgba(62,58,54,.08);
+  --radius:24px; --radius-sm:16px; --ease:cubic-bezier(.22,1,.36,1);
+}
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0;}
 html,body{height:100%;}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif; background:var(--bg1); color:var(--text); overflow-x:hidden; -webkit-font-smoothing:antialiased;}
+
+/* ФОН */
 .bg-blobs{position:fixed; inset:0; z-index:-1; overflow:hidden;}
 .blob{position:absolute; border-radius:50%; filter:blur(60px); opacity:.55; animation:float 18s ease-in-out infinite;}
 .blob.b1{width:320px; height:320px; background:var(--accent); top:-80px; left:-80px;}
 .blob.b2{width:280px; height:280px; background:var(--peach); bottom:-60px; right:-60px; animation-delay:-6s;}
 .blob.b3{width:240px; height:240px; background:var(--lav); top:40%; right:-100px; animation-delay:-12s;}
 @keyframes float{0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(30px,-40px) scale(1.1);} 66%{transform:translate(-20px,30px) scale(.95);}}
+
 .glass, .glass-strong{background:var(--glass); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow);}
 .glass-strong{background:var(--glass-strong);}
+
 .app{max-width:480px; margin:0 auto; min-height:100dvh; padding:env(safe-area-inset-top) 16px calc(96px + env(safe-area-inset-bottom)); position:relative;}
-#onboarding{position:fixed; inset:0; z-index:100; max-width:480px; margin:0 auto; padding:calc(24px + env(safe-area-inset-top)) 20px calc(24px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; transition:opacity .5s var(--ease), transform .5s var(--ease);}
+
+/* ОНБОРДИНГ — ИСПРАВЛЕНА СТРУКТУРА */
+#onboarding{
+  position:fixed; inset:0; z-index:100; max-width:480px; margin:0 auto;
+  display:flex; flex-direction:column;
+  transition:opacity .5s var(--ease), transform .5s var(--ease);
+}
 #onboarding.hidden{opacity:0; transform:scale(.96); pointer-events:none;}
+
+.ob-content{
+  flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  padding:calc(24px + env(safe-area-inset-top)) 20px 20px;
+}
+.ob-footer{
+  flex-shrink:0;
+  padding:12px 20px calc(20px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top, var(--bg1) 60%, transparent);
+  position:relative;
+  z-index:10;
+}
+
 .ob-progress{display:flex; gap:6px; margin-bottom:32px;}
 .ob-progress .dot{flex:1; height:4px; border-radius:2px; background:rgba(46,42,38,.12); overflow:hidden; position:relative;}
 .ob-progress .dot::after{content:""; position:absolute; inset:0; background:var(--accent); transform:scaleX(0); transform-origin:left; transition:transform .5s var(--ease);}
 .ob-progress .dot.active::after{transform:scaleX(1);}
 .ob-progress .dot.done::after{transform:scaleX(1); opacity:.5;}
-.ob-step{flex:1; display:none; flex-direction:column; animation:slideIn .5s var(--ease);}
+
+.ob-step{display:none; flex-direction:column; animation:slideIn .5s var(--ease);}
 .ob-step.active{display:flex;}
 @keyframes slideIn{from{opacity:0; transform:translateX(30px);} to{opacity:1; transform:translateX(0);}}
 .ob-title{font-size:28px; font-weight:700; letter-spacing:-.5px; margin-bottom:8px; line-height:1.15;}
 .ob-sub{font-size:15px; color:var(--muted); margin-bottom:28px; line-height:1.4;}
+
 .field{margin-bottom:16px;}
 .field label{display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:8px;}
 .input-wrap{display:flex; align-items:center; gap:12px; background:var(--glass-strong); backdrop-filter:blur(20px); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; transition:all .2s;}
@@ -60,12 +90,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 .goal-card.selected .gc-icon svg{stroke:#fff;}
 .goal-card .gc-title{font-size:15px; font-weight:700;}
 .goal-card .gc-desc{font-size:12px; color:var(--muted); line-height:1.3;}
-.ob-nav{margin-top:auto; padding-top:24px; display:flex; gap:12px;}
+
+.ob-nav{display:flex; gap:12px;}
 .btn{flex:1; border:none; border-radius:var(--radius-sm); padding:17px; font-size:16px; font-weight:700; background:var(--accent); color:#fff; cursor:pointer; transition:all .25s var(--ease); box-shadow:0 8px 24px rgba(127,182,157,.35); display:flex; align-items:center; justify-content:center; gap:8px;}
 .btn:active{transform:scale(.97);}
 .btn:disabled{opacity:.4; box-shadow:none; cursor:not-allowed;}
 .btn.secondary{background:var(--glass-strong); color:var(--text); border:1px solid var(--border); box-shadow:var(--shadow); flex:0 0 auto; padding:17px 24px;}
 .btn svg{width:20px; height:20px; stroke:currentColor;}
+
+/* ОСНОВНОЕ ПРИЛОЖЕНИЕ */
 #mainApp{display:none; opacity:0; transition:opacity .6s var(--ease);}
 #mainApp.visible{display:block; opacity:1;}
 .header{display:flex; align-items:center; justify-content:space-between; padding:calc(16px + env(safe-area-inset-top)) 0 16px;}
@@ -153,60 +186,67 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 
 <div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 
+<!-- ОНБОРДИНГ (ИСПРАВЛЕН) -->
 <div id="onboarding">
-  <div class="ob-progress">
-    <div class="dot active" data-dot="0"></div><div class="dot" data-dot="1"></div><div class="dot" data-dot="2"></div><div class="dot" data-dot="3"></div>
-  </div>
-  <div class="ob-step active" data-step="0">
-    <div class="ob-title">Давай знакомиться 👋</div>
-    <div class="ob-sub">Пара вопросов, чтобы всё было по-твоему</div>
-    <div class="field"><label>Как тебя зовут?</label><div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><input type="text" id="inpName" placeholder="Имя"></div></div>
-    <div class="field"><label>Возраст</label><div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><input type="number" id="inpAge" placeholder="16"><span class="unit">лет</span></div></div>
-    <div class="field"><label>Пол</label><div class="segment" id="genderSeg"><button data-gender="male" class="active">Парень</button><button data-gender="female">Девушка</button></div></div>
-  </div>
-  <div class="ob-step" data-step="1">
-    <div class="ob-title">Параметры тела</div>
-    <div class="ob-sub">Нужны для расчёта КБЖУ и нагрузки</div>
-    <div class="field"><label>Вес</label><div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/><path d="M6 21h12a2 2 0 0 0 2-2l-2-8H6l-2 8a2 2 0 0 0 2 2z"/></svg><input type="number" id="inpWeight" placeholder="65"><span class="unit">кг</span></div></div>
-    <div class="field"><label>Рост</label><div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v20M8 6l4-4 4 4M8 18l4 4 4-4"/></svg><input type="number" id="inpHeight" placeholder="175"><span class="unit">см</span></div></div>
-    <div class="field"><label>Уровень активности</label><div class="activity-levels" id="activityList">
-      <button class="level" data-act="1.2"><div class="lv-dot"></div><div class="lv-info"><div class="lv-title">Низкий</div><div class="lv-desc">Сплю и учусь</div></div></button>
-      <button class="level selected" data-act="1.375"><div class="lv-dot"></div><div class="lv-info"><div class="lv-title">Средний</div><div class="lv-desc">Пара тренировок в неделю</div></div></button>
-      <button class="level" data-act="1.55"><div class="lv-dot"></div><div class="lv-info"><div class="lv-title">Высокий</div><div class="lv-desc">3–5 тренировок в неделю</div></div></button>
-      <button class="level" data-act="1.725"><div class="lv-dot"></div><div class="lv-info"><div class="lv-title">Очень высокий</div><div class="lv-desc">Спорт почти каждый день</div></div></button>
-    </div></div>
-  </div>
-  <div class="ob-step" data-step="2">
-    <div class="ob-title">Какая цель?</div>
-    <div class="ob-sub">Приложение подстроит план и питание</div>
-    <div class="goal-grid" id="goalGrid">
-      <button class="goal-card" data-goal="lose"><div class="gc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v6M12 22v-6M4 12H2M22 12h-2M6 6l4 4M18 6l-4 4M6 18l4-4M18 18l-4-4"/></svg></div><div class="gc-title">Похудеть</div><div class="gc-desc">Сбросить вес</div></button>
-      <button class="goal-card" data-goal="gain"><div class="gc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 12h12M12 6v12"/></svg></div><div class="gc-title">Набрать массу</div><div class="gc-desc">Стать больше</div></button>
-      <button class="goal-card" data-goal="tone"><div class="gc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="gc-title">Тонус</div><div class="gc-desc">Поддерживать форму</div></button>
-      <button class="goal-card" data-goal="strength"><div class="gc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 4v16M18 4v16M4 7h4M16 7h4M4 17h4M16 17h4M8 12h8"/></svg></div><div class="gc-title">Сила</div><div class="gc-desc">Прогресс в весах</div></button>
+  <div class="ob-content">
+    <div class="ob-progress">
+      <div class="dot active" data-dot="0"></div><div class="dot" data-dot="1"></div><div class="dot" data-dot="2"></div><div class="dot" data-dot="3"></div>
     </div>
-  </div>
-  <div class="ob-step" data-step="3">
-    <div class="ob-title">Готово! 🎉</div>
-    <div class="ob-sub">Вот твоя стартовая норма</div>
-    <div class="glass-strong" style="padding:24px; text-align:center;">
-      <div style="font-size:13px; color:var(--muted); margin-bottom:6px;">Твоя норма калорий</div>
-      <div id="calcKcal" style="font-size:44px; font-weight:800; letter-spacing:-1px; color:var(--accent-deep);">0</div>
-      <div style="font-size:13px; color:var(--muted);">ккал / день</div>
-      <div class="macros" style="margin-top:20px;">
-        <div class="macro"><div class="mv" id="calcP">0 г</div><div class="ml">Белки</div></div>
-        <div class="macro"><div class="mv" id="calcF">0 г</div><div class="ml">Жиры</div></div>
-        <div class="macro"><div class="mv" id="calcC">0 г</div><div class="ml">Углеводы</div></div>
+    <div class="ob-step active" data-step="0">
+      <div class="ob-title">Давай знакомиться 👋</div>
+      <div class="ob-sub">Пара вопросов, чтобы всё было по-твоему</div>
+      <div class="field"><label>Как тебя зовут?</label><div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><input type="text" id="inpName" placeholder="Имя"></div></div>
+      <div class="field"><label>Возраст</label><div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><input type="number" id="inpAge" placeholder="16"><span class="unit">лет</span></div></div>
+      <div class="field"><label>Пол</label><div class="segment" id="genderSeg"><button data-gender="male" class="active">Парень</button><button data-gender="female">Девушка</button></div></div>
+    </div>
+    <div class="ob-step" data-step="1">
+      <div class="ob-title">Параметры тела</div>
+      <div class="ob-sub">Нужны для расчёта КБЖУ и нагрузки</div>
+      <div class="field"><label>Вес</label><div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/><path d="M6 21h12a2 2 0 0 0 2-2l-2-8H6l-2 8a2 2 0 0 0 2 2z"/></svg><input type="number" id="inpWeight" placeholder="65"><span class="unit">кг</span></div></div>
+      <div class="field"><label>Рост</label><div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v20M8 6l4-4 4 4M8 18l4 4 4-4"/></svg><input type="number" id="inpHeight" placeholder="175"><span class="unit">см</span></div></div>
+      <div class="field"><label>Уровень активности</label><div class="activity-levels" id="activityList">
+        <button class="level" data-act="1.2"><div class="lv-dot"></div><div class="lv-info"><div class="lv-title">Низкий</div><div class="lv-desc">Сплю и учусь</div></div></button>
+        <button class="level selected" data-act="1.375"><div class="lv-dot"></div><div class="lv-info"><div class="lv-title">Средний</div><div class="lv-desc">Пара тренировок в неделю</div></div></button>
+        <button class="level" data-act="1.55"><div class="lv-dot"></div><div class="lv-info"><div class="lv-title">Высокий</div><div class="lv-desc">3–5 тренировок в неделю</div></div></button>
+        <button class="level" data-act="1.725"><div class="lv-dot"></div><div class="lv-info"><div class="lv-title">Очень высокий</div><div class="lv-desc">Спорт почти каждый день</div></div></button>
+      </div></div>
+    </div>
+    <div class="ob-step" data-step="2">
+      <div class="ob-title">Какая цель?</div>
+      <div class="ob-sub">Приложение подстроит план и питание</div>
+      <div class="goal-grid" id="goalGrid">
+        <button class="goal-card" data-goal="lose"><div class="gc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v6M12 22v-6M4 12H2M22 12h-2M6 6l4 4M18 6l-4 4M6 18l4-4M18 18l-4-4"/></svg></div><div class="gc-title">Похудеть</div><div class="gc-desc">Сбросить вес</div></button>
+        <button class="goal-card" data-goal="gain"><div class="gc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 12h12M12 6v12"/></svg></div><div class="gc-title">Набрать массу</div><div class="gc-desc">Стать больше</div></button>
+        <button class="goal-card" data-goal="tone"><div class="gc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="gc-title">Тонус</div><div class="gc-desc">Поддерживать форму</div></button>
+        <button class="goal-card" data-goal="strength"><div class="gc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 4v16M18 4v16M4 7h4M16 7h4M4 17h4M16 17h4M8 12h8"/></svg></div><div class="gc-title">Сила</div><div class="gc-desc">Прогресс в весах</div></button>
+      </div>
+    </div>
+    <div class="ob-step" data-step="3">
+      <div class="ob-title">Готово! 🎉</div>
+      <div class="ob-sub">Вот твоя стартовая норма</div>
+      <div class="glass-strong" style="padding:24px; text-align:center;">
+        <div style="font-size:13px; color:var(--muted); margin-bottom:6px;">Твоя норма калорий</div>
+        <div id="calcKcal" style="font-size:44px; font-weight:800; letter-spacing:-1px; color:var(--accent-deep);">0</div>
+        <div style="font-size:13px; color:var(--muted);">ккал / день</div>
+        <div class="macros" style="margin-top:20px;">
+          <div class="macro"><div class="mv" id="calcP">0 г</div><div class="ml">Белки</div></div>
+          <div class="macro"><div class="mv" id="calcF">0 г</div><div class="ml">Жиры</div></div>
+          <div class="macro"><div class="mv" id="calcC">0 г</div><div class="ml">Углеводы</div></div>
+        </div>
       </div>
     </div>
   </div>
-  <div class="ob-nav">
-    <button class="btn secondary hidden" id="btnBack"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <button class="btn" id="btnNext">Далее</button>
+  <div class="ob-footer">
+    <div class="ob-nav">
+      <button class="btn secondary hidden" id="btnBack"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <button class="btn" id="btnNext">Далее</button>
+    </div>
   </div>
 </div>
 
+<!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
 <div id="mainApp" class="app">
+  <!-- ГЛАВНАЯ -->
   <section id="home" class="screen active">
     <div class="header"><div><h1 id="greetName">Привет 👋</h1><div class="sub" id="todayWorkout">Сегодня — отдых</div></div><div class="avatar" id="avatarInitial" onclick="switchTab('profile')">A</div></div>
     <div class="card glass card-clickable" onclick="switchTab('food')">
@@ -231,6 +271,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     </div>
   </section>
 
+  <!-- ПЛАН -->
   <section id="plan" class="screen">
     <div class="header"><div><h1>План</h1><div class="sub">Выбери тренировку на каждый день</div></div></div>
     <div class="card glass">
@@ -239,6 +280,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     </div>
   </section>
 
+  <!-- ПИТАНИЕ -->
   <section id="food" class="screen">
     <div class="header"><div><h1>Питание</h1><div class="sub">Дневник</div></div></div>
     <div class="card glass" id="foodListCard">
@@ -248,6 +290,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     <button class="btn" onclick="openFoodModal()">+ Добавить приём пищи</button>
   </section>
 
+  <!-- ДРУЗЬЯ -->
   <section id="friends" class="screen">
     <div class="header"><div><h1>Друзья</h1><div class="sub">Твой ID: <span id="myId" style="font-weight:700; color:var(--accent-deep);"></span></div></div></div>
     <div class="card glass">
@@ -267,6 +310,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     </div>
   </section>
 
+  <!-- ПРОФИЛЬ -->
   <section id="profile" class="screen">
     <div class="header"><div><h1>Профиль</h1><div class="sub">Твои данные</div></div></div>
     <div class="card glass">
@@ -283,6 +327,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     </div>
   </section>
 
+  <!-- ТАББАР -->
   <nav class="tabbar">
     <div class="tabbar-inner">
       <button class="tab active" data-screen="home"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>Главная</button>
@@ -294,6 +339,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
   </nav>
 </div>
 
+<!-- МОДАЛКА ЕДЫ -->
 <div class="modal-overlay" id="foodModal">
   <div class="modal">
     <h3>Добавить продукт</h3>
@@ -305,6 +351,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
   </div>
 </div>
 
+<!-- МОДАЛКА ПРОФИЛЯ -->
 <div class="modal-overlay" id="editProfileModal">
   <div class="modal">
     <h3>Редактировать</h3>
@@ -382,6 +429,7 @@ function showStep(i){
   if(i===steps.length-1) calcNutrition();
   btnNext.disabled = !validateStep(i);
   btnNext.style.opacity = btnNext.disabled ? .4 : 1;
+  document.querySelector('.ob-content').scrollTop = 0;
 }
 
 function validateStep(i){
