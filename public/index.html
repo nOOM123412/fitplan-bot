@@ -3,10 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, interactive-widget=resizes-content">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#F4F1EC">
 <title>FitPlan</title>
 <style>
+/* ... (Все стили оставляем точно такими же, как в твоем текущем файле, они не ломались) ... */
 :root{ --bg1:#F4F1EC; --glass:rgba(255,255,255,.55); --glass-strong:rgba(255,255,255,.85); --border:rgba(255,255,255,.7); --text:#2E2A26; --muted:#8A8279; --accent:#7FB69D; --accent-deep:#5E9A7E; --peach:#F7D9C4; --lav:#E4DDF3; --shadow:0 8px 32px rgba(62,58,54,.08); --radius:24px; --radius-sm:16px; --ease:cubic-bezier(.22,1,.36,1); }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0;}
 html,body{height:100%;}
@@ -340,11 +339,10 @@ let obStep = 0;
 let editGenderValue = 'male';
 let currentPlanDay = null;
 
-// Данные для сервера
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
 const SERVER_URL = window.location.origin;
 
-/* ================= ЗАГРУЗКА JSON ================= */
+/* ================= ЗАГРУЗКА ================= */
 async function loadPlans() {
   try {
     const response = await fetch('./plans.json');
@@ -353,50 +351,33 @@ async function loadPlans() {
   } catch (error) { console.error('Ошибка загрузки планов:', error); }
 }
 
-/* ================= API СЕРВЕРА ================= */
-async function fetchUser() {
+async function fetchServerData() {
   try {
     const res = await fetch(`${SERVER_URL}/api/user?id=${USER_ID}`);
     if(res.ok) {
       const data = await res.json();
       user.sub_until = data.sub_until || 0;
-      updateProfileUI();
+      if(data.foods) todayFoods = data.foods;
+      if(data.plans) weekPlans = data.plans;
+      if(data.streak) streakDone = data.streak;
+      if(data.profile && Object.keys(data.profile).length) {
+        user = { ...user, ...data.profile, sub_until: user.sub_until };
+      }
     }
   } catch(e) { console.error('API Error', e); }
 }
 
-async function saveUserToServer(refId = null) {
+async function saveToServer() {
   try {
-    const body = { id: USER_ID, name: user.name };
-    if(refId) body.referred_by = refId;
-    await fetch(`${SERVER_URL}/api/save`, {
-      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
-    });
-    await fetchUser();
+    const data = {
+      id: USER_ID,
+      profile: { name: user.name, age: user.age, gender: user.gender, weight: user.weight, height: user.height, goal: user.goal, kcal: user.kcal, uniqueId: user.uniqueId },
+      foods: todayFoods,
+      plans: weekPlans,
+      streak: streakDone
+    };
+    await fetch(`${SERVER_URL}/api/save`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
   } catch(e) { console.error(e); }
-}
-
-/* ================= LOCALSTORAGE ================= */
-function saveToLocal(){
-  localStorage.setItem('fitplan_user', JSON.stringify(user));
-  localStorage.setItem('fitplan_foods', JSON.stringify(todayFoods));
-  localStorage.setItem('fitplan_plans', JSON.stringify(weekPlans));
-  localStorage.setItem('fitplan_streak', JSON.stringify(streakDone));
-  localStorage.setItem('fitplan_friends', JSON.stringify(friends));
-}
-
-function loadFromLocal(){
-  const u = localStorage.getItem('fitplan_user');
-  const f = localStorage.getItem('fitplan_foods');
-  const p = localStorage.getItem('fitplan_plans');
-  const s = localStorage.getItem('fitplan_streak');
-  const fr = localStorage.getItem('fitplan_friends');
-  if(u) user = JSON.parse(u);
-  if(f) todayFoods = JSON.parse(f);
-  if(p) weekPlans = JSON.parse(p);
-  if(s) streakDone = JSON.parse(s);
-  if(fr) friends = JSON.parse(fr);
-  return !!u;
 }
 
 /* ================= ОНБОРДИНГ ================= */
@@ -407,9 +388,7 @@ const btnBack = document.getElementById('btnBack');
 
 function hideKeyboard() {
   document.activeElement.blur();
-  if (window.Telegram?.WebApp?.HapticFeedback) {
-    window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
-  }
+  if (window.Telegram?.WebApp?.HapticFeedback) window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
 }
 
 function showStep(i){
@@ -479,11 +458,7 @@ function calcNutrition(){
 
 function finishOnboarding(){
   if(!user.uniqueId) user.uniqueId = Math.floor(100000 + Math.random() * 900000).toString();
-  saveToLocal();
-  const urlParams = new URLSearchParams(window.location.search);
-  const refId = urlParams.get('ref');
-  saveUserToServer(refId);
-  
+  saveToServer();
   document.getElementById('onboarding').classList.add('hidden');
   setTimeout(()=>{
     document.getElementById('onboarding').style.display='none';
@@ -494,20 +469,7 @@ function finishOnboarding(){
   }, 500);
 }
 
-/* ================= ОСНОВНОЕ ПРИЛОЖЕНИЕ ================= */
-function updateProfileUI() {
-  const now = Math.floor(Date.now() / 1000);
-  const subEl = document.getElementById('profSub');
-  if(user.sub_until > now) {
-    const days = Math.ceil((user.sub_until - now) / 86400);
-    subEl.textContent = `Активна (${days} дн.)`;
-    subEl.style.color = 'var(--accent-deep)';
-  } else {
-    subEl.textContent = 'Не активна';
-    subEl.style.color = 'var(--muted)';
-  }
-}
-
+/* ================= ОСНОВНОЕ ================= */
 function initMainApp(){
   const goalNames = {lose:'Похудение', gain:'Набор массы', tone:'Тонус', strength:'Сила'};
   document.getElementById('greetName').textContent = 'Привет, ' + user.name + ' 👋';
@@ -521,9 +483,19 @@ function initMainApp(){
   document.getElementById('profKcal').textContent = user.kcal + ' ккал';
   document.getElementById('myId').textContent = user.uniqueId;
   
-  updateProfileUI();
-  updateHomeMacros(); renderWeekPlans(); renderStreak(); renderFoodList(); renderFriends();
-  fetchUser();
+  updateProfileUI(); updateHomeMacros(); renderWeekPlans(); renderStreak(); renderFoodList(); renderFriends();
+}
+
+function updateProfileUI() {
+  const now = Math.floor(Date.now() / 1000);
+  const subEl = document.getElementById('profSub');
+  if(user.sub_until > now) {
+    subEl.textContent = `Активна (${Math.ceil((user.sub_until - now) / 86400)} дн.)`;
+    subEl.style.color = 'var(--accent-deep)';
+  } else {
+    subEl.textContent = 'Не активна';
+    subEl.style.color = 'var(--muted)';
+  }
 }
 
 function updateHomeMacros(){
@@ -541,15 +513,14 @@ function updateHomeMacros(){
   document.getElementById('macroP').textContent = eatenP + ' г';
   document.getElementById('macroF').textContent = eatenF + ' г';
   document.getElementById('macroC').textContent = eatenC + ' г';
-  saveToLocal();
+  saveToServer();
 }
 
-/* ================= ПЛАН НА НЕДЕЛЮ ================= */
+/* ================= ПЛАН ================= */
 function renderWeekPlans(){
   const grid = document.getElementById('weekGrid');
   grid.innerHTML = '';
   const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-  
   days.forEach(day=>{
     const selected = weekPlans[day];
     const div = document.createElement('div');
@@ -577,10 +548,9 @@ function openPlanModal(day) {
     return;
   }
 
-  // Группируем планы по первой букве (условная группа)
   const groups = {};
   TRAINING_DB[day].forEach(plan => {
-    const groupName = plan.name.split(' ')[0]; // "Грудь", "Спина", "Ноги" и т.д.
+    const groupName = plan.name.split(' ')[0];
     if(!groups[groupName]) groups[groupName] = [];
     groups[groupName].push(plan);
   });
@@ -589,7 +559,6 @@ function openPlanModal(day) {
     const groupDiv = document.createElement('div');
     groupDiv.style.marginBottom = '16px';
     groupDiv.innerHTML = `<div style="font-size:13px; font-weight:700; color:var(--muted); margin-bottom:8px; text-transform:uppercase;">${groupName}</div>`;
-    
     plans.forEach(plan => {
       const btn = document.createElement('div');
       btn.style.cssText = 'padding:12px 14px; background:rgba(255,255,255,0.5); border-radius:12px; margin-bottom:6px; font-size:14px; font-weight:600; cursor:pointer; border:1px solid rgba(46,42,38,0.08);';
@@ -599,7 +568,6 @@ function openPlanModal(day) {
     });
     content.appendChild(groupDiv);
   }
-  
   document.getElementById('planModal').classList.add('show');
 }
 
@@ -613,7 +581,7 @@ function selectPlan(day, planName){
   if(found) weekPlans[day] = found;
   closePlanModal();
   renderWeekPlans(); 
-  saveToLocal(); 
+  saveToServer(); 
   toast('План на ' + day + ' обновлён');
 }
 
@@ -628,7 +596,7 @@ function updateTodayWorkout(){
     sub.textContent = 'Сегодня — ' + plan.name;
     content.innerHTML = `<div class="ex"><span class="ex-name">${plan.name}</span><span class="ex-sets">${plan.exercises.length} упр.</span></div>`;
     const btn = document.createElement('button'); btn.className = 'btn'; btn.style.marginTop = '16px'; btn.textContent = 'Завершить тренировку';
-    btn.onclick = ()=>{ const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1; streakDone[dayIdx] = true; renderStreak(); saveToLocal(); toast('Тренировка засчитана! 💪'); };
+    btn.onclick = ()=>{ const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1; streakDone[dayIdx] = true; renderStreak(); saveToServer(); toast('Тренировка засчитана! 💪'); };
     content.appendChild(btn);
   } else {
     sub.textContent = 'Сегодня — отдых'; content.innerHTML = '<p class="muted">План не выбран. Перейди в раздел «План».</p>';
@@ -652,9 +620,21 @@ function addFood(){
   const c100 = +document.getElementById('foodC').value || 0;
   const weight = +document.getElementById('foodWeight').value || 100;
   if(!name || kcal100 <= 0) { toast('Заполни название и ккал'); return; }
+  
   const ratio = weight / 100;
-  todayFoods.push({ name, kcal: Math.round(kcal100 * ratio), p: Math.round(p100*ratio), f: Math.round(f100*ratio), c: Math.round(c100*ratio), weight });
-  updateHomeMacros(); renderFoodList(); closeFoodModal(); toast('Продукт добавлен');
+  todayFoods.push({ 
+    name, 
+    kcal: Math.round(kcal100 * ratio), 
+    p: Math.round(p100*ratio), 
+    f: Math.round(f100*ratio), 
+    c: Math.round(c100*ratio), 
+    weight 
+  });
+  
+  updateHomeMacros(); 
+  renderFoodList(); 
+  closeFoodModal(); 
+  toast('Продукт добавлен');
   ['foodName','foodKcal','foodP','foodF','foodC','foodWeight'].forEach(id=> document.getElementById(id).value='');
 }
 
@@ -687,7 +667,7 @@ function findFriend(){
     name: displayName, 
     streak: Math.floor(Math.random() * 7) 
   });
-  saveToLocal(); 
+  saveToServer(); 
   renderFriends(); 
   document.getElementById('friendSearchInput').value = ''; 
   toast('Друг добавлен!');
@@ -708,7 +688,7 @@ function renderFriends(){
   }
 }
 
-function removeFriend(index) { friends.splice(index, 1); saveToLocal(); renderFriends(); toast('Друг удален'); }
+function removeFriend(index) { friends.splice(index, 1); saveToServer(); renderFriends(); toast('Друг удален'); }
 
 /* ================= ПРОФИЛЬ ================= */
 function openEditProfile(){
@@ -738,7 +718,7 @@ function saveProfile(){
   if(w) user.weight = w;
   if(h) user.height = h;
   user.gender = editGenderValue;
-  calcNutrition(); saveToLocal(); initMainApp(); closeEditProfile(); toast('Профиль обновлён');
+  calcNutrition(); saveToServer(); initMainApp(); closeEditProfile(); toast('Профиль обновлён');
 }
 
 /* ================= НАВИГАЦИЯ ================= */
@@ -749,7 +729,6 @@ function switchTab(name){
 }
 document.querySelectorAll('.tab').forEach(tab=>{ tab.addEventListener('click', ()=> switchTab(tab.dataset.screen)); });
 
-/* ================= TOAST ================= */
 let toastTimer;
 function toast(msg){
   const t = document.getElementById('toast');
@@ -760,7 +739,10 @@ function toast(msg){
 /* ================= СТАРТ ================= */
 async function startApp() {
   await loadPlans();
-  if(loadFromLocal()){
+  await fetchServerData();
+  const hasLocal = !!localStorage.getItem('fitplan_user');
+  
+  if(hasLocal || user.name) {
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     document.getElementById('mainApp').style.opacity = 1;
