@@ -8,7 +8,7 @@ from aiogram.client.default import DefaultBotProperties
 # Твой токен от @BotFather
 TOKEN = "ТВОЙ_ТОКЕН_ЗДЕСЬ"
 # Ссылка на твой index.html (загрузи его на GitHub Pages или Vercel)
-WEBAPP_URL = "bot-1794065452-4003-noom.bothost.tech"
+WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech"
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
