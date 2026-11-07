@@ -7,62 +7,33 @@
 <meta name="theme-color" content="#F4F1EC">
 <title>FitPlan</title>
 <style>
-/* БАЗА */
-:root{
-  --bg1:#F4F1EC; --glass:rgba(255,255,255,.55); --glass-strong:rgba(255,255,255,.85);
-  --border:rgba(255,255,255,.7); --text:#2E2A26; --muted:#8A8279; --accent:#7FB69D;
-  --accent-deep:#5E9A7E; --peach:#F7D9C4; --lav:#E4DDF3; --shadow:0 8px 32px rgba(62,58,54,.08);
-  --radius:24px; --radius-sm:16px; --ease:cubic-bezier(.22,1,.36,1);
-}
+:root{ --bg1:#F4F1EC; --glass:rgba(255,255,255,.55); --glass-strong:rgba(255,255,255,.85); --border:rgba(255,255,255,.7); --text:#2E2A26; --muted:#8A8279; --accent:#7FB69D; --accent-deep:#5E9A7E; --peach:#F7D9C4; --lav:#E4DDF3; --shadow:0 8px 32px rgba(62,58,54,.08); --radius:24px; --radius-sm:16px; --ease:cubic-bezier(.22,1,.36,1); }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0;}
 html,body{height:100%;}
 body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif; background:var(--bg1); color:var(--text); overflow-x:hidden; -webkit-font-smoothing:antialiased;}
-
-/* ФОН */
 .bg-blobs{position:fixed; inset:0; z-index:-1; overflow:hidden;}
 .blob{position:absolute; border-radius:50%; filter:blur(60px); opacity:.55; animation:float 18s ease-in-out infinite;}
 .blob.b1{width:320px; height:320px; background:var(--accent); top:-80px; left:-80px;}
 .blob.b2{width:280px; height:280px; background:var(--peach); bottom:-60px; right:-60px; animation-delay:-6s;}
 .blob.b3{width:240px; height:240px; background:var(--lav); top:40%; right:-100px; animation-delay:-12s;}
 @keyframes float{0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(30px,-40px) scale(1.1);} 66%{transform:translate(-20px,30px) scale(.95);}}
-
 .glass, .glass-strong{background:var(--glass); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow);}
 .glass-strong{background:var(--glass-strong);}
-
 .app{max-width:480px; margin:0 auto; min-height:100dvh; padding:env(safe-area-inset-top) 16px calc(96px + env(safe-area-inset-bottom)); position:relative;}
-
-/* ОНБОРДИНГ — ИСПРАВЛЕНА СТРУКТУРА */
-#onboarding{
-  position:fixed; inset:0; z-index:100; max-width:480px; margin:0 auto;
-  display:flex; flex-direction:column;
-  transition:opacity .5s var(--ease), transform .5s var(--ease);
-}
+#onboarding{position:fixed; inset:0; z-index:100; max-width:480px; margin:0 auto; display:flex; flex-direction:column; transition:opacity .5s var(--ease), transform .5s var(--ease);}
 #onboarding.hidden{opacity:0; transform:scale(.96); pointer-events:none;}
-
-.ob-content{
-  flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
-  padding:calc(24px + env(safe-area-inset-top)) 20px 20px;
-}
-.ob-footer{
-  flex-shrink:0;
-  padding:12px 20px calc(20px + env(safe-area-inset-bottom));
-  background:linear-gradient(to top, var(--bg1) 60%, transparent);
-  position:relative;
-  z-index:10;
-}
-
+.ob-content{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:calc(24px + env(safe-area-inset-top)) 20px 20px;}
+.ob-footer{flex-shrink:0; padding:12px 20px calc(20px + env(safe-area-inset-bottom)); background:linear-gradient(to top, var(--bg1) 60%, transparent); position:relative; z-index:10;}
 .ob-progress{display:flex; gap:6px; margin-bottom:32px;}
 .ob-progress .dot{flex:1; height:4px; border-radius:2px; background:rgba(46,42,38,.12); overflow:hidden; position:relative;}
 .ob-progress .dot::after{content:""; position:absolute; inset:0; background:var(--accent); transform:scaleX(0); transform-origin:left; transition:transform .5s var(--ease);}
 .ob-progress .dot.active::after{transform:scaleX(1);}
 .ob-progress .dot.done::after{transform:scaleX(1); opacity:.5;}
-
 .ob-step{display:none; flex-direction:column; animation:slideIn .5s var(--ease);}
 .ob-step.active{display:flex;}
 @keyframes slideIn{from{opacity:0; transform:translateX(30px);} to{opacity:1; transform:translateX(0);}}
 .ob-title{font-size:28px; font-weight:700; letter-spacing:-.5px; margin-bottom:8px; line-height:1.15;}
 .ob-sub{font-size:15px; color:var(--muted); margin-bottom:28px; line-height:1.4;}
-
 .field{margin-bottom:16px;}
 .field label{display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:8px;}
 .input-wrap{display:flex; align-items:center; gap:12px; background:var(--glass-strong); backdrop-filter:blur(20px); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; transition:all .2s;}
@@ -90,15 +61,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 .goal-card.selected .gc-icon svg{stroke:#fff;}
 .goal-card .gc-title{font-size:15px; font-weight:700;}
 .goal-card .gc-desc{font-size:12px; color:var(--muted); line-height:1.3;}
-
 .ob-nav{display:flex; gap:12px;}
 .btn{flex:1; border:none; border-radius:var(--radius-sm); padding:17px; font-size:16px; font-weight:700; background:var(--accent); color:#fff; cursor:pointer; transition:all .25s var(--ease); box-shadow:0 8px 24px rgba(127,182,157,.35); display:flex; align-items:center; justify-content:center; gap:8px;}
 .btn:active{transform:scale(.97);}
 .btn:disabled{opacity:.4; box-shadow:none; cursor:not-allowed;}
 .btn.secondary{background:var(--glass-strong); color:var(--text); border:1px solid var(--border); box-shadow:var(--shadow); flex:0 0 auto; padding:17px 24px;}
 .btn svg{width:20px; height:20px; stroke:currentColor;}
-
-/* ОСНОВНОЕ ПРИЛОЖЕНИЕ */
 #mainApp{display:none; opacity:0; transition:opacity .6s var(--ease);}
 #mainApp.visible{display:block; opacity:1;}
 .header{display:flex; align-items:center; justify-content:space-between; padding:calc(16px + env(safe-area-inset-top)) 0 16px;}
@@ -134,19 +102,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 .day{flex:1; aspect-ratio:1; border-radius:12px; background:rgba(46,42,38,.05); display:grid; place-items:center; font-size:11px; font-weight:600; color:var(--muted); transition:all .3s var(--ease);}
 .day.done{background:var(--accent); color:#fff; box-shadow:0 4px 12px rgba(127,182,157,.35);}
 .week-grid{display:flex; flex-direction:column; gap:8px;}
-.plan-card{border-radius:var(--radius-sm); overflow:hidden; background:rgba(46,42,38,.03); transition:all .3s var(--ease);}
-.plan-card.open{background:rgba(127,182,157,.08);}
-.plan-header{display:flex; align-items:center; justify-content:space-between; padding:14px 16px; cursor:pointer;}
-.plan-day{font-weight:700; font-size:15px; width:40px;}
-.plan-title{flex:1; font-size:14px; color:var(--text);}
-.plan-arrow{width:18px; height:18px; stroke:var(--muted); transition:transform .3s var(--ease);}
-.plan-card.open .plan-arrow{transform:rotate(180deg); stroke:var(--accent);}
-.plan-details{padding:0 16px 16px; display:none;}
-.plan-card.open .plan-details{display:block; animation:fadeUp .3s var(--ease);}
-.plan-details p{font-size:13px; color:var(--muted); line-height:1.5; margin-bottom:12px;}
-.plan-options{display:flex; flex-direction:column; gap:6px; max-height: 250px; overflow-y: auto;}
-.plan-opt{padding:10px 12px; border-radius:10px; background:#fff; border:1px solid rgba(46,42,38,.08); font-size:13px; font-weight:600; cursor:pointer; transition:all .2s;}
-.plan-opt.selected{background:var(--accent); color:#fff; border-color:var(--accent);}
+.plan-row{display:flex; align-items:center; padding:12px 0; border-bottom:1px solid rgba(46,42,38,.06);}
+.plan-row:last-child{border-bottom:none;}
+.plan-day-label{font-weight:700; font-size:15px; width:45px;}
+.plan-name-text{flex:1; font-size:14px; color:var(--text); margin-left:10px;}
+.plan-add-btn{width:32px; height:32px; border-radius:50%; background:rgba(127,182,157,.15); border:none; display:grid; place-items:center; cursor:pointer; flex:none;}
+.plan-add-btn svg{width:18px; height:18px; stroke:var(--accent-deep);}
 .empty{text-align:center; padding:32px 16px; color:var(--muted);}
 .empty svg{width:48px; height:48px; stroke:var(--muted); opacity:.4; margin-bottom:12px;}
 .empty p{font-size:14px; line-height:1.5; margin-bottom:16px;}
@@ -186,12 +147,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 
 <div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 
-<!-- ОНБОРДИНГ (ИСПРАВЛЕН) -->
+<!-- ОНБОРДИНГ -->
 <div id="onboarding">
   <div class="ob-content">
-    <div class="ob-progress">
-      <div class="dot active" data-dot="0"></div><div class="dot" data-dot="1"></div><div class="dot" data-dot="2"></div><div class="dot" data-dot="3"></div>
-    </div>
+    <div class="ob-progress"><div class="dot active" data-dot="0"></div><div class="dot" data-dot="1"></div><div class="dot" data-dot="2"></div><div class="dot" data-dot="3"></div></div>
     <div class="ob-step active" data-step="0">
       <div class="ob-title">Давай знакомиться 👋</div>
       <div class="ob-sub">Пара вопросов, чтобы всё было по-твоему</div>
@@ -246,7 +205,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 
 <!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
 <div id="mainApp" class="app">
-  <!-- ГЛАВНАЯ -->
   <section id="home" class="screen active">
     <div class="header"><div><h1 id="greetName">Привет 👋</h1><div class="sub" id="todayWorkout">Сегодня — отдых</div></div><div class="avatar" id="avatarInitial" onclick="switchTab('profile')">A</div></div>
     <div class="card glass card-clickable" onclick="switchTab('food')">
@@ -271,7 +229,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     </div>
   </section>
 
-  <!-- ПЛАН -->
   <section id="plan" class="screen">
     <div class="header"><div><h1>План</h1><div class="sub">Выбери тренировку на каждый день</div></div></div>
     <div class="card glass">
@@ -280,7 +237,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     </div>
   </section>
 
-  <!-- ПИТАНИЕ -->
   <section id="food" class="screen">
     <div class="header"><div><h1>Питание</h1><div class="sub">Дневник</div></div></div>
     <div class="card glass" id="foodListCard">
@@ -290,7 +246,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     <button class="btn" onclick="openFoodModal()">+ Добавить приём пищи</button>
   </section>
 
-  <!-- ДРУЗЬЯ -->
   <section id="friends" class="screen">
     <div class="header"><div><h1>Друзья</h1><div class="sub">Твой ID: <span id="myId" style="font-weight:700; color:var(--accent-deep);"></span></div></div></div>
     <div class="card glass">
@@ -310,7 +265,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     </div>
   </section>
 
-  <!-- ПРОФИЛЬ -->
   <section id="profile" class="screen">
     <div class="header"><div><h1>Профиль</h1><div class="sub">Твои данные</div></div></div>
     <div class="card glass">
@@ -322,12 +276,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
       <div class="profile-field"><span class="pf-label">Рост</span><span class="pf-value" id="profHeight">—</span></div>
       <div class="profile-field"><span class="pf-label">Цель</span><span class="pf-value" id="profGoal">—</span></div>
       <div class="profile-field"><span class="pf-label">Норма ккал</span><span class="pf-value" id="profKcal">—</span></div>
+      <div class="profile-field"><span class="pf-label">Подписка</span><span class="pf-value" id="profSub" style="color:var(--accent-deep);">—</span></div>
       <button class="btn secondary" style="width:100%; margin-top:16px;" onclick="openEditProfile()">Редактировать</button>
       <div class="disclaimer">Приложение FitPlan носит информационный характер. Перед началом тренировок проконсультируйтесь с врачом. Мы не несем ответственности за возможные травмы.</div>
     </div>
   </section>
 
-  <!-- ТАББАР -->
   <nav class="tabbar">
     <div class="tabbar-inner">
       <button class="tab active" data-screen="home"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>Главная</button>
@@ -339,7 +293,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
   </nav>
 </div>
 
-<!-- МОДАЛКА ЕДЫ -->
+<!-- МОДАЛКИ -->
 <div class="modal-overlay" id="foodModal">
   <div class="modal">
     <h3>Добавить продукт</h3>
@@ -351,7 +305,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
   </div>
 </div>
 
-<!-- МОДАЛКА ПРОФИЛЯ -->
 <div class="modal-overlay" id="editProfileModal">
   <div class="modal">
     <h3>Редактировать</h3>
@@ -364,19 +317,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
   </div>
 </div>
 
+<!-- МОДАЛКА ВЫБОРА ПЛАНА -->
+<div class="modal-overlay" id="planModal">
+  <div class="modal">
+    <h3>Выбрать тренировку</h3>
+    <div id="planModalContent"></div>
+    <button class="btn secondary" style="width:100%; margin-top:16px;" onclick="closePlanModal()">Закрыть</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 /* ================= ПЕРЕМЕННЫЕ ================= */
 let TRAINING_DB = {};
-let user = { name:'', age:16, gender:'male', weight:65, height:175, activity:1.375, goal:'gain', kcal:0, protein:0, fat:0, carbs:0, uniqueId:'' };
+let user = { name:'', age:16, gender:'male', weight:65, height:175, activity:1.375, goal:'gain', kcal:0, protein:0, fat:0, carbs:0, uniqueId:'', sub_until:0 };
 let todayFoods = [];
 let weekPlans = { 'Пн':null, 'Вт':null, 'Ср':null, 'Чт':null, 'Пт':null, 'Сб':null, 'Вс':null };
 let streakDone = [false,false,false,false,false,false,false];
 let friends = [];
 let obStep = 0;
 let editGenderValue = 'male';
+let currentPlanDay = null;
 
+// Данные для сервера
+const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
+const SERVER_URL = window.location.origin;
+
+/* ================= ЗАГРУЗКА JSON ================= */
 async function loadPlans() {
   try {
     const response = await fetch('./plans.json');
@@ -385,6 +353,30 @@ async function loadPlans() {
   } catch (error) { console.error('Ошибка загрузки планов:', error); }
 }
 
+/* ================= API СЕРВЕРА ================= */
+async function fetchUser() {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/user?id=${USER_ID}`);
+    if(res.ok) {
+      const data = await res.json();
+      user.sub_until = data.sub_until || 0;
+      updateProfileUI();
+    }
+  } catch(e) { console.error('API Error', e); }
+}
+
+async function saveUserToServer(refId = null) {
+  try {
+    const body = { id: USER_ID, name: user.name };
+    if(refId) body.referred_by = refId;
+    await fetch(`${SERVER_URL}/api/save`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)
+    });
+    await fetchUser();
+  } catch(e) { console.error(e); }
+}
+
+/* ================= LOCALSTORAGE ================= */
 function saveToLocal(){
   localStorage.setItem('fitplan_user', JSON.stringify(user));
   localStorage.setItem('fitplan_foods', JSON.stringify(todayFoods));
@@ -488,6 +480,10 @@ function calcNutrition(){
 function finishOnboarding(){
   if(!user.uniqueId) user.uniqueId = Math.floor(100000 + Math.random() * 900000).toString();
   saveToLocal();
+  const urlParams = new URLSearchParams(window.location.search);
+  const refId = urlParams.get('ref');
+  saveUserToServer(refId);
+  
   document.getElementById('onboarding').classList.add('hidden');
   setTimeout(()=>{
     document.getElementById('onboarding').style.display='none';
@@ -496,6 +492,20 @@ function finishOnboarding(){
     requestAnimationFrame(()=> app.style.opacity=1);
     initMainApp();
   }, 500);
+}
+
+/* ================= ОСНОВНОЕ ПРИЛОЖЕНИЕ ================= */
+function updateProfileUI() {
+  const now = Math.floor(Date.now() / 1000);
+  const subEl = document.getElementById('profSub');
+  if(user.sub_until > now) {
+    const days = Math.ceil((user.sub_until - now) / 86400);
+    subEl.textContent = `Активна (${days} дн.)`;
+    subEl.style.color = 'var(--accent-deep)';
+  } else {
+    subEl.textContent = 'Не активна';
+    subEl.style.color = 'var(--muted)';
+  }
 }
 
 function initMainApp(){
@@ -511,7 +521,9 @@ function initMainApp(){
   document.getElementById('profKcal').textContent = user.kcal + ' ккал';
   document.getElementById('myId').textContent = user.uniqueId;
   
+  updateProfileUI();
   updateHomeMacros(); renderWeekPlans(); renderStreak(); renderFoodList(); renderFriends();
+  fetchUser();
 }
 
 function updateHomeMacros(){
@@ -532,42 +544,77 @@ function updateHomeMacros(){
   saveToLocal();
 }
 
+/* ================= ПЛАН НА НЕДЕЛЮ ================= */
 function renderWeekPlans(){
   const grid = document.getElementById('weekGrid');
   grid.innerHTML = '';
   const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-  if(Object.keys(TRAINING_DB).length === 0) { grid.innerHTML = '<div class="empty"><p>Загрузка планов...</p></div>'; return; }
+  
   days.forEach(day=>{
     const selected = weekPlans[day];
-    const dayOptions = TRAINING_DB[day] || [];
     const div = document.createElement('div');
-    div.className = 'plan-card' + (selected ? ' open' : '');
+    div.className = 'plan-row';
     div.innerHTML = `
-      <div class="plan-header" onclick="togglePlan('${day}')">
-        <span class="plan-day">${day}</span>
-        <span class="plan-title">${selected ? selected.name : 'Выбрать тренировку'}</span>
-        <svg class="plan-arrow" viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
-      </div>
-      <div class="plan-details">
-        <p>${selected ? selected.desc : 'Нажми, чтобы выбрать вариант из списка.'}</p>
-        ${selected ? '<p style="color:var(--text);font-weight:600;font-size:13px;">Упражнения:</p><ul style="padding-left:16px;font-size:13px;color:var(--muted);margin-bottom:12px;">' + selected.exercises.map(e=>'<li>'+e+'</li>').join('') + '</ul>' : ''}
-        <div class="plan-options">${dayOptions.map(opt=>`<div class="plan-opt ${selected && selected.name===opt.name?'selected':''}" onclick="selectPlan('${day}','${opt.name}')">${opt.name}</div>`).join('')}</div>
-      </div>`;
+      <span class="plan-day-label">${day}</span>
+      <span class="plan-name-text">${selected ? selected.name : 'Отдых'}</span>
+      <button class="plan-add-btn" onclick="openPlanModal('${day}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    `;
     grid.appendChild(div);
   });
   updateTodayWorkout();
 }
 
-function togglePlan(day){
-  const cards = document.querySelectorAll('.plan-card');
-  const idx = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].indexOf(day);
-  if(idx >= 0 && cards[idx]) cards[idx].classList.toggle('open');
+function openPlanModal(day) {
+  currentPlanDay = day;
+  const content = document.getElementById('planModalContent');
+  content.innerHTML = '';
+  
+  if(!TRAINING_DB[day]) {
+    content.innerHTML = '<p class="muted">Нет доступных планов для этого дня.</p>';
+    document.getElementById('planModal').classList.add('show');
+    return;
+  }
+
+  // Группируем планы по первой букве (условная группа)
+  const groups = {};
+  TRAINING_DB[day].forEach(plan => {
+    const groupName = plan.name.split(' ')[0]; // "Грудь", "Спина", "Ноги" и т.д.
+    if(!groups[groupName]) groups[groupName] = [];
+    groups[groupName].push(plan);
+  });
+
+  for(const [groupName, plans] of Object.entries(groups)) {
+    const groupDiv = document.createElement('div');
+    groupDiv.style.marginBottom = '16px';
+    groupDiv.innerHTML = `<div style="font-size:13px; font-weight:700; color:var(--muted); margin-bottom:8px; text-transform:uppercase;">${groupName}</div>`;
+    
+    plans.forEach(plan => {
+      const btn = document.createElement('div');
+      btn.style.cssText = 'padding:12px 14px; background:rgba(255,255,255,0.5); border-radius:12px; margin-bottom:6px; font-size:14px; font-weight:600; cursor:pointer; border:1px solid rgba(46,42,38,0.08);';
+      btn.textContent = plan.name;
+      btn.onclick = () => selectPlan(day, plan.name);
+      groupDiv.appendChild(btn);
+    });
+    content.appendChild(groupDiv);
+  }
+  
+  document.getElementById('planModal').classList.add('show');
+}
+
+function closePlanModal() {
+  document.getElementById('planModal').classList.remove('show');
+  currentPlanDay = null;
 }
 
 function selectPlan(day, planName){
   const found = TRAINING_DB[day].find(o=>o.name===planName);
   if(found) weekPlans[day] = found;
-  renderWeekPlans(); saveToLocal(); toast('План на ' + day + ' обновлён');
+  closePlanModal();
+  renderWeekPlans(); 
+  saveToLocal(); 
+  toast('План на ' + day + ' обновлён');
 }
 
 function updateTodayWorkout(){
@@ -594,6 +641,7 @@ function renderStreak(){
   container.innerHTML = days.map((d,i)=>`<div class="day ${streakDone[i]?'done':''}">${d}</div>`).join('');
 }
 
+/* ================= ПИТАНИЕ ================= */
 function openFoodModal(){ document.getElementById('foodModal').classList.add('show'); }
 function closeFoodModal(){ document.getElementById('foodModal').classList.remove('show'); }
 function addFood(){
@@ -619,6 +667,7 @@ function renderFoodList(){
   }
 }
 
+/* ================= ДРУЗЬЯ ================= */
 let searchType = 'id';
 function switchSearch(type){
   searchType = type;
@@ -630,11 +679,18 @@ function findFriend(){
   const val = document.getElementById('friendSearchInput').value.trim();
   if(!val) return toast('Введи данные для поиска');
   if(friends.find(f => f.id === val || f.tg === val)) return toast('Этот друг уже добавлен');
-  const fakeNames = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Сергей', 'Екатерина'];
-  const randomName = fakeNames[Math.floor(Math.random() * fakeNames.length)];
-  const randomStreak = Math.floor(Math.random() * 7);
-  friends.push({ id: searchType === 'id' ? val : Math.floor(100000 + Math.random()*900000).toString(), tg: searchType === 'tg' ? val : '', name: randomName, streak: randomStreak });
-  saveToLocal(); renderFriends(); document.getElementById('friendSearchInput').value = ''; toast('Друг добавлен!');
+  
+  const displayName = searchType === 'tg' ? val : 'Друг ' + val;
+  friends.push({ 
+    id: searchType === 'id' ? val : Math.floor(100000 + Math.random()*900000).toString(), 
+    tg: searchType === 'tg' ? val : '', 
+    name: displayName, 
+    streak: Math.floor(Math.random() * 7) 
+  });
+  saveToLocal(); 
+  renderFriends(); 
+  document.getElementById('friendSearchInput').value = ''; 
+  toast('Друг добавлен!');
 }
 
 function renderFriends(){
@@ -654,6 +710,7 @@ function renderFriends(){
 
 function removeFriend(index) { friends.splice(index, 1); saveToLocal(); renderFriends(); toast('Друг удален'); }
 
+/* ================= ПРОФИЛЬ ================= */
 function openEditProfile(){
   document.getElementById('editName').value = user.name;
   document.getElementById('editAge').value = user.age;
@@ -684,6 +741,7 @@ function saveProfile(){
   calcNutrition(); saveToLocal(); initMainApp(); closeEditProfile(); toast('Профиль обновлён');
 }
 
+/* ================= НАВИГАЦИЯ ================= */
 function switchTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.screen===name));
   document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active', s.id===name));
@@ -691,6 +749,7 @@ function switchTab(name){
 }
 document.querySelectorAll('.tab').forEach(tab=>{ tab.addEventListener('click', ()=> switchTab(tab.dataset.screen)); });
 
+/* ================= TOAST ================= */
 let toastTimer;
 function toast(msg){
   const t = document.getElementById('toast');
@@ -698,6 +757,7 @@ function toast(msg){
   clearTimeout(toastTimer); toastTimer = setTimeout(()=> t.classList.remove('show'), 2200);
 }
 
+/* ================= СТАРТ ================= */
 async function startApp() {
   await loadPlans();
   if(loadFromLocal()){
