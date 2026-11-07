@@ -13,7 +13,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 
 # ================= НАСТРОЙКИ =================
-TOKEN = "8718686711:AAHX4NrsVn4CfhHhMJr6Z5hsuBdvIvdfjQ"
+TOKEN = "8718686711:AAHX4NrsVZ5hsuBdvIvdfjQ"
 WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech"
 ADMIN_ID = 7714111634
 OPERATOR = "@sai_helper"
