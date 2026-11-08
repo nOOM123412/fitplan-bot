@@ -22,12 +22,10 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 
 # ================= НАСТРОЙКИ =================
-# Токен берётся из переменной окружения BOT_TOKEN.
-# На Bothost задай его в настройках бота!
 TOKEN = os.environ.get("BOT_TOKEN", "-").strip()
 
 if not TOKEN or TOKEN == "-":
-    raise ValueError("❌ Не задан BOT_TOKEN. Установи переменную окружения BOT_TOKEN в настройках Bothost или впиши токен в код.")
+    raise ValueError("❌ Не задан BOT_TOKEN. Установи переменную окружения BOT_TOKEN в настройках Bothost.")
 
 WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech"
 ADMIN_ID = 7714111634
@@ -164,10 +162,12 @@ async def api_save_all(request):
         async with db.execute("SELECT sub_until FROM users WHERE user_id = ?", (int(uid),)) as cur:
             row = await cur.fetchone()
         
-        if row and row['sub_until'] != 0 and row['sub_until'] < now:
+        # ЖЁСТКАЯ ПРОВЕРКА: 0 ИЛИ истёкшая = блок
+        if row and (not row['sub_until'] or row['sub_until'] < now):
             return web.json_response({"error": "Subscription expired"}, status=403)
         
         if not row:
+            # Новый пользователь через API: даём 3 дня триала
             await db.execute("INSERT INTO users (user_id, name, sub_until, created_at) VALUES (?, ?, ?, ?)",
                              (int(uid), "User", now + 259200, datetime.utcnow().isoformat()))
         
@@ -284,11 +284,13 @@ async def cmd_start(message: types.Message):
     uid = message.from_user.id
     async with aiosqlite.connect(DB_FILE) as db:
         db.row_factory = aiosqlite.Row
-        async with db.execute("SELECT user_id FROM users WHERE user_id=?", (uid,)) as cur:
-            if not await cur.fetchone():
-                await db.execute("INSERT INTO users (user_id, name, username, sub_until, created_at) VALUES (?,?,?,?,?)",
-                                 (uid, message.from_user.first_name, message.from_user.username, int(time.time())+259200, datetime.utcnow().isoformat()))
-                await db.commit()
+        async with db.execute("SELECT user_id, sub_until FROM users WHERE user_id=?", (uid,)) as cur:
+            row = await cur.fetchone()
+        if not row:
+            # Новый пользователь — даём 3 дня триала
+            await db.execute("INSERT INTO users (user_id, name, username, sub_until, created_at) VALUES (?,?,?,?,?)",
+                             (uid, message.from_user.first_name, message.from_user.username, int(time.time())+259200, datetime.utcnow().isoformat()))
+            await db.commit()
     await message.answer("Привет! Это <b>FitPlan</b>.\n\nТвой личный тренер и дневник питания.", reply_markup=get_main_menu())
 
 @dp.callback_query(F.data == "menu_sub")
@@ -302,7 +304,7 @@ async def cb_sub_info(callback: CallbackQuery):
     sub_until = row['sub_until'] if row else 0
     now = int(time.time())
     status = "❌ Не активна"
-    if sub_until > now:
+    if sub_until and sub_until > now:
         days = math.ceil((sub_until - now) / 86400)
         status = f"✅ Активна ({days} дн.)"
     
@@ -436,7 +438,6 @@ async def process_admin_amount(message: Message, state: FSMContext):
     except ValueError: await message.answer("❌ Введи число.")
     finally: await state.clear()
 
-# === НОВОЕ: ОБНУЛЕНИЕ ПОДПИСКИ ===
 @dp.callback_query(F.data == "admin_reset_sub")
 async def cb_admin_reset_sub(callback: CallbackQuery, state: FSMContext):
     if callback.from_user.id != ADMIN_ID: return
@@ -478,7 +479,8 @@ async def cb_admin_users_list(callback: CallbackQuery):
     text = "📋 <b>Пользователи:</b>\n\n"
     for u in users:
         un = f" (@{u['username']})" if u['username'] else ""
-        text += f"👤 <b>{u['name']}</b>{un}\n🆔 <code>{u['user_id']}</code> | 💰 {u['balance']} ₽\n\n"
+        sub = "✅" if (u['sub_until'] and u['sub_until'] > time.time()) else "❌"
+        text += f"👤 <b>{u['name']}</b>{un}\n🆔 <code>{u['user_id']}</code> | 💰 {u['balance']} ₽ | Подписка: {sub}\n\n"
     kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="⬅️ Назад", callback_data="admin_back")]])
     await callback.message.edit_text(text, reply_markup=kb)
 
