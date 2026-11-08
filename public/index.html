@@ -126,13 +126,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 @keyframes fadeUp{from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);}}
 .toast{position:fixed; bottom:calc(100px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%) translateY(20px); background:var(--glass-strong); border:1px solid var(--border); border-radius:16px; padding:12px 20px; font-size:14px; font-weight:600; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:all .4s var(--ease); z-index:200; white-space:nowrap;}
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
-.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.2); backdrop-filter:blur(8px); z-index:150; display:none; align-items:center; justify-content:center; padding:20px;}
-.modal-overlay.show{display:flex;}
-.modal{background:var(--glass-strong); backdrop-filter:blur(30px); border-radius:var(--radius); padding:24px; width:100%; max-width:400px; box-shadow:0 20px 60px rgba(0,0,0,.15); animation:modalIn .3s var(--ease); max-height: 85vh; overflow-y: auto;}
+
+/* ИСПРАВЛЕННЫЙ CSS ДЛЯ МОДАЛКИ */
+.modal-overlay {
+  position: fixed; 
+  inset: 0; 
+  background: rgba(0,0,0,0.5); /* Затемнение */
+  backdrop-filter: blur(8px); 
+  z-index: 999; 
+  display: none; 
+  align-items: center; 
+  justify-content: center; 
+  padding: 20px;
+}
+.modal-overlay.show {
+  display: flex;
+}
+.modal {
+  background: #fff; /* Белый фон, чтобы не просвечивало */
+  border-radius: var(--radius); 
+  padding: 24px; 
+  width: 100%; 
+  max-width: 400px; 
+  box-shadow: 0 20px 60px rgba(0,0,0,.2); 
+  animation: modalIn .3s var(--ease); 
+  max-height: 90vh; 
+  overflow-y: auto;
+  position: relative;
+  z-index: 1000;
+}
 @keyframes modalIn{from{opacity:0; transform:scale(.95) translateY(10px);} to{opacity:1; transform:scale(1) translateY(0);}}
 .modal h3{font-size:18px; margin-bottom:16px;}
 .modal .field{margin-bottom:14px; display:flex; flex-direction:column; gap:6px;}
-.modal .input-wrap{padding:12px 14px;}
+.modal .input-wrap{padding:12px 14px; background: #fff; border: 1px solid #ccc; }
 .modal .input-wrap input{font-size:15px;}
 .food-macros-row{display:flex; gap:8px;}
 .food-macros-row .input-wrap{flex:1; padding:10px; justify-content:center;}
@@ -389,8 +415,6 @@ let friends = [];
 let obStep = 0;
 let editGenderValue = 'male';
 let currentPlanDay = null;
-// Флаг, начата ли тренировка сегодня. Инициализируем сразу!
-let isWorkoutStarted = false;
 
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
 const SERVER_URL = window.location.origin;
@@ -643,7 +667,6 @@ function selectPlan(day, planName){
   toast('План на ' + day + ' обновлён');
 }
 
-/* ================= ТРЕНИРОВКА СЕГОДНЯ ================= */
 function updateTodayWorkout(){
   const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
   const todayIdx = new Date().getDay();
@@ -669,26 +692,15 @@ function updateTodayWorkout(){
     btn.className = 'btn'; 
     btn.style.marginTop = '16px'; 
     
-    if(!isWorkoutStarted) {
-      btn.textContent = 'Начать тренировку';
-      btn.onclick = () => {
-        isWorkoutStarted = true;
-        toast('Тренировка началась! 💪');
-        updateTodayWorkout(); 
-      };
-    } else {
-      btn.textContent = 'Завершить тренировку';
-      btn.classList.add('secondary');
-      btn.onclick = () => { 
-        const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1; 
-        streakDone[dayIdx] = true; 
-        isWorkoutStarted = false;
-        renderStreak(); 
-        saveToServer(); 
-        toast('Тренировка засчитана! Молодец!'); 
-        updateTodayWorkout();
-      };
-    }
+    btn.textContent = 'Завершить тренировку';
+    
+    btn.onclick = () => { 
+      const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1; 
+      streakDone[dayIdx] = true; 
+      renderStreak(); 
+      saveToServer(); 
+      toast('Тренировка засчитана! 💪'); 
+    };
     content.appendChild(btn);
   } else {
     sub.textContent = 'Сегодня — отдых'; 
