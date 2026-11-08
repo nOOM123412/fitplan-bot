@@ -158,14 +158,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 
 <div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 
-<!-- МОДАЛКА "ПОДПИСКА ИСТЕКЛА" -->
-<div class="modal-overlay" id="expiredModal">
-  <div class="modal" style="text-align:center;">
-    <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
-    <h3>Подписка истекла</h3>
-    <p style="font-size: 14px; color: var(--muted); margin-bottom: 20px;">Твой пробный период закончился. Чтобы продолжить пользоваться приложением, продли подписку в боте.</p>
-    <button class="btn" onclick="window.Telegram.WebApp.close()">Перейти в бот</button>
-  </div>
+<!-- ЭКРАН БЛОКИРОВКИ (ВМЕСТО МОДАЛКИ) -->
+<div id="expiredScreen" style="display:none; position:fixed; inset:0; z-index:2000; background:var(--bg1); align-items:center; justify-content:center; text-align:center; padding:20px; flex-direction:column;">
+  <div style="font-size: 64px; margin-bottom: 24px;">⏳</div>
+  <h2 style="font-size: 24px; margin-bottom: 12px; color: var(--accent-deep);">Подписка истекла</h2>
+  <p style="font-size: 15px; color: var(--muted); margin-bottom: 32px; line-height: 1.5; max-width: 300px;">Твой пробный период закончился. Чтобы продолжить пользоваться приложением, продли подписку в боте.</p>
+  <button class="btn" onclick="window.Telegram.WebApp.close()" style="max-width: 280px;">Перейти в бот</button>
 </div>
 
 <!-- ОНБОРДИНГ -->
@@ -442,7 +440,12 @@ async function saveToServer() {
       plans: weekPlans,
       streak: streakDone
     };
-    await fetch(`${SERVER_URL}/api/save`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
+    const res = await fetch(`${SERVER_URL}/api/save`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
+    
+    if(res.status === 403) {
+      // Если сервер вернул 403 (подписка истекла), показываем экран блокировки
+      document.getElementById('expiredScreen').style.display = 'flex';
+    }
   } catch(e) { console.error(e); }
 }
 
@@ -915,22 +918,12 @@ function toast(msg){
 async function startApp() {
   await fetchServerData();
   
-  // Проверяем подписку
-  if(user.sub_until > 0 && user.sub_until < Math.floor(Date.now() / 1000)) {
-    // Показываем модалку "подписка истекла"
-    document.getElementById('expiredModal').classList.add('show');
-    
-    // Блокируем все вкладки, кроме Профиля
-    const tabbar = document.querySelector('.tabbar-inner');
-    tabbar.addEventListener('click', (e) => {
-      const tab = e.target.closest('.tab');
-      if (tab && tab.dataset.screen !== 'profile') {
-        e.preventDefault();
-        e.stopPropagation();
-        // Показываем модалку снова, если закрыли
-        document.getElementById('expiredModal').classList.add('show');
-      }
-    }, true);
+  // ЖЕСТКАЯ ПРОВЕРКА ПОДПИСКИ ПРИ СТАРТЕ
+  const now = Math.floor(Date.now() / 1000);
+  if(user.sub_until > 0 && user.sub_until < now) {
+    // Показываем экран блокировки на весь экран
+    document.getElementById('expiredScreen').style.display = 'flex';
+    return; // Прекращаем инициализацию, показываем только заглушку
   }
   
   const hasLocal = !!localStorage.getItem('fitplan_user');
