@@ -391,8 +391,6 @@ let friends = [];
 let obStep = 0;
 let editGenderValue = 'male';
 let currentPlanDay = null;
-// Флаг, начата ли тренировка сегодня
-let isWorkoutStarted = false;
 
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
 const SERVER_URL = window.location.origin;
@@ -657,7 +655,6 @@ function updateTodayWorkout(){
   if(plan && plan.name !== 'Отдых'){
     sub.textContent = 'Сегодня — ' + plan.name;
     
-    // Отрисовка карточки
     content.innerHTML = `
       <div class="ex" style="border-bottom:none; padding-bottom:0;">
         <span class="ex-name">${plan.name}</span>
@@ -677,11 +674,11 @@ function updateTodayWorkout(){
       btn.onclick = () => {
         isWorkoutStarted = true;
         toast('Тренировка началась! 💪');
-        updateTodayWorkout(); // Перерисовываем кнопку
+        updateTodayWorkout(); 
       };
     } else {
       btn.textContent = 'Завершить тренировку';
-      btn.classList.add('secondary'); // Меняем цвет
+      btn.classList.add('secondary');
       btn.onclick = () => { 
         const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1; 
         streakDone[dayIdx] = true; 
@@ -758,7 +755,7 @@ function addFood(){
   
   updateHomeMacros(); 
   renderFoodList(); 
-  closeFoodModal(); 
+  closeFoodModal(); // Закрываем модалку
   toast('Продукт добавлен');
   ['foodName','foodKcal','foodP','foodF','foodC','foodWeight'].forEach(id=> document.getElementById(id).value='');
 }
@@ -768,8 +765,27 @@ function renderFoodList(){
   if(todayFoods.length === 0){
     container.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg><p>Ты пока ничего не добавил.<br>Добавь продукт, и я посчитаю КБЖУ.</p></div>';
   } else {
-    container.innerHTML = todayFoods.map(f=>`<div class="ex"><span class="ex-name">${f.name} <span style="font-size:12px;color:var(--muted);">${f.weight}г</span></span><span class="ex-sets">${f.kcal} ккал</span></div>`).join('');
+    container.innerHTML = todayFoods.map((f, i) => `
+      <div class="ex" style="justify-content:space-between;">
+        <div style="flex:1;">
+          <span class="ex-name">${f.name}</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px;">${f.weight}г</span>
+          <div style="font-size:12px;color:var(--accent-deep);margin-top:4px;font-weight:600;">Б: ${f.p} г | Ж: ${f.f} г | У: ${f.c} г</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="ex-sets">${f.kcal} ккал</span>
+          <button style="border:none;background:none;color:var(--muted);cursor:pointer;font-size:16px;" onclick="removeFood(${i})">✕</button>
+        </div>
+      </div>
+    `).join('');
   }
+}
+
+function removeFood(index) {
+  todayFoods.splice(index, 1);
+  updateHomeMacros();
+  renderFoodList();
+  toast('Продукт удалён');
 }
 
 /* ================= ДРУЗЬЯ ================= */
