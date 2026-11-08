@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import math
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher, types, F
@@ -13,7 +14,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 
 # ================= НАСТРОЙКИ =================
-TOKEN = "1"
+TOKEN = "2"
 WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech"
 ADMIN_ID = 7714111634
 OPERATOR = "@sai_helper"
@@ -42,6 +43,13 @@ async def handle_index(request):
     response = web.FileResponse('./public/index.html')
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     return response
+
+async def handle_static(request):
+    filename = request.match_info['filename']
+    filepath = os.path.join('./public', filename)
+    if os.path.exists(filepath):
+        return web.FileResponse(filepath)
+    return web.Response(status=404, text="File not found")
 
 async def api_get_user(request):
     user_id = request.query.get('id')
@@ -86,6 +94,8 @@ async def start_web_server():
     app.router.add_get('/api/user', api_get_user)
     app.router.add_post('/api/save', api_save_all)
     app.router.add_post('/api/buy_sub', api_buy_sub)
+    app.router.add_get('/{filename}', handle_static)
+    
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', 3000)
@@ -106,15 +116,158 @@ async def cmd_start(message: types.Message):
     if uid not in db:
         db[uid] = {"name": message.from_user.first_name or "User", "tg_username": message.from_user.username or "", "balance": 0, "sub_until": 0, "referred_by": None, "ref_count": 0, "ref_earned": 0, "foods": [], "plans": {}, "streak": [False]*7, "profile": {}}
         save_db(db)
-    # Вернули приветствие
     await message.answer(
         "Привет! Это <b>FitPlan</b>.\n\n"
         "Твой личный тренер и дневник питания. Нажми кнопку ниже, чтобы начать.",
         reply_markup=get_main_menu()
     )
 
-# ... (Остальной код бота с подписками и админкой оставляем без изменений) ...
+@dp.callback_query(F.data == "menu_sub")
+async def cb_sub_info(callback: CallbackQuery):
+    db = load_db()
+    uid = str(callback.from_user.id)
+    balance = db.get(uid, {}).get("balance", 0)
+    sub_until = db.get(uid, {}).get("sub_until", 0)
+    
+    now = int(time.time())
+    status = "❌ Не активна"
+    if sub_until > now:
+        days = math.ceil((sub_until - now) / 86400)
+        status = f"✅ Активна ({days} дн.)"
+    
+    text = (
+        f"💳 <b>Твоя подписка</b>\n\n"
+        f"Баланс: <b>{balance} ₽</b>\n"
+        f"Статус: <b>{status}</b>\n\n"
+        f"Стоимость подписки на 1 месяц:\n"
+        f"<s>999 ₽</s> <b>499 ₽</b> (-50% 🎉)\n\n"
+    )
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💳 Оплатить с баланса", callback_data="pay_sub")],
+        [InlineKeyboardButton(text="👨‍💻 Оператор", url=f"https://t.me/{OPERATOR.replace('@','')}")],
+        [InlineKeyboardButton(text="⬅️ Назад", callback_data="menu_main")]
+    ])
+    await callback.message.edit_text(text, reply_markup=kb)
 
+@dp.callback_query(F.data == "pay_sub")
+async def cb_pay_sub(callback: CallbackQuery):
+    db = load_db()
+    uid = str(callback.from_user.id)
+    
+    if uid not in db:
+        return await callback.answer("Ошибка: пользователь не найден", show_alert=True)
+    
+    if db[uid]['balance'] < 499:
+        return await callback.answer("Недостаточно средств на балансе!", show_alert=True)
+    
+    db[uid]['balance'] -= 499
+    current_until = max(db[uid]['sub_until'], int(time.time()))
+    db[uid]['sub_until'] = current_until + (30 * 24 * 60 * 60)
+    save_db(db)
+    
+    await callback.answer("Подписка оплачена!", show_alert=True)
+    await cb_sub_info(callback)
+
+@dp.callback_query(F.data == "menu_ref")
+async def cb_ref_info(callback: CallbackQuery):
+    db = load_db()
+    uid = str(callback.from_user.id)
+    user_data = db.get(uid, {})
+    ref_count = user_data.get("ref_count", 0)
+    ref_earned = user_data.get("ref_earned", 0)
+    bot_username = (await bot.get_me()).username
+    ref_link = f"https://t.me/{bot_username}?start=ref_{uid}"
+    text = (f"👥 <b>Реферальная система</b>\n\nПриглашай друзей и получай <b>10%</b> с каждого их пополнения!\n\n"
+            f"Твоя ссылка:\n<code>{ref_link}</code>\n\n"
+            f"Приглашено друзей: <b>{ref_count}</b>\nЗаработано: <b>{ref_earned} ₽</b>")
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅️ Назад", callback_data="menu_main")]
+    ])
+    await callback.message.edit_text(text, reply_markup=kb)
+
+@dp.callback_query(F.data == "menu_main")
+async def cb_main_menu(callback: CallbackQuery):
+    text = "Привет! Это <b>FitPlan</b>.\n\nТвой личный тренер и дневник питания."
+    await callback.message.edit_text(text, reply_markup=get_main_menu())
+
+# ================= АДМИНКА =================
+class AdminState(StatesGroup):
+    waiting_for_balance_user = State()
+    waiting_for_balance_amount = State()
+
+def get_admin_menu():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💰 Начислить баланс", callback_data="admin_add_balance")],
+        [InlineKeyboardButton(text="📋 Все пользователи", callback_data="admin_users_list")]
+    ])
+
+@dp.message(Command("admin"))
+async def cmd_admin(message: Message):
+    if message.from_user.id != ADMIN_ID: return await message.answer("⛔ Нет доступа.")
+    await message.answer("👑 <b>Админ-панель</b>", reply_markup=get_admin_menu())
+
+@dp.callback_query(F.data == "admin_add_balance")
+async def cb_admin_balance(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id != ADMIN_ID: return
+    await callback.message.edit_text("Введи <b>Telegram ID</b> пользователя:")
+    await state.set_state(AdminState.waiting_for_balance_user)
+
+@dp.message(AdminState.waiting_for_balance_user)
+async def process_admin_user(message: Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID: return
+    target_id = message.text.strip()
+    db = load_db()
+    if target_id not in db:
+        await message.answer("❌ Пользователь не найден.")
+        return await state.clear()
+    await state.update_data(target_id=target_id)
+    await message.answer(f"Введи <b>сумму</b> для <code>{db[target_id].get('name', 'User')}</code>:")
+    await state.set_state(AdminState.waiting_for_balance_amount)
+
+@dp.message(AdminState.waiting_for_balance_amount)
+async def process_admin_amount(message: Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID: return
+    try:
+        amount = int(message.text.strip())
+        data = await state.get_data()
+        target_id = data['target_id']
+        db = load_db()
+        if target_id in db:
+            db[target_id]['balance'] += amount
+            ref_by = db[target_id].get('referred_by')
+            if ref_by and ref_by in db:
+                bonus = int(amount * 0.10)
+                db[ref_by]['balance'] += bonus
+                db[ref_by]['ref_earned'] += bonus
+                db[ref_by]['ref_count'] += 1
+                try: await bot.send_message(ref_by, f"🎉 Друг пополнил баланс! Тебе +{bonus} ₽.")
+                except: pass
+            save_db(db)
+            try: await bot.send_message(target_id, f"🎉 Твой баланс пополнен на {amount} ₽!")
+            except: pass
+            await message.answer(f"✅ Баланс пополнен на {amount} ₽.")
+            await cmd_admin(message)
+    except ValueError: await message.answer("❌ Введи число.")
+    finally: await state.clear()
+
+@dp.callback_query(F.data == "admin_users_list")
+async def cb_admin_users_list(callback: CallbackQuery):
+    if callback.from_user.id != ADMIN_ID: return
+    db = load_db()
+    if not db: return await callback.message.edit_text("База пуста.")
+    text = "📋 <b>Пользователи:</b>\n\n"
+    for uid, data in list(db.items())[:30]:
+        un = f" (@{data.get('tg_username', '')})" if data.get('tg_username') else ""
+        text += f"👤 <b>{data.get('name', 'User')}</b>{un}\n🆔 <code>{uid}</code> | 💰 {data.get('balance', 0)} ₽\n\n"
+    kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="⬅️ Назад", callback_data="admin_back")]])
+    await callback.message.edit_text(text, reply_markup=kb)
+
+@dp.callback_query(F.data == "admin_back")
+async def cb_admin_back(callback: CallbackQuery):
+    if callback.from_user.id != ADMIN_ID: return
+    await callback.message.edit_text("👑 <b>Админ-панель</b>", reply_markup=get_admin_menu())
+
+# ================= ЗАПУСК =================
 async def main():
     await start_web_server()
     await dp.start_polling(bot)
