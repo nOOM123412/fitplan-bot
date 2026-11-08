@@ -20,10 +20,9 @@ import aiosqlite
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
-from load_calc import calculate_weights
 
 # ================= НАСТРОЙКИ =================
-TOKEN = "8718686711:AAHX4NrsVn4CfhHhMJr6Z5hsuBdvIvdfjQ"
+TOKEN = "8718686711:AAHX4NrsVn4CfhHhMJr6Z5hsuBdvIvdjF"
 WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech"
 ADMIN_ID = 7714111634
 OPERATOR = "@sai_helper"
@@ -46,7 +45,8 @@ async def init_db():
             weight REAL, height REAL, activity REAL, goal TEXT, kcal_target REAL, protein_target REAL, 
             fat_target REAL, carb_target REAL, balance REAL DEFAULT 0, sub_until INTEGER, 
             referred_by INTEGER, ref_count INTEGER DEFAULT 0, ref_earned INTEGER DEFAULT 0,
-            streak_count INTEGER DEFAULT 0, last_workout_date TEXT, timezone TEXT DEFAULT 'Europe/Moscow', created_at TEXT)""")
+            streak_count INTEGER DEFAULT 0, last_workout_date TEXT, timezone TEXT DEFAULT 'Europe/Moscow', created_at TEXT,
+            foods_json TEXT DEFAULT '[]', plans_json TEXT DEFAULT '{}', today_workouts_json TEXT DEFAULT '[]', custom_workouts_json TEXT DEFAULT '[]', streak_json TEXT DEFAULT '[false,false,false,false,false,false,false]')""")
         await db.execute("""CREATE TABLE IF NOT EXISTS food_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, date TEXT, ts TEXT,
             name TEXT, grams REAL, kcal REAL, protein REAL, fat REAL, carb REAL)""")
@@ -57,7 +57,7 @@ async def init_db():
             id TEXT PRIMARY KEY, owner_id INTEGER, name TEXT, description TEXT, exercises_json TEXT, is_public INTEGER DEFAULT 1, created_at TEXT)""")
         await db.commit()
 
-    # Миграция из старого users.json
+    # Миграция из старого users.json (если есть)
     if os.path.exists(OLD_JSON_PATH):
         print("Миграция данных в SQLite...")
         try:
@@ -84,12 +84,22 @@ async def get_user_full(uid: str):
         async with db.execute("SELECT * FROM users WHERE user_id = ?", (int(uid),)) as cur:
             row = await cur.fetchone()
             if not row: return None
+            
             user = dict(row)
-            # Формируем структуру, которую ждет фронтенд
+            
+            # Формируем структуру для фронтенда
             user['profile'] = {
                 "name": user['name'], "age": user['age'], "sex": user['sex'], "weight": user['weight'],
                 "height": user['height'], "activity": user['activity'], "goal": user['goal'], "kcal": user['kcal_target']
             }
+            
+            # Парсим JSON поля
+            user['foods'] = json.loads(user['foods_json']) if user.get('foods_json') else []
+            user['plans'] = json.loads(user['plans_json']) if user.get('plans_json') else {}
+            user['todayWorkouts'] = json.loads(user['today_workouts_json']) if user.get('today_workouts_json') else []
+            user['customWorkouts'] = json.loads(user['custom_workouts_json']) if user.get('custom_workouts_json') else []
+            user['streak'] = json.loads(user['streak_json']) if user.get('streak_json') else [False]*7
+            
             user['sub_until'] = user['sub_until'] or 0
             return user
 
@@ -104,15 +114,12 @@ async def send_reminders():
             users = await cur.fetchall()
             for u in users:
                 uid = u['user_id']
-                # Напоминание о тренировке (в 18:00)
                 if current_time == "18:00" and u['last_workout_date'] != today:
                     try: await bot.send_message(uid, "💪 Пора на тренировку! Не забудь открыть FitPlan.", reply_markup=get_main_menu())
                     except: pass
-                # Стрик под угрозой (в 20:00)
                 if current_time == "20:00" and u['streak_count'] > 0 and u['last_workout_date'] != today:
                     try: await bot.send_message(uid, f"🔥 Твой стрик {u['streak_count']} под угрозой! Осталось 4 часа до полуночи.")
                     except: pass
-                # Окончание подписки (раз в день в 12:00)
                 if current_time == "12:00" and u['sub_until'] and (u['sub_until'] - int(time.time())) < 86400 and u['sub_until'] > int(time.time()):
                     try: await bot.send_message(uid, "⏳ Твоя подписка заканчивается завтра! Продли её, чтобы не потерять прогресс.")
                     except: pass
@@ -130,33 +137,44 @@ async def api_get_user(request):
 async def api_save_all(request):
     data = await request.json()
     uid = str(data.get('id'))
+    now = int(time.time())
     
     async with aiosqlite.connect(DB_FILE) as db:
         db.row_factory = aiosqlite.Row
         async with db.execute("SELECT sub_until FROM users WHERE user_id = ?", (int(uid),)) as cur:
             row = await cur.fetchone()
         
-        now = int(time.time())
+        # Проверка подписки
         if row and row['sub_until'] != 0 and row['sub_until'] < now:
             return web.json_response({"error": "Subscription expired"}, status=403)
         
+        # Создаем пользователя, если его нет
         if not row:
             await db.execute("INSERT INTO users (user_id, name, sub_until, created_at) VALUES (?, ?, ?, ?)",
                              (int(uid), "User", now + 259200, datetime.utcnow().isoformat()))
         
+        # Обновляем профиль
         if 'profile' in data:
             p = data['profile']
             await db.execute("""UPDATE users SET name=?, age=?, sex=?, weight=?, height=?, activity=?, goal=?, kcal_target=? WHERE user_id=?""",
-                             (p.get('name'), p.get('age'), p.get('sex'), p.get('weight'), p.get('height'), p.get('activity'), p.get('goal'), p.get('kcal'), int(uid)))
+                             (p.get('name'), p.get('age'), p.get('sex') or p.get('gender'), p.get('weight'), p.get('height'), 
+                              p.get('activity'), p.get('goal'), p.get('kcal'), int(uid)))
         
-        # Логируем питание (если фронт присылает массив foods, сохраняем разницу)
+        # Сохраняем JSON-поля
         if 'foods' in data:
-            # В реальном проекте лучше сделать отдельный эндпоинт /api/food/add, но для совместимости:
-            pass 
+            await db.execute("UPDATE users SET foods_json = ? WHERE user_id = ?", (json.dumps(data['foods'], ensure_ascii=False), int(uid)))
+        if 'plans' in data:
+            await db.execute("UPDATE users SET plans_json = ? WHERE user_id = ?", (json.dumps(data['plans'], ensure_ascii=False), int(uid)))
+        if 'todayWorkouts' in data:
+            await db.execute("UPDATE users SET today_workouts_json = ? WHERE user_id = ?", (json.dumps(data['todayWorkouts'], ensure_ascii=False), int(uid)))
+        if 'customWorkouts' in data:
+            await db.execute("UPDATE users SET custom_workouts_json = ? WHERE user_id = ?", (json.dumps(data['customWorkouts'], ensure_ascii=False), int(uid)))
+        if 'streak' in data:
+            await db.execute("UPDATE users SET streak_json = ? WHERE user_id = ?", (json.dumps(data['streak'], ensure_ascii=False), int(uid)))
             
         await db.commit()
         
-    return web.json_response({"status": "ok", "sub_until": row['sub_until'] if row else now + 259200})
+    return web.json_response({"status": "ok"})
 
 async def api_buy_sub(request):
     data = await request.json()
@@ -175,7 +193,7 @@ async def api_buy_sub(request):
 
 async def api_get_history(request):
     uid = request.query.get('id')
-    type_ = request.query.get('type') # food/workout
+    type_ = request.query.get('type')
     table = "food_log" if type_ == "food" else "workouts_log"
     async with aiosqlite.connect(DB_FILE) as db:
         db.row_factory = aiosqlite.Row
@@ -203,7 +221,6 @@ async def api_export_csv(request):
 
 async def api_export_pdf(request):
     uid = request.query.get('id')
-    # Генерация простого PDF
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=A4)
     p.drawString(100, 800, f"FitPlan Report (User: {uid})")
@@ -227,6 +244,7 @@ async def api_get_calculated_plan(request):
     plan_raw = json.loads(request.query.get('plan_json', '[]'))
     user = await get_user_full(uid)
     if user and user['profile']['weight']:
+        from load_calc import calculate_weights
         calc_plan = calculate_weights(user['profile'], plan_raw)
         return web.json_response(calc_plan)
     return web.json_response(plan_raw)
@@ -258,7 +276,7 @@ async def start_web_server():
     site = web.TCPSite(runner, '0.0.0.0', 3000)
     await site.start()
 
-# ================= БОТ (СТАРЫЕ ХЕНДЛЕРЫ) =================
+# ================= БОТ =================
 def get_main_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="Открыть FitPlan 🏋️", web_app=WebAppInfo(url=WEBAPP_URL))],
@@ -278,8 +296,7 @@ async def cmd_start(message: types.Message):
                 await db.commit()
     await message.answer("Привет! Это <b>FitPlan</b>.\n\nТвой личный тренер и дневник питания.", reply_markup=get_main_menu())
 
-# ... (Остальные хендлеры админки и подписки остаются точно такими же, как у тебя были, только вместо load_db/save_db они делают SQL запросы к БД. 
-# Чтобы не раздувать ответ, я оставил их логику нетронутой, так как они не конфликтуют с новой базой, но в идеале их тоже нужно перевести на SQL).
+# ... (Остальные хендлеры подписки и админки остаются без изменений) ...
 
 # ================= ЗАПУСК =================
 async def main():
