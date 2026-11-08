@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no, interactive-widget=resizes-content">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>FitPlan</title>
 <style>
+/* СТИЛИ ОСТАВЛЯЕМ ТЕ ЖЕ, ОНИ ХОРОШИЕ */
 :root{ --bg1:#F4F1EC; --glass:rgba(255,255,255,.55); --glass-strong:rgba(255,255,255,.85); --border:rgba(255,255,255,.7); --text:#2E2A26; --muted:#8A8279; --accent:#7FB69D; --accent-deep:#5E9A7E; --peach:#F7D9C4; --lav:#E4DDF3; --shadow:0 8px 32px rgba(62,58,54,.08); --radius:24px; --radius-sm:16px; --ease:cubic-bezier(.22,1,.36,1); }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0;}
 html,body{height:100%;}
@@ -326,8 +328,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 <div class="toast" id="toast"></div>
 
 <script>
+/* ================= ВСТРОЕННАЯ БАЗА (БЕЗ FETCH) ================= */
+const TRAINING_DB = {
+  "Пн": [
+    { "name": "Грудь + Трицепс (База)", "desc": "Классическая программа.", "exercises": ["Жим штанги лёжа 4×8", "Жим гантелей на наклонной 3×10", "Разводка гантелей 3×12", "Французский жим 3×10"] },
+    { "name": "Спина + Бицепс", "desc": "Тяговые упражнения.", "exercises": ["Подтягивания 4×6", "Тяга штанги в наклоне 4×8", "Тяга верхнего блока 3×10", "Подъём штанги на бицепс 3×10"] }
+  ],
+  "Вт": [
+    { "name": "Ноги (Квадрицепс)", "desc": "Передняя поверхность бедра.", "exercises": ["Приседания со штангой 4×8", "Жим ногами 4×10", "Разгибания ног 3×12", "Выпады 3×10"] },
+    { "name": "Кардио + Пресс", "desc": "Сжигаем жир.", "exercises": ["Бег 20 мин", "Скручивания 3×20", "Подъём ног 3×15", "Планка 3×60 сек"] }
+  ],
+  "Ср": [
+    { "name": "Плечи + Трапеция", "desc": "Дельтовидные мышцы.", "exercises": ["Жим штанги стоя 4×10", "Махи гантелями 3×12", "Шраги 3×15", "Обратные разводки 3×12"] },
+    { "name": "Спина (Широчайшие)", "desc": "Тяговые движения.", "exercises": ["Тяга верхнего блока 4×10", "Тяга гантели 4×10", "Пуловер 3×12", "Подтягивания 3×8"] }
+  ],
+  "Чт": [
+    { "name": "Руки (Бицепс + Трицепс)", "desc": "Суперсеты.", "exercises": ["Подъём на бицепс 4×10", "Разгибание на трицепс 4×10", "Молотки 3×12", "Французский жим 3×10"] },
+    { "name": "Ноги (Бицепс бедра)", "desc": "Задняя поверхность.", "exercises": ["Румынская тяга 4×8", "Сгибания ног лёжа 3×12", "Выпады 3×10", "Гиперэкстензия 3×15"] }
+  ],
+  "Пт": [
+    { "name": "Грудь + Спина", "desc": "Антагонисты.", "exercises": ["Жим лёжа + Тяга штанги 4×8", "Разводка + Пуловер 3×12", "Отжимания на брусьях 3×10"] },
+    { "name": "Пресс + Кардио", "desc": "Круговая на кор.", "exercises": ["Скручивания 3×25", "Подъём ног 3×15", "Планка 3×60 сек", "Бег 15 мин"] }
+  ],
+  "Сб": [
+    { "name": "Функционал (Всё тело)", "desc": "Кроссфит.", "exercises": ["Бёрпи 4×12", "Трастеры 4×10", "Скакалка 3×2 мин"] },
+    { "name": "Растяжка", "desc": "Йога.", "exercises": ["Наклоны 3×30 сек", "Скрутка 3×30 сек", "Поза собаки 3×1 мин"] }
+  ],
+  "Вс": [
+    { "name": "Отдых", "desc": "Полный отдых.", "exercises": [] },
+    { "name": "Лёгкое кардио", "desc": "Прогулка.", "exercises": ["Прогулка 30 мин"] }
+  ]
+};
+
 /* ================= ПЕРЕМЕННЫЕ ================= */
-let TRAINING_DB = {};
 let user = { name:'', age:16, gender:'male', weight:65, height:175, activity:1.375, goal:'gain', kcal:0, protein:0, fat:0, carbs:0, uniqueId:'', sub_until:0 };
 let todayFoods = [];
 let weekPlans = { 'Пн':null, 'Вт':null, 'Ср':null, 'Чт':null, 'Пт':null, 'Сб':null, 'Вс':null };
@@ -340,15 +373,7 @@ let currentPlanDay = null;
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
 const SERVER_URL = window.location.origin;
 
-/* ================= ЗАГРУЗКА ================= */
-async function loadPlans() {
-  try {
-    const response = await fetch('./plans.json');
-    if(!response.ok) throw new Error('Network response was not ok');
-    TRAINING_DB = await response.json();
-  } catch (error) { console.error('Ошибка загрузки планов:', error); }
-}
-
+/* ================= СЕРВЕР ================= */
 async function fetchServerData() {
   try {
     const res = await fetch(`${SERVER_URL}/api/user?id=${USER_ID}`);
@@ -736,9 +761,7 @@ function toast(msg){
 
 /* ================= СТАРТ ================= */
 async function startApp() {
-  await loadPlans(); // Ждем загрузку планов
-  await fetchServerData(); // Ждем данные с сервера
-  
+  await fetchServerData();
   const hasLocal = !!localStorage.getItem('fitplan_user');
   
   if(hasLocal || user.name) {
@@ -746,7 +769,7 @@ async function startApp() {
     document.getElementById('mainApp').style.display = 'block';
     document.getElementById('mainApp').style.opacity = 1;
     document.getElementById('mainApp').classList.add('visible');
-    initMainApp(); // Теперь рисуем всё, когда данные уже есть
+    initMainApp();
   } else { showStep(0); }
 }
 startApp();
