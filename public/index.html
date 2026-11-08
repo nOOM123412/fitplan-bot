@@ -229,6 +229,16 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height:
 .muscle-tab { flex: 0 0 auto; padding: 11px 18px; border-radius: 18px; border: 1px solid var(--glass-border); background: var(--glass); font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: all 0.3s var(--ease); font-size: 14px; font-family: var(--font); }
 .muscle-tab.active { border-color: transparent; background: var(--accent-gradient); color: #fff; box-shadow: 0 4px 12px rgba(143,174,148,0.3); }
 
+.muscle-tab.custom-tab {
+  background: linear-gradient(135deg, #b8d4bc, #9dbba1);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(143,174,148,0.35);
+  font-weight: 800;
+}
+.muscle-tab.custom-tab:active { transform: scale(0.96); }
+.muscle-tab.custom-tab.active { background: var(--accent-gradient); }
+
 .workout-option { padding: 17px; background: var(--glass); border-radius: var(--radius-sm); margin-bottom: 12px; cursor: pointer; border: 1px solid var(--glass-border); transition: all 0.25s var(--ease); box-shadow: var(--shadow-sm); }
 .workout-option:active { transform: scale(0.98); }
 .workout-option .wo-name { font-size: 16px; font-weight: 800; margin-bottom: 6px; }
@@ -263,12 +273,39 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height:
 .ob-result-label { font-size: 15px; color: var(--text-muted); margin-bottom: 8px; font-weight: 600; }
 .ob-result-kcal { font-size: 54px; font-weight: 800; color: var(--accent-deep); letter-spacing: -2px; line-height: 1; }
 .ob-result-unit { font-size: 15px; color: var(--text-muted); margin: 6px 0 24px; font-weight: 600; }
+
+/* ================= ЭКРАН БЛОКИРОВКИ ================= */
+#expiredScreen {
+  position: fixed; inset: 0; z-index: 5000;
+  background: var(--bg); background-image: var(--bg-gradient);
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  padding: 40px 24px; text-align: center; max-width: 480px; margin: 0 auto;
+}
+#expiredScreen.show { display: flex; animation: fadeIn 0.4s var(--ease); }
+.expired-icon { width: 96px; height: 96px; border-radius: 50%; background: var(--danger-light); color: var(--danger); display: grid; place-items: center; margin-bottom: 28px; }
+.expired-icon svg { width: 52px; height: 52px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+.expired-title { font-size: 30px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 14px; }
+.expired-text { font-size: 16px; color: var(--text-muted); line-height: 1.5; font-weight: 500; margin-bottom: 36px; max-width: 320px; }
+.expired-actions { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; }
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
 <div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+
+<!-- ЭКРАН БЛОКИРОВКИ -->
+<div id="expiredScreen">
+  <div class="expired-icon">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+  </div>
+  <div class="expired-title">Подписка истекла</div>
+  <div class="expired-text">Чтобы продолжить пользоваться FitPlan, продли подписку в боте. Все твои данные сохранены.</div>
+  <div class="expired-actions">
+    <button class="btn primary" onclick="openBotForPayment()">Перейти к оплате</button>
+    <button class="btn secondary" onclick="location.reload()">Проверить снова</button>
+  </div>
+</div>
 
 <!-- ЭКРАН ТРЕНИРОВКИ -->
 <div id="workoutScreen">
@@ -500,6 +537,10 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height:
         <button onclick="setTheme('light')">Светлая</button>
         <button onclick="setTheme('dark')">Тёмная</button>
       </div>
+    </div>
+    <div class="card">
+      <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Аккаунт</div></h2>
+      <button class="btn secondary" onclick="restartOnboarding()">Вернуться к регистрации</button>
     </div>
   </section>
 
@@ -776,7 +817,7 @@ async function saveToServer() {
       streak: streakDone
     };
     const res = await fetch(`${SERVER_URL}/api/save`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
-    if(res.status === 403) { /* Подписка истекла */ }
+    if(res.status === 403) { showExpiredScreen(); }
   } catch(e) { console.error(e); }
 }
 
@@ -796,6 +837,32 @@ async function fetchServerData() {
       if(data.streak) streakDone = data.streak;
     }
   } catch(e) { console.error('API Error', e); }
+}
+
+/* ================= ПРОВЕРКА ПОДПИСКИ ================= */
+function showExpiredScreen() {
+  const el = document.getElementById('expiredScreen');
+  if (el) el.classList.add('show');
+  // Блокируем скролл под ним
+  document.body.style.overflow = 'hidden';
+}
+
+function checkSubscription() {
+  const now = Math.floor(Date.now() / 1000);
+  if (user.sub_until > 0 && user.sub_until < now) {
+    showExpiredScreen();
+    return false;
+  }
+  return true;
+}
+
+function openBotForPayment() {
+  const botUrl = "https://t.me/FitPlan_bot"; // замени на свой @username бота, если надо
+  if (window.Telegram?.WebApp?.openTelegramLink) {
+    window.Telegram.WebApp.openTelegramLink(botUrl);
+  } else {
+    window.open(botUrl, '_blank');
+  }
 }
 
 /* ================= ОБЩИЕ ФУНКЦИИ ================= */
@@ -957,6 +1024,29 @@ function finishOnboarding() {
   switchTab('home');
 }
 
+function restartOnboarding() {
+  if (!confirm('Вернуться к регистрации? Текущие данные профиля будут стёрты.')) return;
+  user = { name:'', age:16, gender:'male', weight:65, height:175, activity:1.375, goal:'gain', kcal:0, protein:0, fat:0, carbs:0, uniqueId:user.uniqueId, sub_until:user.sub_until };
+  todayFoods = [];
+  weekPlans = { 'Пн':null,'Вт':null,'Ср':null,'Чт':null,'Пт':null,'Сб':null,'Вс':null };
+  customWorkouts = [];
+  todayWorkouts = [];
+  streakDone = [false,false,false,false,false,false,false];
+  workoutsCompleted = 0;
+  saveToServer();
+  obStep = 0;
+  document.getElementById('inpName').value = '';
+  document.getElementById('inpAge').value = '';
+  document.getElementById('inpWeight').value = '';
+  document.getElementById('inpHeight').value = '';
+  document.querySelectorAll('#genderSeg button').forEach((b,i) => b.classList.toggle('active', i===0));
+  document.querySelectorAll('#activitySeg button').forEach((b,i) => b.classList.toggle('active', i===1));
+  document.querySelectorAll('#goalSeg button').forEach((b,i) => b.classList.toggle('active', i===1));
+  updateObStep();
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('onboarding').style.display = 'flex';
+}
+
 /* ================= ГЕНЕРАЦИЯ ================= */
 function setsAndRepsByDuration(duration) {
   if (duration <= 30) return { count: 3, sets: 3, reps: 12 };
@@ -1103,16 +1193,38 @@ function addExtraWorkout() { targetDayKey = null; openWorkoutPicker(); }
 function openWorkoutPicker() {
   renderMuscleTabs(); renderWorkoutOptions(); openModal('modal-plan');
 }
+
 function renderMuscleTabs() {
-  document.getElementById('muscleTabs').innerHTML = Object.keys(MUSCLE_LABELS).map(k =>
+  let html = `<button class="muscle-tab custom-tab ${currentMuscleGroup === 'custom' ? 'active' : ''}" onclick="selectMuscle('custom')">+ Своя</button>`;
+  html += Object.keys(MUSCLE_LABELS).map(k =>
     `<button class="muscle-tab ${k === currentMuscleGroup ? 'active' : ''}" onclick="selectMuscle('${k}')">${MUSCLE_LABELS[k]}</button>`
   ).join('');
+  document.getElementById('muscleTabs').innerHTML = html;
 }
+
 function selectMuscle(k) { currentMuscleGroup = k; renderMuscleTabs(); renderWorkoutOptions(); }
 function renderWorkoutOptions() {
+  let html = '';
+
+  if (currentMuscleGroup === 'custom') {
+    html += `<button class="btn secondary" style="margin-bottom: 16px;" onclick="openCustomPlanModal()">+ Создать свою тренировку</button>`;
+    if (customWorkouts.length === 0) {
+      html += '<div style="text-align:center;color:var(--text-muted);padding:20px;">У тебя пока нет своих тренировок</div>';
+    } else {
+      html += customWorkouts.map(c => `
+        <div class="workout-option" onclick="chooseWorkout('${c.id}')">
+          <div class="wo-name">${c.name}</div>
+          <div class="wo-desc">${c.desc || 'Своя тренировка'}</div>
+          <div class="wo-meta"><span class="wo-badge">Своя</span><span class="wo-badge">${currentDuration} мин</span></div>
+        </div>`).join('');
+    }
+    document.getElementById('workoutOptionsList').innerHTML = html;
+    return;
+  }
+
   const arr = WORKOUT_CATALOG[currentMuscleGroup] || [];
   const { count } = setsAndRepsByDuration(currentDuration);
-  let html = arr.map(t => {
+  html = arr.map(t => {
     const shown = Math.min(count, t.ex.length);
     return `
     <div class="workout-option" onclick="chooseWorkout('${t.id}')">
@@ -1124,15 +1236,10 @@ function renderWorkoutOptions() {
       </div>
     </div>`;
   }).join('');
-  const custom = customWorkouts.map(c => `
-    <div class="workout-option" onclick="chooseWorkout('${c.id}')">
-      <div class="wo-name">${c.name}</div>
-      <div class="wo-desc">${c.desc || 'Своя тренировка'}</div>
-      <div class="wo-meta"><span class="wo-badge">Своя</span><span class="wo-badge">${currentDuration} мин</span></div>
-    </div>`).join('');
-  document.getElementById('workoutOptionsList').innerHTML = (html + custom) ||
+  document.getElementById('workoutOptionsList').innerHTML = html ||
     '<div style="text-align:center;color:var(--text-muted);padding:20px;">Нет тренировок в этой группе</div>';
 }
+
 function chooseWorkout(templateId) {
   if (targetDayKey) {
     weekPlans[targetDayKey] = templateId;
@@ -1420,10 +1527,14 @@ function exportData(type, format) {
 function renderAll() {
   renderHome(); renderWeekGrid(); renderFood(); renderProgress(); renderProfile();
 }
+
 window.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   await fetchServerData();
-  
+
+  // Проверяем подписку до любого рендера
+  if (!checkSubscription()) return;
+
   if (user.name && user.kcal) {
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
