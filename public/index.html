@@ -390,7 +390,6 @@ let obStep = 0;
 let editGenderValue = 'male';
 let currentPlanDay = null;
 
-// Флаг для кнопки "Начать/Завершить"
 let isWorkoutStarted = false;
 
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
@@ -731,7 +730,7 @@ function saveCustomPlan() {
   toast('Свой план создан и выбран!');
 }
 
-/* ================= ПИТАНИЕ (СВЯЗКА ИСПРАВЛЕНА) ================= */
+/* ================= ПИТАНИЕ ================= */
 function openFoodModal(){ document.getElementById('foodModal').classList.add('show'); }
 function closeFoodModal(){ document.getElementById('foodModal').classList.remove('show'); }
 
@@ -761,15 +760,10 @@ function addFood(){
   // 2. Очищаем поля
   ['foodName','foodKcal','foodP','foodF','foodC','foodWeight'].forEach(id=> document.getElementById(id).value='');
   
-  // 3. Обновляем интерфейс (макросы и список)
-  try {
-    updateHomeMacros();
-    renderFoodList();
-    toast('Продукт добавлен');
-  } catch(e) {
-    console.error("Ошибка обновления интерфейса", e);
-    toast('Продукт добавлен (ошибка обновления)');
-  }
+  // 3. Обновляем интерфейс
+  updateHomeMacros();
+  renderFoodList();
+  toast('Продукт добавлен');
 }
 
 function renderFoodList(){
