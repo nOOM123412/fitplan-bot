@@ -540,7 +540,7 @@ function openPlanModal(day) {
   const content = document.getElementById('planModalContent');
   content.innerHTML = '';
   
-  if(!TRAINING_DB[day]) {
+  if(!TRAINING_DB[day] || TRAINING_DB[day].length === 0) {
     content.innerHTML = '<p class="muted">Нет доступных планов для этого дня.</p>';
     document.getElementById('planModal').classList.add('show');
     return;
