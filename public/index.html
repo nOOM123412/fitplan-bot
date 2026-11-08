@@ -6,301 +6,288 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>FitPlan</title>
 <style>
-:root{ --bg1:#F4F1EC; --glass:rgba(255,255,255,.55); --glass-strong:rgba(255,255,255,.85); --border:rgba(255,255,255,.7); --text:#2E2A26; --muted:#8A8279; --accent:#7FB69D; --accent-deep:#5E9A7E; --peach:#F7D9C4; --lav:#E4DDF3; --shadow:0 8px 32px rgba(62,58,54,.08); --radius:24px; --radius-sm:16px; --ease:cubic-bezier(.22,1,.36,1); }
-*{box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0;}
-html,body{height:100%;}
-body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif; background:var(--bg1); color:var(--text); overflow-x:hidden; -webkit-font-smoothing:antialiased;}
-.bg-blobs{position:fixed; inset:0; z-index:-1; overflow:hidden;}
-.blob{position:absolute; border-radius:50%; filter:blur(60px); opacity:.55; animation:float 18s ease-in-out infinite;}
-.blob.b1{width:320px; height:320px; background:var(--accent); top:-80px; left:-80px;}
-.blob.b2{width:280px; height:280px; background:var(--peach); bottom:-60px; right:-60px; animation-delay:-6s;}
-.blob.b3{width:240px; height:240px; background:var(--lav); top:40%; right:-100px; animation-delay:-12s;}
-@keyframes float{0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(30px,-40px) scale(1.1);} 66%{transform:translate(-20px,30px) scale(.95);}}
-.glass, .glass-strong{background:var(--glass); backdrop-filter:blur(24px) saturate(180%); -webkit-backdrop-filter:blur(24px) saturate(180%); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow);}
-.glass-strong{background:var(--glass-strong);}
-.app{max-width:480px; margin:0 auto; min-height:100dvh; padding:env(safe-area-inset-top) 16px calc(96px + env(safe-area-inset-bottom)); position:relative;}
-#onboarding{position:fixed; inset:0; z-index:100; max-width:480px; margin:0 auto; display:flex; flex-direction:column; transition:opacity .5s var(--ease), transform .5s var(--ease);}
-#onboarding.hidden{opacity:0; transform:scale(.96); pointer-events:none;}
-.ob-content{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:calc(24px + env(safe-area-inset-top)) 20px 20px;}
-.ob-footer{flex-shrink:0; padding:12px 20px calc(20px + env(safe-area-inset-bottom)); background:linear-gradient(to top, var(--bg1) 60%, transparent); position:relative; z-index:10;}
-.ob-progress{display:flex; gap:6px; margin-bottom:32px;}
-.ob-progress .dot{flex:1; height:4px; border-radius:2px; background:rgba(46,42,38,.12); overflow:hidden; position:relative;}
-.ob-progress .dot::after{content:""; position:absolute; inset:0; background:var(--accent); transform:scaleX(0); transform-origin:left; transition:transform .5s var(--ease);}
-.ob-progress .dot.active::after{transform:scaleX(1);}
-.ob-progress .dot.done::after{transform:scaleX(1); opacity:.5;}
-.ob-step{display:none; flex-direction:column; animation:slideIn .5s var(--ease);}
-.ob-step.active{display:flex;}
-@keyframes slideIn{from{opacity:0; transform:translateX(30px);} to{opacity:1; transform:translateX(0);}}
-.ob-title{font-size:28px; font-weight:700; letter-spacing:-.5px; margin-bottom:8px; line-height:1.15;}
-.ob-sub{font-size:15px; color:var(--muted); margin-bottom:28px; line-height:1.4;}
-.field{margin-bottom:16px;}
-.field label{display:block; font-size:13px; font-weight:600; color:var(--muted); margin-bottom:8px;}
-.input-wrap{display:flex; align-items:center; gap:12px; background:var(--glass-strong); backdrop-filter:blur(20px); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px; transition:all .2s;}
-.input-wrap:focus-within{border-color:var(--accent); box-shadow:0 0 0 4px rgba(127,182,157,.15);}
-.input-wrap svg{flex:none; width:20px; height:20px; stroke:var(--muted);}
-.input-wrap input{flex:1; border:none; background:none; outline:none; font-size:16px; color:var(--text); font-family:inherit; min-width:0;}
-.input-wrap .unit{font-size:14px; color:var(--muted); font-weight:500;}
-.segment{display:flex; background:rgba(46,42,38,.06); border-radius:14px; padding:4px;}
-.segment button{flex:1; padding:12px; border:none; border-radius:11px; background:none; font-size:14px; font-weight:600; color:var(--muted); cursor:pointer; transition:all .3s var(--ease); font-family:inherit;}
-.segment button.active{background:#fff; color:var(--text); box-shadow:0 2px 8px rgba(62,58,54,.1);}
-.activity-levels{display:flex; flex-direction:column; gap:8px;}
-.level{display:flex; align-items:center; gap:12px; padding:14px 16px; border-radius:14px; background:var(--glass-strong); border:1.5px solid var(--border); cursor:pointer; transition:all .25s var(--ease); text-align:left;}
-.level.selected{border-color:var(--accent); background:rgba(127,182,157,.15);}
-.level .lv-dot{width:12px; height:12px; border-radius:50%; flex:none; background:var(--muted); transition:all .25s;}
-.level.selected .lv-dot{background:var(--accent); box-shadow:0 0 0 4px rgba(127,182,157,.25);}
-.level .lv-info{flex:1;}
-.level .lv-title{font-size:14px; font-weight:600;}
-.level .lv-desc{font-size:12px; color:var(--muted);}
-.goal-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
-.goal-card{padding:20px 16px; border-radius:var(--radius-sm); background:var(--glass-strong); border:1.5px solid var(--border); cursor:pointer; transition:all .3s var(--ease); text-align:left; display:flex; flex-direction:column; gap:10px;}
-.goal-card.selected{border-color:var(--accent); background:rgba(127,182,157,.15); box-shadow:0 8px 24px rgba(127,182,157,.25); transform:translateY(-2px);}
-.goal-card .gc-icon{width:44px; height:44px; border-radius:12px; display:grid; place-items:center; background:var(--lav); transition:background .3s;}
-.goal-card.selected .gc-icon{background:var(--accent);}
-.goal-card .gc-icon svg{width:24px; height:24px; stroke:var(--text); transition:stroke .3s;}
-.goal-card.selected .gc-icon svg{stroke:#fff;}
-.goal-card .gc-title{font-size:15px; font-weight:700;}
-.goal-card .gc-desc{font-size:12px; color:var(--muted); line-height:1.3;}
-.ob-nav{display:flex; gap:12px;}
-.btn{flex:1; border:none; border-radius:var(--radius-sm); padding:17px; font-size:16px; font-weight:700; background:var(--accent); color:#fff; cursor:pointer; transition:all .25s var(--ease); box-shadow:0 8px 24px rgba(127,182,157,.35); display:flex; align-items:center; justify-content:center; gap:8px;}
-.btn:active{transform:scale(.97);}
-.btn:disabled{opacity:.4; box-shadow:none; cursor:not-allowed;}
-.btn.secondary{background:var(--glass-strong); color:var(--text); border:1px solid var(--border); box-shadow:var(--shadow); flex:0 0 auto; padding:17px 24px;}
-.btn svg{width:20px; height:20px; stroke:currentColor;}
-#mainApp{display:none; opacity:0; transition:opacity .6s var(--ease);}
-#mainApp.visible{display:block; opacity:1;}
-.header{display:flex; align-items:center; justify-content:space-between; padding:calc(16px + env(safe-area-inset-top)) 0 16px;}
-.header h1{font-size:26px; font-weight:700; letter-spacing:-.5px;}
-.header .sub{font-size:13px; color:var(--muted); margin-top:2px;}
-.avatar{width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--peach)); display:grid; place-items:center; font-weight:700; color:#fff; font-size:18px; box-shadow:0 4px 16px rgba(127,182,157,.3); flex:none; cursor:pointer;}
-.card{padding:20px; margin-bottom:14px; transition:transform .3s var(--ease);}
-.card-clickable{cursor:pointer;}
-.card-clickable:active{transform:scale(.98);}
-.card h2{font-size:16px; font-weight:700; margin-bottom:14px; display:flex; align-items:center; gap:8px;}
-.card h2 svg{width:20px; height:20px; stroke:var(--accent);}
-.kcal-row{display:flex; align-items:center; gap:20px;}
-.ring{width:110px; height:110px; border-radius:50%; flex:none; background:conic-gradient(var(--accent) 0 var(--p,0%), rgba(127,182,157,.15) var(--p,0%) 100%); display:grid; place-items:center; transition:--p 1s var(--ease);}
-.ring-inner{width:86px; height:86px; border-radius:50%; background:var(--glass-strong); display:grid; place-items:center; text-align:center;}
-.ring-inner .big{font-size:22px; font-weight:800; line-height:1;}
-.ring-inner .small{font-size:11px; color:var(--muted); margin-top:2px;}
-.kcal-info{flex:1;}
-.kcal-info .label{font-size:13px; color:var(--muted); margin-bottom:4px;}
-.kcal-info .value{font-size:28px; font-weight:800; letter-spacing:-.5px;}
-.kcal-info .value small{font-size:14px; font-weight:600; color:var(--muted);}
-.macros{display:flex; gap:8px; margin-top:16px;}
-.macro{flex:1; border-radius:14px; padding:12px 8px; text-align:center;}
-.macro:nth-child(1){background:rgba(228,221,243,.7);}
-.macro:nth-child(2){background:rgba(247,217,196,.7);}
-.macro:nth-child(3){background:rgba(205,232,221,.7);}
-.macro .mv{font-size:16px; font-weight:800;}
-.macro .ml{font-size:11px; color:var(--muted); margin-top:2px;}
-.ex{display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(46,42,38,.06);}
-.ex:last-child{border-bottom:none;}
-.ex .ex-name{font-size:15px; font-weight:600;}
-.ex .ex-sets{font-size:13px; color:var(--accent-deep); font-weight:700; background:rgba(127,182,157,.15); padding:4px 10px; border-radius:8px;}
-.streak{display:flex; gap:6px; margin-top:4px;}
-.day{flex:1; aspect-ratio:1; border-radius:12px; background:rgba(46,42,38,.05); display:grid; place-items:center; font-size:11px; font-weight:600; color:var(--muted); transition:all .3s var(--ease);}
-.day.done{background:var(--accent); color:#fff; box-shadow:0 4px 12px rgba(127,182,157,.35);}
-.week-grid{display:flex; flex-direction:column; gap:8px;}
-.plan-row{display:flex; align-items:center; padding:12px 0; border-bottom:1px solid rgba(46,42,38,.06);}
-.plan-row:last-child{border-bottom:none;}
-.plan-day-label{font-weight:700; font-size:15px; width:45px;}
-.plan-name-text{flex:1; font-size:14px; color:var(--text); margin-left:10px;}
-.plan-add-btn{width:32px; height:32px; border-radius:50%; background:rgba(127,182,157,.15); border:none; display:grid; place-items:center; cursor:pointer; flex:none;}
-.plan-add-btn svg{width:18px; height:18px; stroke:var(--accent-deep);}
-.empty{text-align:center; padding:32px 16px; color:var(--muted);}
-.empty svg{width:48px; height:48px; stroke:var(--muted); opacity:.4; margin-bottom:12px;}
-.empty p{font-size:14px; line-height:1.5; margin-bottom:16px;}
-.profile-field{display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid rgba(46,42,38,.06);}
-.profile-field:last-child{border-bottom:none;}
-.profile-field .pf-label{font-size:14px; color:var(--muted);}
-.profile-field .pf-value{font-size:15px; font-weight:600; display:flex; align-items:center; gap:8px;}
-.disclaimer{font-size:10px; color:var(--muted); text-align:center; margin-top:24px; opacity:0.6; line-height:1.4;}
-.tabbar{position:fixed; bottom:0; left:0; right:0; max-width:480px; margin:0 auto; padding:8px 12px calc(8px + env(safe-area-inset-bottom)); display:flex; gap:4px; z-index:50;}
-.tabbar-inner{flex:1; display:flex; gap:4px; background:var(--glass-strong); backdrop-filter:blur(30px); border:1px solid var(--border); border-radius:22px; box-shadow:var(--shadow); padding:6px;}
-.tab{flex:1; border:none; background:none; padding:8px 4px; border-radius:16px; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; font-weight:600; color:var(--muted); cursor:pointer; transition:all .3s;}
-.tab svg{width:22px; height:22px; stroke:currentColor; transition:transform .3s;}
-.tab.active{color:var(--accent-deep); background:rgba(127,182,157,.12);}
-.tab.active svg{transform:scale(1.1); stroke:var(--accent-deep);}
-.screen{display:none;}
-.screen.active{display:block; animation:fadeUp .45s var(--ease);}
-@keyframes fadeUp{from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);}}
-.toast{position:fixed; bottom:calc(100px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%) translateY(20px); background:var(--glass-strong); border:1px solid var(--border); border-radius:16px; padding:12px 20px; font-size:14px; font-weight:600; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:all .4s var(--ease); z-index:200; white-space:nowrap;}
-.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
-.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:999; display:none; align-items:center; justify-content:center; padding:20px;}
-.modal-overlay.show{display:flex;}
-.modal{background: #ffffff; border-radius:var(--radius); padding:24px; width:100%; max-width:380px; box-shadow:0 20px 60px rgba(0,0,0,.2); animation:modalIn .3s var(--ease); max-height: 90vh; overflow-y: auto;}
-@keyframes modalIn{from{opacity:0; transform:scale(.95) translateY(10px);} to{opacity:1; transform:scale(1) translateY(0);}}
-.modal h3{font-size:18px; margin-bottom:16px;}
-.modal .field{margin-bottom:14px; display:flex; flex-direction:column; gap:6px;}
-.modal .input-wrap{padding:12px 14px; background: #fff; border: 1px solid #ddd;}
-.modal .input-wrap input{font-size:15px;}
-.food-macros-row{display:flex; gap:8px;}
-.food-macros-row .input-wrap{flex:1; padding:10px; justify-content:center; min-width: 0;}
-.food-macros-row .input-wrap input{text-align:center; width: 100%;}
-.modal .btn {flex: none; width: 100%; margin-top: 8px; padding: 15px;}
-.modal .btn.secondary {width: auto;}
-.muscle-group-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; }
-.muscle-tab { flex: none; padding: 10px 16px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--glass-strong); font-weight: 600; color: var(--muted); cursor: pointer; white-space: nowrap; transition: all 0.2s; font-size: 14px; }
-.muscle-tab.active { border-color: var(--accent); background: rgba(127,182,157,.15); color: var(--accent-deep); }
-.workout-option { padding: 14px; background: rgba(255,255,255,0.5); border-radius: 14px; margin-bottom: 10px; cursor: pointer; border: 1px solid rgba(46,42,38,0.08); transition: all 0.2s; }
-.workout-option:hover { background: #fff; border-color: var(--accent); }
-.workout-option .wo-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-.workout-option .wo-desc { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 8px; }
-.workout-option .wo-meta { display: flex; gap: 8px; flex-wrap: wrap; }
-.wo-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: rgba(127,182,157,.12); color: var(--accent-deep); }
-.duration-selector { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
-.duration-btn { flex: none; padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--glass-strong); font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-.duration-btn.active { border-color: var(--accent); background: rgba(127,182,157,.15); color: var(--accent-deep); }
-.exercise-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(46,42,38,.06); }
-.exercise-row:last-child { border-bottom: none; }
-.ex-name-block { flex: 1; }
-.ex-title { font-size: 14px; font-weight: 600; color: var(--text); }
-.ex-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.weight-control { display: flex; align-items: center; gap: 8px; background: rgba(46,42,38,.04); padding: 4px; border-radius: 12px; }
-.weight-btn { width: 28px; height: 28px; border-radius: 8px; border: none; background: #fff; color: var(--text); font-size: 18px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,.05); display: grid; place-items: center; }
-.weight-btn:active { transform: scale(0.95); }
-.weight-val { font-size: 14px; font-weight: 700; color: var(--accent-deep); min-width: 40px; text-align: center; }
-/* ЭКРАН ТРЕНИРОВКИ */
-#workoutScreen { position: fixed; inset: 0; z-index: 1000; background: var(--bg1); display: none; flex-direction: column; padding: env(safe-area-inset-top) 16px calc(16px + env(safe-area-inset-bottom)); max-width: 480px; margin: 0 auto; overflow-y: auto; }
-#workoutScreen.active { display: flex; animation: slideUp .3s var(--ease); }
-@keyframes slideUp { from{transform: translateY(100%);} to{transform: translateY(0);} }
-.workout-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
-.workout-header h2 { font-size: 18px; font-weight: 700; }
-.close-workout { width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.05); border: none; display: grid; place-items: center; cursor: pointer; }
-.close-workout svg { width: 18px; height: 18px; stroke: var(--text); }
-.workout-progress-bar { height: 6px; background: rgba(46,42,38,.1); border-radius: 3px; margin-bottom: 24px; overflow: hidden; }
-.workout-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s var(--ease); }
-.workout-card { background: #fff; border-radius: 24px; padding: 24px; box-shadow: 0 8px 32px rgba(0,0,0,.06); text-align: center; margin-bottom: auto; }
-.workout-ex-name { font-size: 24px; font-weight: 800; margin-bottom: 8px; line-height: 1.2; }
-.workout-ex-meta { font-size: 15px; color: var(--muted); margin-bottom: 24px; }
-.workout-set-tracker { display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; }
-.set-dot { width: 40px; height: 40px; border-radius: 12px; background: rgba(46,42,38,.05); display: grid; place-items: center; font-weight: 700; color: var(--muted); transition: all 0.3s; }
-.set-dot.done { background: var(--accent); color: #fff; }
-.set-dot.current { border: 2px solid var(--accent); color: var(--accent-deep); }
-.workout-timer { font-size: 48px; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; margin-bottom: 24px; }
-.workout-timer.running { color: var(--accent-deep); }
-.btn-workout { width: 100%; padding: 20px; border-radius: 16px; font-size: 18px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
-.btn-workout.primary { background: var(--accent); color: #fff; box-shadow: 0 8px 24px rgba(127,182,157,.4); }
-.btn-workout.secondary { background: rgba(46,42,38,.05); color: var(--text); }
-.btn-workout:active { transform: scale(0.98); }
-.btn-workout:disabled { opacity: 0.5; box-shadow: none; }
-.rest-timer-text { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 8px; }
+/* ================= ТЕМЫ И ПЕРЕМЕННЫЕ ================= */
+:root {
+  --bg: #f2f2f7;
+  --bg-card: #ffffff;
+  --text-main: #000000;
+  --text-muted: #8e8e93;
+  --accent: #34c759;
+  --accent-light: #e5f8ea;
+  --border: rgba(0,0,0,0.08);
+  --shadow: 0 4px 16px rgba(0,0,0,0.04);
+  --radius: 20px;
+  --radius-sm: 12px;
+  --safe-top: env(safe-area-inset-top, 20px);
+  --safe-bottom: env(safe-area-inset-bottom, 20px);
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+[data-theme="dark"] {
+  --bg: #000000;
+  --bg-card: #1c1c1e;
+  --text-main: #ffffff;
+  --text-muted: #8e8e93;
+  --accent: #30d158;
+  --accent-light: rgba(48, 209, 88, 0.15);
+  --border: rgba(255,255,255,0.1);
+  --shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
 
-/* Новые стили для списка тренировок дня */
-.workout-day-card { padding: 14px; border-radius: 14px; background: rgba(255,255,255,0.5); border: 1px solid rgba(46,42,38,0.08); margin-bottom: 10px; }
-.workout-day-card.done { background: rgba(127,182,157,0.1); border-color: var(--accent); }
-.workout-day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.workout-day-name { font-size: 15px; font-weight: 700; }
-.workout-day-status { font-size: 12px; font-weight: 600; color: var(--accent-deep); }
-.workout-day-exercises { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 10px; }
-.workout-day-btn { width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: 700; font-size: 14px; cursor: pointer; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body { font-family: var(--font); background: var(--bg); color: var(--text-main); overflow-x: hidden; transition: background 0.3s, color 0.3s; -webkit-font-smoothing: antialiased; }
+svg { display: block; }
+
+.app-container { max-width: 480px; margin: 0 auto; min-height: 100vh; padding: 0 16px calc(90px + var(--safe-bottom)); position: relative; }
+
+/* ================= ОБЩИЕ КОМПОНЕНТЫ ================= */
+.header { display: flex; justify-content: space-between; align-items: center; padding: calc(16px + var(--safe-top)) 0 16px; }
+.header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+.header .sub { font-size: 14px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+.avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--text-main); color: var(--bg); display: grid; place-items: center; font-weight: 700; font-size: 18px; cursor: pointer; }
+
+.card { background: var(--bg-card); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--border); transition: transform 0.2s, background 0.3s; }
+.card:active.clickable { transform: scale(0.98); }
+.card h2 { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+.card h2 .title { display: flex; align-items: center; gap: 8px; }
+.card h2 svg { width: 20px; height: 20px; stroke: var(--text-main); stroke-width: 2; fill: none; }
+
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 16px; border-radius: var(--radius-sm); border: none; font-size: 16px; font-weight: 600; font-family: var(--font); cursor: pointer; transition: all 0.2s; }
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.primary:active { transform: scale(0.97); opacity: 0.9; }
+.btn.secondary { background: var(--accent-light); color: var(--accent); }
+.btn.outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+.btn-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--accent-light); color: var(--accent); border: none; display: grid; place-items: center; cursor: pointer; }
+.btn-icon svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+
+/* ================= ГЛАВНАЯ ================= */
+.kcal-row { display: flex; align-items: center; gap: 20px; }
+.ring { width: 100px; height: 100px; border-radius: 50%; background: conic-gradient(var(--accent) 0 var(--p,0%), var(--border) var(--p,0%) 100%); display: grid; place-items: center; position: relative; }
+.ring-inner { width: 82px; height: 82px; border-radius: 50%; background: var(--bg-card); display: grid; place-items: center; text-align: center; }
+.ring-inner .big { font-size: 20px; font-weight: 800; }
+.ring-inner .small { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; margin-top: 2px; }
+.kcal-info { flex: 1; }
+.kcal-info .label { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+.kcal-info .value { font-size: 28px; font-weight: 800; }
+.kcal-info .value small { font-size: 16px; color: var(--text-muted); font-weight: 600; }
+
+.macros { display: flex; gap: 10px; margin-top: 20px; }
+.macro { flex: 1; background: var(--bg); border-radius: var(--radius-sm); padding: 12px; text-align: center; border: 1px solid var(--border); }
+.macro .mv { font-size: 16px; font-weight: 700; }
+.macro .ml { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.workout-day-card { background: var(--bg); border-radius: var(--radius-sm); padding: 16px; border: 1px solid var(--border); margin-bottom: 12px; display: flex; flex-direction: column; gap: 12px; }
+.workout-day-card.done { opacity: 0.7; }
+.workout-day-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.workout-day-name { font-size: 16px; font-weight: 700; }
+.workout-day-status { font-size: 12px; font-weight: 600; color: var(--accent); display: flex; align-items: center; gap: 4px; }
+.workout-day-exercises { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+.workout-day-actions { display: flex; gap: 8px; }
+.workout-day-btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 600; font-size: 14px; cursor: pointer; }
 .workout-day-btn.start { background: var(--accent); color: #fff; }
-.workout-day-btn.done { background: rgba(127,182,157,0.2); color: var(--accent-deep); }
-.header-add-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; border: none; font-size: 22px; font-weight: 700; cursor: pointer; display: grid; place-items: center; box-shadow: 0 4px 12px rgba(127,182,157,.3); }
+.workout-day-btn.delete { flex: 0 0 48px; background: var(--bg-card); border: 1px solid var(--border); display: grid; place-items: center; color: #ff3b30; }
+.workout-day-btn.delete svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+/* ================= ПЛАН ================= */
+.week-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.week-row:last-child { border-bottom: none; }
+.week-day { font-size: 15px; font-weight: 600; width: 40px; color: var(--text-muted); }
+.week-plan { flex: 1; font-size: 15px; font-weight: 500; margin-left: 12px; }
+.week-plan.empty { color: var(--text-muted); font-style: italic; }
+.duration-control { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+input[type=range] { flex: 1; accent-color: var(--accent); height: 6px; border-radius: 3px; background: var(--border); appearance: none; }
+input[type=range]::-webkit-slider-thumb { appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--bg-card); border: 2px solid var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+/* ================= ПРОГРЕСС ================= */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.stat-box { background: var(--bg); border-radius: var(--radius-sm); padding: 16px; border: 1px solid var(--border); }
+.stat-box .sv { font-size: 28px; font-weight: 800; color: var(--accent); line-height: 1; }
+.stat-box .sl { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
+.bar-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 120px; margin-top: 16px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+.bar-fill { width: 60%; background: var(--accent); border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.3s; }
+.bar-fill.zero { background: var(--border); }
+.bar-label { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+
+.streak-days { display: flex; gap: 6px; margin-top: 12px; }
+.streak-day { flex: 1; aspect-ratio: 1; border-radius: 8px; background: var(--bg); border: 1px solid var(--border); display: grid; place-items: center; font-size: 12px; font-weight: 600; color: var(--text-muted); }
+.streak-day.done { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ================= ТАББАР ================= */
+.tabbar { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; padding: 8px 16px calc(8px + var(--safe-bottom)); background: rgba(var(--bg-rgb, 255,255,255), 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: flex; justify-content: space-between; z-index: 100; }
+[data-theme="dark"] .tabbar { background: rgba(28,28,30, 0.85); }
+.tab { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: var(--text-muted); font-size: 10px; font-weight: 600; cursor: pointer; padding: 8px 12px; border-radius: 12px; transition: all 0.2s; }
+.tab svg { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; }
+.tab.active { color: var(--accent); }
+
+/* ================= ЭКРАН ТРЕНИРОВКИ ================= */
+#workoutScreen { position: fixed; inset: 0; z-index: 1000; background: var(--bg); display: none; flex-direction: column; padding: var(--safe-top) 20px calc(20px + var(--safe-bottom)); max-width: 480px; margin: 0 auto; }
+#workoutScreen.active { display: flex; animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.ws-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
+.ws-progress-bar { height: 6px; background: var(--border); border-radius: 3px; margin-bottom: 24px; overflow: hidden; }
+.ws-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s; }
+.ws-card { background: var(--bg-card); border-radius: 24px; padding: 32px 24px; box-shadow: var(--shadow); text-align: center; margin-bottom: auto; border: 1px solid var(--border); }
+.ws-ex-name { font-size: 26px; font-weight: 800; margin-bottom: 8px; line-height: 1.2; }
+.ws-ex-meta { font-size: 15px; color: var(--text-muted); margin-bottom: 32px; font-weight: 500; }
+.ws-set-tracker { display: flex; justify-content: center; gap: 12px; margin-bottom: 32px; }
+.ws-set-dot { width: 44px; height: 44px; border-radius: 12px; background: var(--bg); display: grid; place-items: center; font-weight: 700; color: var(--text-muted); transition: all 0.3s; border: 1px solid var(--border); }
+.ws-set-dot.done { background: var(--accent); color: #fff; border-color: var(--accent); }
+.ws-set-dot.current { border: 2px solid var(--accent); color: var(--accent); background: transparent; }
+.ws-timer { font-size: 56px; font-weight: 800; color: var(--text-main); font-variant-numeric: tabular-nums; margin-bottom: 32px; letter-spacing: -2px; }
+.ws-timer.running { color: var(--accent); }
+.ws-weight-control { display: inline-flex; align-items: center; gap: 16px; background: var(--bg); padding: 8px 16px; border-radius: 16px; margin-bottom: 32px; border: 1px solid var(--border); }
+.ws-weight-btn { width: 32px; height: 32px; border-radius: 8px; border: none; background: var(--bg-card); color: var(--text-main); font-size: 20px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.ws-weight-val { font-size: 20px; font-weight: 800; min-width: 60px; text-align: center; }
+
+/* ================= МОДАЛКИ ================= */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
+.modal-overlay.show { display: flex; animation: fadeIn 0.2s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal { background: var(--bg-card); border-radius: 24px 24px 0 0; padding: 24px; width: 100%; max-width: 480px; max-height: 90vh; display: flex; flex-direction: column; animation: slideUpModal 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-header h3 { font-size: 20px; font-weight: 700; }
+.modal-scroll { overflow-y: auto; flex: 1; padding-bottom: 20px; }
+
+.muscle-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 16px; margin-bottom: 16px; scrollbar-width: none; }
+.muscle-tabs::-webkit-scrollbar { display: none; }
+.muscle-tab { flex: none; padding: 10px 16px; border-radius: 16px; border: 1px solid var(--border); background: var(--bg); font-weight: 600; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: all 0.2s; font-size: 14px; }
+.muscle-tab.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+
+.workout-option { padding: 16px; background: var(--bg); border-radius: var(--radius-sm); margin-bottom: 12px; cursor: pointer; border: 1px solid var(--border); transition: all 0.2s; }
+.workout-option:active { transform: scale(0.98); }
+.workout-option .wo-name { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
+.workout-option .wo-desc { font-size: 13px; color: var(--text-muted); line-height: 1.4; margin-bottom: 10px; }
+.workout-option .wo-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+.wo-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 8px; background: var(--accent-light); color: var(--accent); }
+
+.input-field { margin-bottom: 16px; }
+.input-field label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+.input-field input { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg); color: var(--text-main); font-size: 16px; font-family: var(--font); outline: none; transition: border-color 0.2s; }
+.input-field input:focus { border-color: var(--accent); }
+.row-inputs { display: flex; gap: 8px; }
+
+.toast { position: fixed; bottom: calc(100px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text-main); color: var(--bg); border-radius: 30px; padding: 12px 24px; font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: all 0.3s; z-index: 3000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ================= ЭКРАНЫ ================= */
+.screen { display: none; padding-bottom: 20px; }
+.screen.active { display: block; animation: fadeSlide 0.3s ease; }
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ================= ОНБОРДИНГ ================= */
+#onboarding { position: fixed; inset: 0; z-index: 1500; background: var(--bg); display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; }
+.ob-content { flex: 1; overflow-y: auto; padding: 40px 24px; }
+.ob-step { display: none; }
+.ob-step.active { display: block; animation: fadeSlide 0.3s ease; }
+.ob-title { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; line-height: 1.1; }
+.ob-sub { font-size: 16px; color: var(--text-muted); margin-bottom: 32px; line-height: 1.4; }
+.ob-footer { padding: 20px 24px calc(20px + var(--safe-bottom)); background: var(--bg); border-top: 1px solid var(--border); }
+.segmented { display: flex; background: var(--bg); border-radius: 12px; padding: 4px; border: 1px solid var(--border); }
+.segmented button { flex: 1; padding: 12px; border-radius: 8px; border: none; background: transparent; font-size: 15px; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+.segmented button.active { background: var(--bg-card); color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
-<div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
-
 <!-- ЭКРАН ТРЕНИРОВКИ -->
 <div id="workoutScreen">
-  <div class="workout-header">
-    <h2 id="wsTitle">Тренировка</h2>
-    <button class="close-workout" onclick="exitWorkout()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  <div class="ws-header">
+    <div style="font-weight: 700; font-size: 18px;" id="wsTitle">Тренировка</div>
+    <button class="btn-icon" onclick="exitWorkout()" style="background: transparent; border: 1px solid var(--border); color: var(--text-main);">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
   </div>
-  <div class="workout-progress-bar"><div class="workout-progress-fill" id="wsProgress" style="width: 0%;"></div></div>
-  <div class="workout-card">
-    <div class="workout-ex-name" id="wsExName">Упражнение</div>
-    <div class="workout-ex-meta" id="wsExMeta">3 подхода × 10 повторений</div>
-    <div class="workout-set-tracker" id="wsSetTracker"></div>
-    <div class="workout-timer" id="wsTimer">00:00</div>
-    <div id="wsWeightControl" class="weight-control" style="justify-content: center; margin-bottom: 24px; display: inline-flex;">
-      <button class="weight-btn" onclick="changeWorkoutWeight(-1)">−</button>
-      <div class="weight-val" id="wsWeightVal" style="font-size: 20px; min-width: 60px;">0 кг</div>
-      <button class="weight-btn" onclick="changeWorkoutWeight(1)">+</button>
+  <div class="ws-progress-bar"><div class="ws-progress-fill" id="wsProgress" style="width: 0%;"></div></div>
+  <div class="ws-card">
+    <div class="ws-ex-name" id="wsExName">Упражнение</div>
+    <div class="ws-ex-meta" id="wsExMeta">3 подхода × 10 повторений</div>
+    <div class="ws-set-tracker" id="wsSetTracker"></div>
+    <div class="ws-timer" id="wsTimer">00:00</div>
+    <div id="wsWeightControl" class="ws-weight-control">
+      <button class="ws-weight-btn" onclick="changeWorkoutWeight(-1)">−</button>
+      <div class="ws-weight-val" id="wsWeightVal">0 кг</div>
+      <button class="ws-weight-btn" onclick="changeWorkoutWeight(1)">+</button>
     </div>
-    <div class="rest-timer-text" id="wsRestText" style="display: none;">Отдых: <span id="wsRestTimer">60</span> сек</div>
-    <button class="btn-workout primary" id="wsActionBtn" onclick="handleWorkoutAction()">Начать подход</button>
-    <button class="btn-workout secondary" id="wsSkipBtn" onclick="skipExercise()" style="display: none;">Пропустить упражнение</button>
+    <div id="wsRestText" style="font-size: 14px; color: var(--text-muted); margin-bottom: 16px; display: none;">Отдых: <span id="wsRestTimer" style="font-weight: 700; color: var(--accent);">60</span> сек</div>
+    <button class="btn primary" id="wsActionBtn" onclick="handleWorkoutAction()">Начать подход</button>
+    <button class="btn outline" id="wsSkipBtn" onclick="skipExercise()" style="margin-top: 12px; display: none;">Пропустить упражнение</button>
   </div>
-</div>
-
-<!-- ЭКРАН БЛОКИРОВКИ -->
-<div id="expiredScreen" style="display:none; position:fixed; inset:0; z-index:2000; background:var(--bg1); align-items:center; justify-content:center; text-align:center; padding:20px; flex-direction:column;">
-  <div style="font-size: 64px; margin-bottom: 24px;">⏳</div>
-  <h2 style="font-size: 24px; margin-bottom: 12px; color: var(--accent-deep);">Подписка истекла</h2>
-  <p style="font-size: 15px; color: var(--muted); margin-bottom: 32px; line-height: 1.5; max-width: 300px;">Твой пробный период закончился. Чтобы продолжить пользоваться приложением, продли подписку в боте.</p>
-  <button class="btn" onclick="window.Telegram.WebApp.close()" style="max-width: 280px;">Перейти в бот</button>
 </div>
 
 <!-- ОНБОРДИНГ -->
 <div id="onboarding">
   <div class="ob-content">
-    <div class="ob-progress"><div class="dot active" data-dot="0"></div><div class="dot" data-dot="1"></div><div class="dot" data-dot="2"></div><div class="dot" data-dot="3"></div></div>
     <div class="ob-step active" data-step="0">
-      <div class="ob-title">Давай знакомиться 👋</div>
+      <div class="ob-title">Давай знакомиться</div>
       <div class="ob-sub">Пара вопросов, чтобы всё было по-твоему</div>
-      <div class="field"><label>Как тебя зовут?</label><div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><input type="text" id="inpName" placeholder="Имя"></div></div>
-      <div class="field"><label>Возраст</label><div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><input type="number" id="inpAge" placeholder="16"><span class="unit">лет</span></div></div>
-      <div class="field"><label>Пол</label><div class="segment" id="genderSeg"><button data-gender="male" class="active">Парень</button><button data-gender="female">Девушка</button></div></div>
+      <div class="input-field"><label>Имя</label><input type="text" id="inpName" placeholder="Как тебя зовут?"></div>
+      <div class="input-field"><label>Возраст</label><input type="number" id="inpAge" placeholder="16"></div>
+      <div class="input-field"><label>Пол</label><div class="segmented" id="genderSeg"><button data-gender="male" class="active">Парень</button><button data-gender="female">Девушка</button></div></div>
     </div>
     <div class="ob-step" data-step="1">
       <div class="ob-title">Параметры тела</div>
-      <div class="ob-sub">Нужны для расчёта КБЖУ и нагрузки</div>
-      <div class="field"><label>Вес</label><div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/><path d="M6 21h12a2 2 0 0 0 2-2l-2-8H6l-2 8a2 2 0 0 0 2 2z"/></svg><input type="number" id="inpWeight" placeholder="65"><span class="unit">кг</span></div></div>
-      <div class="field"><label>Рост</label><div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v20M8 6l4-4 4 4M8 18l4 4 4-4"/></svg><input type="number" id="inpHeight" placeholder="175"><span class="unit">см</span></div></div>
-      <div class="field"><label>Уровень активности</label><div class="activity-levels" id="activityList">
-        <button class="level" data-act="1.2"><div class="lv-dot"></div><div class="lv-info"><div class="lv-title">Низкий</div><div class="lv-desc">Сплю и учусь</div></div></button>
-        <button class="level selected" data-act="1.375"><div class="lv-dot"></div><div class="lv-info"><div class="lv-title">Средний</div><div class="lv-desc">Пара тренировок в неделю</div></div></button>
-        <button class="level" data-act="1.55"><div class="lv-dot"></div><div class="lv-info"><div class="lv-title">Высокий</div><div class="lv-desc">3–5 тренировок в неделю</div></div></button>
-        <button class="level" data-act="1.725"><div class="lv-dot"></div><div class="lv-info"><div class="lv-title">Очень высокий</div><div class="lv-desc">Спорт почти каждый день</div></div></button>
-      </div></div>
+      <div class="ob-sub">Нужны для расчёта КБЖУ и весов</div>
+      <div class="input-field"><label>Вес (кг)</label><input type="number" id="inpWeight" placeholder="65"></div>
+      <div class="input-field"><label>Рост (см)</label><input type="number" id="inpHeight" placeholder="175"></div>
+      <div class="input-field"><label>Уровень активности</label>
+        <div class="segmented" id="activitySeg">
+          <button data-act="1.2">Низкий</button>
+          <button data-act="1.375" class="active">Средний</button>
+          <button data-act="1.55">Высокий</button>
+        </div>
+      </div>
     </div>
     <div class="ob-step" data-step="2">
       <div class="ob-title">Какая цель?</div>
-      <div class="ob-sub">Приложение подстроит план и питание</div>
-      <div class="goal-grid" id="goalGrid">
-        <button class="goal-card" data-goal="lose"><div class="gc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v6M12 22v-6M4 12H2M22 12h-2M6 6l4 4M18 6l-4 4M6 18l4-4M18 18l-4-4"/></svg></div><div class="gc-title">Похудеть</div><div class="gc-desc">Сбросить вес</div></button>
-        <button class="goal-card" data-goal="gain"><div class="gc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 12h12M12 6v12"/></svg></div><div class="gc-title">Набрать массу</div><div class="gc-desc">Стать больше</div></button>
-        <button class="goal-card" data-goal="tone"><div class="gc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="gc-title">Тонус</div><div class="gc-desc">Поддерживать форму</div></button>
-        <button class="goal-card" data-goal="strength"><div class="gc-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 4v16M18 4v16M4 7h4M16 7h4M4 17h4M16 17h4M8 12h8"/></svg></div><div class="gc-title">Сила</div><div class="gc-desc">Прогресс в весах</div></button>
+      <div class="ob-sub">Подстроим программу под тебя</div>
+      <div class="input-field"><label>Цель</label>
+        <div class="segmented" id="goalSeg" style="flex-wrap: wrap; gap: 4px;">
+          <button data-goal="lose">Похудеть</button>
+          <button data-goal="gain" class="active">Набрать массу</button>
+          <button data-goal="tone">Тонус</button>
+          <button data-goal="strength">Сила</button>
+        </div>
       </div>
     </div>
     <div class="ob-step" data-step="3">
-      <div class="ob-title">Готово! 🎉</div>
-      <div class="ob-sub">Вот твоя стартовая норма</div>
-      <div class="glass-strong" style="padding:24px; text-align:center;">
-        <div style="font-size:13px; color:var(--muted); margin-bottom:6px;">Твоя норма калорий</div>
-        <div id="calcKcal" style="font-size:44px; font-weight:800; letter-spacing:-1px; color:var(--accent-deep);">0</div>
-        <div style="font-size:13px; color:var(--muted);">ккал / день</div>
-        <div class="macros" style="margin-top:20px;">
+      <div class="ob-title">Готово!</div>
+      <div class="ob-sub">Твоя норма калорий рассчитана</div>
+      <div class="card" style="text-align: center; margin-top: 20px;">
+        <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">Норма калорий</div>
+        <div id="calcKcal" style="font-size: 48px; font-weight: 800; color: var(--accent); letter-spacing: -1px;">0</div>
+        <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 20px;">ккал / день</div>
+        <div class="macros">
           <div class="macro"><div class="mv" id="calcP">0 г</div><div class="ml">Белки</div></div>
           <div class="macro"><div class="mv" id="calcF">0 г</div><div class="ml">Жиры</div></div>
           <div class="macro"><div class="mv" id="calcC">0 г</div><div class="ml">Углеводы</div></div>
         </div>
       </div>
-      <div style="margin-top: 20px; text-align: center; font-size: 14px; color: var(--accent); font-weight: 600;">🎁 Твой пробный период на 3 дня активирован!</div>
     </div>
   </div>
   <div class="ob-footer">
-    <div class="ob-nav">
-      <button class="btn secondary hidden" id="btnBack"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <button class="btn" id="btnNext">Далее</button>
-    </div>
+    <button class="btn primary" id="btnNext">Далее</button>
   </div>
 </div>
 
 <!-- ОСНОВНОЕ ПРИЛОЖЕНИЕ -->
-<div id="mainApp" class="app">
-  <section id="home" class="screen active">
-    <div class="header"><div><h1 id="greetName">Привет 👋</h1><div class="sub" id="todayWorkout">Сегодня — отдых</div></div><div class="avatar" id="avatarInitial" onclick="switchTab('profile')">A</div></div>
-    <div class="card glass card-clickable" onclick="switchTab('food')">
-      <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>Калории <span style="font-size:12px;font-weight:normal;color:var(--muted);margin-left:auto;">Добавить →</span></h2>
+<div id="mainApp" class="app-container" style="display: none;">
+  
+  <section id="screen-home" class="screen active">
+    <div class="header">
+      <div><h1 id="greetName">Привет 👋</h1><div class="sub" id="todaySub">Сегодня — отдых</div></div>
+      <div class="avatar" id="avatarInitial" onclick="switchTab('profile')">A</div>
+    </div>
+    
+    <div class="card clickable" onclick="switchTab('food')">
+      <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>Калории</div><span style="font-size: 12px; color: var(--accent);">Добавить →</span></h2>
       <div class="kcal-row">
         <div class="ring" id="kcalRing" style="--p:0%"><div class="ring-inner"><div><div class="big" id="kcalLeft">0</div><div class="small">осталось</div></div></div></div>
-        <div class="kcal-info"><div class="label">Съедено сегодня</div><div class="value" id="kcalEaten">0 <small>/ <span id="kcalTarget">0</span></small></div></div>
+        <div class="kcal-info">
+          <div class="label">Съедено</div>
+          <div class="value" id="kcalEaten">0 <small>/ <span id="kcalTarget">0</span></small></div>
+        </div>
       </div>
       <div class="macros">
         <div class="macro"><div class="mv" id="macroP">0 г</div><div class="ml">Белки</div></div>
@@ -308,125 +295,126 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
         <div class="macro"><div class="mv" id="macroF">0 г</div><div class="ml">Жиры</div></div>
       </div>
     </div>
-    <div class="card glass" id="todayPlanCard">
-      <h2 style="display:flex; justify-content:space-between; align-items:center;">
-        <span style="display:flex; align-items:center; gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 4v16M18 4v16M4 7h4M16 7h4M4 17h4M16 17h4M8 12h8"/></svg>Тренировки на сегодня</span>
-        <button class="header-add-btn" onclick="addExtraWorkout()">+</button>
-      </h2>
+
+    <div class="card">
+      <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M4 7h4M16 7h4M4 17h4M16 17h4M8 12h8"/></svg>Тренировки</div><button class="btn-icon" onclick="addExtraWorkout()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></h2>
       <div id="todayPlanContent"></div>
     </div>
-    <div class="card glass">
-      <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Стрик</h2>
-      <div class="streak" id="streakContainer"></div>
+
+    <div class="card">
+      <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Стрик</div></h2>
+      <div class="streak-days" id="streakContainer"></div>
     </div>
   </section>
 
-  <section id="plan" class="screen">
-    <div class="header"><div><h1>План</h1><div class="sub">Выбери тренировку на каждый день</div></div></div>
-    <div class="card glass" style="padding: 16px;">
-      <h2 style="margin-bottom: 8px;">Длительность тренировки</h2>
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <input type="range" id="durationRange" min="15" max="180" step="15" value="45" oninput="updateDurationLabel(this.value)" style="flex: 1; accent-color: var(--accent);">
-        <span id="durationLabel" style="font-weight: 700; color: var(--accent-deep); font-size: 16px; width: 60px; text-align: right;">45 мин</span>
+  <section id="screen-plan" class="screen">
+    <div class="header"><div><h1>План</h1><div class="sub">Выбери тренировку на неделю</div></div></div>
+    
+    <div class="card">
+      <h2><div class="title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Длительность</div></h2>
+      <div class="duration-control">
+        <input type="range" id="durationRange" min="15" max="180" step="15" value="45" oninput="updateDurationLabel(this.value)">
+        <span id="durationLabel" style="font-weight: 700; color: var(--accent); font-size: 18px; width: 70px; text-align: right;">45 мин</span>
       </div>
-      <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">От этого зависит количество упражнений и подходов.</p>
     </div>
-    <div class="card glass">
-      <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Неделя</h2>
-      <div class="week-grid" id="weekGrid"></div>
+
+    <div class="card">
+      <h2><div class="title"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Неделя</div></h2>
+      <div id="weekGrid"></div>
     </div>
   </section>
 
-  <section id="food" class="screen">
-    <div class="header"><div><h1>Питание</h1><div class="sub">Дневник</div></div></div>
-    <div class="card glass" id="foodListCard">
-      <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 11h18M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>Съедено сегодня</h2>
+  <section id="screen-food" class="screen">
+    <div class="header"><div><h1>Питание</h1><div class="sub">Дневник за сегодня</div></div></div>
+    <div class="card">
       <div id="foodItems"></div>
+      <button class="btn primary" style="margin-top: 16px;" onclick="openFoodModal()">+ Добавить продукт</button>
     </div>
-    <button class="btn" onclick="openFoodModal()">+ Добавить приём пищи</button>
   </section>
 
-  <section id="progress" class="screen">
+  <section id="screen-progress" class="screen">
     <div class="header"><div><h1>Прогресс</h1><div class="sub">Твои результаты</div></div></div>
-    <div class="card glass">
-      <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Статистика</h2>
+    <div class="card">
+      <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 9l-5 5-2-2-4 4"/></svg>Статистика</div></h2>
       <div class="stat-grid">
         <div class="stat-box"><div class="sv" id="statStreak">0</div><div class="sl">Дней подряд</div></div>
         <div class="stat-box"><div class="sv" id="statWorkouts">0</div><div class="sl">Тренировок</div></div>
       </div>
     </div>
-    <div class="card glass">
-      <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>График калорий (Неделя)</h2>
+    <div class="card">
+      <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>Калории за неделю</div></h2>
       <div class="bar-chart" id="chartKcal"></div>
     </div>
-    <div class="card glass">
-      <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Экспорт данных</h2>
-      <div class="export-btns">
-        <button class="btn secondary" style="width:100%;" onclick="exportData('food', 'csv')">📥 Скачать питание (CSV)</button>
-        <button class="btn secondary" style="width:100%;" onclick="exportData('workout', 'csv')">📥 Скачать тренировки (CSV)</button>
-        <button class="btn" style="width:100%;" onclick="exportData('workout', 'pdf')">📄 Полный отчет (PDF)</button>
+    <div class="card">
+      <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Экспорт</div></h2>
+      <button class="btn secondary" style="margin-bottom: 8px;" onclick="exportData('food', 'csv')">Питание (CSV)</button>
+      <button class="btn secondary" style="margin-bottom: 8px;" onclick="exportData('workout', 'csv')">Тренировки (CSV)</button>
+      <button class="btn primary" onclick="exportData('workout', 'pdf')">Полный отчет (PDF)</button>
+    </div>
+  </section>
+
+  <section id="screen-profile" class="screen">
+    <div class="header"><div><h1>Профиль</h1><div class="sub">Настройки</div></div></div>
+    <div class="card">
+      <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Личные данные</div></h2>
+      <div class="week-row"><span class="week-day" style="width: 120px; color: var(--text-muted);">Имя</span><span class="week-plan" style="text-align: right;" id="profName">—</span></div>
+      <div class="week-row"><span class="week-day" style="width: 120px; color: var(--text-muted);">Возраст</span><span class="week-plan" style="text-align: right;" id="profAge">—</span></div>
+      <div class="week-row"><span class="week-day" style="width: 120px; color: var(--text-muted);">Вес</span><span class="week-plan" style="text-align: right;" id="profWeight">—</span></div>
+      <div class="week-row"><span class="week-day" style="width: 120px; color: var(--text-muted);">Норма ккал</span><span class="week-plan" style="text-align: right;" id="profKcal">—</span></div>
+      <button class="btn outline" style="margin-top: 16px;" onclick="openEditProfile()">Редактировать</button>
+    </div>
+    <div class="card">
+      <h2><div class="title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>Тема</div></h2>
+      <div class="segmented" id="themeSeg">
+        <button onclick="setTheme('light')">Светлая</button>
+        <button onclick="setTheme('dark')">Тёмная</button>
       </div>
     </div>
   </section>
 
-  <section id="profile" class="screen">
-    <div class="header"><div><h1>Профиль</h1><div class="sub">Твои данные</div></div></div>
-    <div class="card glass">
-      <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Личные данные</h2>
-      <div class="profile-field"><span class="pf-label">Имя</span><span class="pf-value" id="profName">—</span></div>
-      <div class="profile-field"><span class="pf-label">Возраст</span><span class="pf-value" id="profAge">—</span></div>
-      <div class="profile-field"><span class="pf-label">Пол</span><span class="pf-value" id="profGender">—</span></div>
-      <div class="profile-field"><span class="pf-label">Вес</span><span class="pf-value" id="profWeight">—</span></div>
-      <div class="profile-field"><span class="pf-label">Рост</span><span class="pf-value" id="profHeight">—</span></div>
-      <div class="profile-field"><span class="pf-label">Цель</span><span class="pf-value" id="profGoal">—</span></div>
-      <div class="profile-field"><span class="pf-label">Норма ккал</span><span class="pf-value" id="profKcal">—</span></div>
-      <div class="profile-field"><span class="pf-label">Подписка</span><span class="pf-value" id="profSub" style="color:var(--accent-deep);">—</span></div>
-      <button class="btn secondary" style="width:100%; margin-top:16px;" onclick="openEditProfile()">Редактировать</button>
-      <div class="disclaimer">Приложение FitPlan носит информационный характер. Перед началом тренировок проконсультируйтесь с врачом.</div>
-    </div>
-  </section>
-
   <nav class="tabbar">
-    <div class="tabbar-inner">
-      <button class="tab active" data-screen="home"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>Главная</button>
-      <button class="tab" data-screen="plan"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>План</button>
-      <button class="tab" data-screen="food"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 11h18M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>Питание</button>
-      <button class="tab" data-screen="progress"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-2-2-4 4"/></svg>Прогресс</button>
-      <button class="tab" data-screen="profile"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Профиль</button>
-    </div>
+    <button class="tab active" data-screen="home" onclick="switchTab('home')"><svg viewBox="0 0 24 24"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg><span>Главная</span></button>
+    <button class="tab" data-screen="plan" onclick="switchTab('plan')"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>План</span></button>
+    <button class="tab" data-screen="food" onclick="switchTab('food')"><svg viewBox="0 0 24 24"><path d="M3 11h18M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg><span>Питание</span></button>
+    <button class="tab" data-screen="progress" onclick="switchTab('progress')"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 9l-5 5-2-2-4 4"/></svg><span>Прогресс</span></button>
+    <button class="tab" data-screen="profile" onclick="switchTab('profile')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Профиль</span></button>
   </nav>
 </div>
 
 <!-- МОДАЛКИ -->
-<div class="modal-overlay" id="planModal">
-  <div class="modal" style="max-width: 420px;">
-    <h3>Выбрать тренировку</h3>
-    <div class="muscle-group-tabs" id="muscleGroupTabs"></div>
-    <div id="workoutOptionsList" style="max-height: 55vh; overflow-y: auto;"></div>
-    <button class="btn secondary" style="width:100%; margin-top:16px;" onclick="closePlanModal()">Закрыть</button>
+<div class="modal-overlay" id="modal-plan">
+  <div class="modal">
+    <div class="modal-header"><h3>Выбрать тренировку</h3><button class="btn-icon" onclick="closeModal('modal-plan')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="muscle-tabs" id="muscleTabs"></div>
+    <div class="modal-scroll" id="workoutOptionsList"></div>
   </div>
 </div>
 
-<div class="modal-overlay" id="foodModal">
+<div class="modal-overlay" id="modal-food">
   <div class="modal">
-    <h3>Добавить продукт</h3>
-    <div class="field"><label>Название</label><div class="input-wrap"><input type="text" id="foodName" placeholder="Курица"></div></div>
-    <div class="field"><label>Ккал на 100г</label><div class="input-wrap"><input type="number" id="foodKcal" placeholder="165"></div></div>
-    <div class="field"><label>Белки / Жиры / Углеводы (на 100г)</label><div class="food-macros-row"><div class="input-wrap"><input type="number" id="foodP" placeholder="Б"></div><div class="input-wrap"><input type="number" id="foodF" placeholder="Ж"></div><div class="input-wrap"><input type="number" id="foodC" placeholder="У"></div></div></div>
-    <div class="field"><label>Сколько грамм съел?</label><div class="input-wrap"><input type="number" id="foodWeight" placeholder="200"><span class="unit">г</span></div></div>
-    <div style="display:flex; gap:8px; margin-top:20px;"><button class="btn secondary" style="flex:1;" onclick="closeFoodModal()">Отмена</button><button class="btn" style="flex:2;" onclick="addFood()">Добавить</button></div>
+    <div class="modal-header"><h3>Добавить продукт</h3><button class="btn-icon" onclick="closeModal('modal-food')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-scroll">
+      <div class="input-field"><label>Название</label><input type="text" id="foodName" placeholder="Курица"></div>
+      <div class="input-field"><label>Ккал на 100г</label><input type="number" id="foodKcal" placeholder="165"></div>
+      <div class="input-field"><label>Б / Ж / У (на 100г)</label>
+        <div class="row-inputs"><input type="number" id="foodP" placeholder="Б"><input type="number" id="foodF" placeholder="Ж"><input type="number" id="foodC" placeholder="У"></div>
+      </div>
+      <div class="input-field"><label>Вес порции (г)</label><input type="number" id="foodWeight" placeholder="200"></div>
+      <button class="btn primary" onclick="addFood()">Добавить</button>
+    </div>
   </div>
 </div>
 
-<div class="modal-overlay" id="editProfileModal">
+<div class="modal-overlay" id="modal-edit-profile">
   <div class="modal">
-    <h3>Редактировать</h3>
-    <div class="field"><label>Имя</label><div class="input-wrap"><input type="text" id="editName"></div></div>
-    <div class="field"><label>Возраст</label><div class="input-wrap"><input type="number" id="editAge"></div></div>
-    <div class="field"><label>Вес</label><div class="input-wrap"><input type="number" id="editWeight"></div></div>
-    <div class="field"><label>Рост</label><div class="input-wrap"><input type="number" id="editHeight"></div></div>
-    <div class="field"><label>Пол</label><div class="segment" id="editGenderSeg"><button data-gender="male" class="active" onclick="setEditGender('male')">Парень</button><button data-gender="female" onclick="setEditGender('female')">Девушка</button></div></div>
-    <div style="display:flex; gap:8px; margin-top:20px;"><button class="btn secondary" style="flex:1;" onclick="closeEditProfile()">Отмена</button><button class="btn" style="flex:2;" onclick="saveProfile()">Сохранить</button></div>
+    <div class="modal-header"><h3>Профиль</h3><button class="btn-icon" onclick="closeModal('modal-edit-profile')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-scroll">
+      <div class="input-field"><label>Имя</label><input type="text" id="editName"></div>
+      <div class="input-field"><label>Возраст</label><input type="number" id="editAge"></div>
+      <div class="input-field"><label>Вес (кг)</label><input type="number" id="editWeight"></div>
+      <div class="input-field"><label>Рост (см)</label><input type="number" id="editHeight"></div>
+      <button class="btn primary" onclick="saveProfile()">Сохранить</button>
+    </div>
   </div>
 </div>
 
@@ -438,77 +426,69 @@ const EXERCISE_LIBRARY = {
   chest: { name: "Грудь", exercises: [
     { name: "Жим штанги лёжа", type: "barbell", ratio: 0.5, minW: 20, step: 2.5, desc: "Базовое движение для массы груди" },
     { name: "Жим гантелей на наклонной", type: "dumbbell", ratio: 0.2, minW: 4, step: 2, desc: "Акцент на верхнюю часть груди" },
-    { name: "Разводка гантелей", type: "dumbbell", ratio: 0.1, minW: 4, step: 2, desc: "Изолирующее движение для растяжения" },
-    { name: "Отжимания от пола", type: "bodyweight", ratio: 0, desc: "Базовое упражнение с собственным весом" },
-    { name: "Жим в кроссовере", type: "machine", ratio: 0.15, minW: 10, step: 5, desc: "Постоянное напряжение в грудных" }
+    { name: "Разводка гантелей", type: "dumbbell", ratio: 0.1, minW: 4, step: 2, desc: "Изолирующее движение" },
+    { name: "Отжимания от пола", type: "bodyweight", ratio: 0, desc: "С собственным весом" },
+    { name: "Жим в кроссовере", type: "machine", ratio: 0.15, minW: 10, step: 5, desc: "Постоянное напряжение" }
   ]},
   back: { name: "Спина", exercises: [
-    { name: "Подтягивания", type: "bodyweight", ratio: 0, desc: "Лучшее упражнение для ширины спины" },
-    { name: "Тяга штанги в наклоне", type: "barbell", ratio: 0.4, minW: 20, step: 2.5, desc: "Толщина спины, акцент на широчайшие" },
-    { name: "Тяга верхнего блока", type: "machine", ratio: 0.35, minW: 15, step: 5, desc: "Безопасная альтернатива подтягиваниям" },
-    { name: "Тяга гантели одной рукой", type: "dumbbell", ratio: 0.15, minW: 4, step: 2, desc: "Проработка спины по одной стороне" },
-    { name: "Гиперэкстензия", type: "bodyweight", ratio: 0, desc: "Укрепление поясницы и разгибателей" }
+    { name: "Подтягивания", type: "bodyweight", ratio: 0, desc: "Для ширины спины" },
+    { name: "Тяга штанги в наклоне", type: "barbell", ratio: 0.4, minW: 20, step: 2.5, desc: "Толщина спины" },
+    { name: "Тяга верхнего блока", type: "machine", ratio: 0.35, minW: 15, step: 5, desc: "Безопасная альтернатива" },
+    { name: "Тяга гантели одной рукой", type: "dumbbell", ratio: 0.15, minW: 4, step: 2, desc: "По одной стороне" },
+    { name: "Гиперэкстензия", type: "bodyweight", ratio: 0, desc: "Укрепление поясницы" }
   ]},
   legs: { name: "Ноги", exercises: [
-    { name: "Приседания со штангой", type: "barbell", ratio: 0.6, minW: 20, step: 2.5, desc: "Король упражнений для ног" },
-    { name: "Жим ногами", type: "machine", ratio: 1.0, minW: 40, step: 10, desc: "Тяжёлая нагрузка на квадрицепс" },
-    { name: "Румынская тяга", type: "barbell", ratio: 0.45, minW: 20, step: 2.5, desc: "Бицепс бедра и ягодицы" },
-    { name: "Выпады с гантелями", type: "dumbbell", ratio: 0.15, minW: 4, step: 2, desc: "Односторонняя нагрузка, баланс" },
-    { name: "Сгибания ног лёжа", type: "machine", ratio: 0.25, minW: 10, step: 5, desc: "Изоляция бицепса бедра" }
+    { name: "Приседания со штангой", type: "barbell", ratio: 0.6, minW: 20, step: 2.5, desc: "Король упражнений" },
+    { name: "Жим ногами", type: "machine", ratio: 1.0, minW: 40, step: 10, desc: "Тяжёлая нагрузка" },
+    { name: "Румынская тяга", type: "barbell", ratio: 0.45, minW: 20, step: 2.5, desc: "Бицепс бедра" },
+    { name: "Выпады с гантелями", type: "dumbbell", ratio: 0.15, minW: 4, step: 2, desc: "Баланс и нагрузка" },
+    { name: "Сгибания ног лёжа", type: "machine", ratio: 0.25, minW: 10, step: 5, desc: "Изоляция" }
   ]},
   shoulders: { name: "Плечи", exercises: [
-    { name: "Жим штанги стоя", type: "barbell", ratio: 0.3, minW: 15, step: 2.5, desc: "Базовое движение для дельт" },
-    { name: "Махи гантелями в стороны", type: "dumbbell", ratio: 0.05, minW: 2, step: 2, desc: "Средняя дельта, ширина плеч" },
-    { name: "Шраги со штангой", type: "barbell", ratio: 0.5, minW: 20, step: 2.5, desc: "Трапеции и верх спины" },
-    { name: "Обратные разводки", type: "dumbbell", ratio: 0.05, minW: 2, step: 2, desc: "Задняя дельта, осанка" }
+    { name: "Жим штанги стоя", type: "barbell", ratio: 0.3, minW: 15, step: 2.5, desc: "Базовое движение" },
+    { name: "Махи гантелями", type: "dumbbell", ratio: 0.05, minW: 2, step: 2, desc: "Средняя дельта" },
+    { name: "Шраги со штангой", type: "barbell", ratio: 0.5, minW: 20, step: 2.5, desc: "Трапеции" },
+    { name: "Обратные разводки", type: "dumbbell", ratio: 0.05, minW: 2, step: 2, desc: "Задняя дельта" }
   ]},
   arms: { name: "Руки", exercises: [
-    { name: "Подъём штанги на бицепс", type: "barbell", ratio: 0.25, minW: 10, step: 2.5, desc: "Классика для бицепса" },
-    { name: "Французский жим", type: "barbell", ratio: 0.2, minW: 10, step: 2.5, desc: "Трицепс, акцент на длинную головку" },
-    { name: "Молотки", type: "dumbbell", ratio: 0.1, minW: 2, step: 2, desc: "Брахиалис, толщина рук" },
-    { name: "Разгибание на трицепс", type: "machine", ratio: 0.25, minW: 10, step: 5, desc: "Изоляция трицепса" }
+    { name: "Подъём штанги на бицепс", type: "barbell", ratio: 0.25, minW: 10, step: 2.5, desc: "Классика" },
+    { name: "Французский жим", type: "barbell", ratio: 0.2, minW: 10, step: 2.5, desc: "Трицепс" },
+    { name: "Молотки", type: "dumbbell", ratio: 0.1, minW: 2, step: 2, desc: "Толщина рук" },
+    { name: "Разгибание на трицепс", type: "machine", ratio: 0.25, minW: 10, step: 5, desc: "Изоляция" }
   ]},
   core: { name: "Кор", exercises: [
-    { name: "Скручивания", type: "bodyweight", ratio: 0, desc: "Прямая мышца живота" },
-    { name: "Планка", type: "bodyweight", ratio: 0, desc: "Статическая нагрузка на весь кор" },
-    { name: "Подъём ног в висе", type: "bodyweight", ratio: 0, desc: "Нижняя часть пресса" },
-    { name: "Боковые наклоны", type: "bodyweight", ratio: 0, desc: "Косые мышцы живота" }
+    { name: "Скручивания", type: "bodyweight", ratio: 0, desc: "Прямая мышца" },
+    { name: "Планка", type: "bodyweight", ratio: 0, desc: "Статика" },
+    { name: "Подъём ног в висе", type: "bodyweight", ratio: 0, desc: "Низ пресса" }
   ]}
 };
 
 const WORKOUT_CATALOG = {
   chest: [
-    { id: "chest_base", name: "Грудь: База", focus: ["chest"], desc: "Тяжёлые жимовые движения. Для массы и силы." },
-    { id: "chest_pump", name: "Грудь: Памп", focus: ["chest"], desc: "Многоповторка и изоляция. Для кровенаполнения." },
-    { id: "chest_upper", name: "Грудь: Верх", focus: ["chest"], desc: "Акцент на верхнюю часть грудных." },
-    { id: "push_full", name: "Жимовой день (Грудь+Плечи+Трицепс)", focus: ["chest", "shoulders", "arms"], desc: "Все жимовые движения в одной тренировке." }
+    { id: "chest_base", name: "Грудь: База", focus: ["chest"], desc: "Тяжёлые жимовые движения." },
+    { id: "chest_pump", name: "Грудь: Памп", focus: ["chest"], desc: "Многоповторка и изоляция." },
+    { id: "push_full", name: "Жимовой день", focus: ["chest", "shoulders", "arms"], desc: "Грудь + плечи + трицепс." }
   ],
   back: [
-    { id: "back_width", name: "Спина: Ширина", focus: ["back"], desc: "Тяги сверху и подтягивания. V-образная форма." },
-    { id: "back_thickness", name: "Спина: Толщина", focus: ["back"], desc: "Тяги к поясу. Масса и плотность спины." },
-    { id: "pull_full", name: "Тяговый день (Спина+Бицепс)", focus: ["back", "arms"], desc: "Все тяговые движения + бицепс." }
+    { id: "back_width", name: "Спина: Ширина", focus: ["back"], desc: "Тяги сверху и подтягивания." },
+    { id: "back_thickness", name: "Спина: Толщина", focus: ["back"], desc: "Тяги к поясу." },
+    { id: "pull_full", name: "Тяговый день", focus: ["back", "arms"], desc: "Спина + бицепс." }
   ],
   legs: [
-    { id: "legs_quad", name: "Ноги: Квадрицепс", focus: ["legs"], desc: "Приседания и жимы. Передняя поверхность бедра." },
-    { id: "legs_ham", name: "Ноги: Бицепс бедра", focus: ["legs"], desc: "Румынская тяга и сгибания. Задняя поверхность." },
-    { id: "legs_full", name: "Ноги: Полная", focus: ["legs"], desc: "Все группы мышц ног за одну тренировку." },
-    { id: "legs_pump", name: "Ноги: Памп", focus: ["legs"], desc: "Многоповторка для пампа и выносливости." }
+    { id: "legs_full", name: "Ноги: Полная", focus: ["legs"], desc: "Все группы мышц ног." },
+    { id: "legs_quad", name: "Ноги: Квадрицепс", focus: ["legs"], desc: "Приседания и жимы." }
   ],
   shoulders: [
-    { id: "shoulders_base", name: "Плечи: База", focus: ["shoulders"], desc: "Жимы и тяги для дельт." },
-    { id: "shoulders_pump", name: "Плечи: Памп", focus: ["shoulders"], desc: "Махи и изоляция. Средняя и задняя дельта." }
+    { id: "shoulders_base", name: "Плечи: База", focus: ["shoulders"], desc: "Жимы и тяги." }
   ],
   arms: [
-    { id: "arms_biceps", name: "Руки: Бицепс", focus: ["arms"], desc: "Подъёмы на бицепс всех вариаций." },
-    { id: "arms_triceps", name: "Руки: Трицепс", focus: ["arms"], desc: "Разгибания и жимы узким хватом." },
-    { id: "arms_full", name: "Руки: Полная", focus: ["arms"], desc: "Бицепс + трицепс. Суперсеты." }
+    { id: "arms_full", name: "Руки: Полная", focus: ["arms"], desc: "Бицепс + трицепс." }
   ],
   core: [
-    { id: "core_strength", name: "Кор: Сила", focus: ["core"], desc: "Статика и динамика для мышц живота." }
+    { id: "core_strength", name: "Кор: Сила", focus: ["core"], desc: "Статика и динамика." }
   ],
   fullbody: [
-    { id: "fb_beginner", name: "Всё тело: Новичок", focus: ["legs", "chest", "back"], desc: "Базовые движения для всего тела. 3 раза в неделю." },
-    { id: "fb_functional", name: "Всё тело: Функционал", focus: ["legs", "chest", "back", "core"], desc: "Круговая тренировка на выносливость." }
+    { id: "fb_functional", name: "Всё тело", focus: ["legs", "chest", "back", "core"], desc: "Круговая тренировка." }
   ]
 };
 
@@ -516,10 +496,9 @@ const WORKOUT_CATALOG = {
 let user = { name:'', age:16, gender:'male', weight:65, height:175, activity:1.375, goal:'gain', kcal:0, protein:0, fat:0, carbs:0, uniqueId:'', sub_until:0 };
 let todayFoods = [];
 let weekPlans = { 'Пн':null, 'Вт':null, 'Ср':null, 'Чт':null, 'Пт':null, 'Сб':null, 'Вс':null };
-let todayWorkouts = []; // Дополнительные тренировки на сегодня
+let todayWorkouts = [];
 let streakDone = [false,false,false,false,false,false,false];
 let obStep = 0;
-let editGenderValue = 'male';
 let currentPlanDay = null;
 let currentDuration = 45;
 let currentMuscleGroup = 'chest';
@@ -534,6 +513,18 @@ let wsCurrentWorkoutIndex = 0;
 
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
 const SERVER_URL = window.location.origin;
+
+/* ================= ТЕМА ================= */
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.querySelectorAll('#themeSeg button').forEach(b => b.classList.toggle('active', b.textContent.toLowerCase().includes(theme === 'light' ? 'свет' : 'тём')));
+  localStorage.setItem('fitplan_theme', theme);
+}
+function initTheme() {
+  const saved = localStorage.getItem('fitplan_theme');
+  if (saved) setTheme(saved);
+  else setTheme(window.Telegram?.WebApp?.colorScheme === 'dark' ? 'dark' : 'light');
+}
 
 /* ================= ГЕНЕРАЦИЯ ТРЕНИРОВКИ ================= */
 function generateWorkout(templateId, duration) {
@@ -610,51 +601,41 @@ async function saveToServer() {
       streak: streakDone
     };
     const res = await fetch(`${SERVER_URL}/api/save`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
-    if(res.status === 403) { document.getElementById('expiredScreen').style.display = 'flex'; }
+    if(res.status === 403) { /* Подписка истекла */ }
   } catch(e) { console.error(e); }
 }
 
 /* ================= ОНБОРДИНГ ================= */
-const steps = document.querySelectorAll('.ob-step');
-const dots = document.querySelectorAll('.dot');
-const btnNext = document.getElementById('btnNext');
-const btnBack = document.getElementById('btnBack');
-function showStep(i){
-  steps.forEach((s,idx)=> s.classList.toggle('active', idx===i));
-  dots.forEach((d,idx)=>{ d.classList.toggle('active', idx===i); d.classList.toggle('done', idx<i); });
-  btnBack.classList.toggle('hidden', i===0);
-  btnNext.textContent = i===steps.length-1 ? 'Начать 🚀' : 'Далее';
-  if(i===steps.length-1) calcNutrition();
-  btnNext.disabled = !validateStep(i);
-  btnNext.style.opacity = btnNext.disabled ? .4 : 1;
-  document.querySelector('.ob-content').scrollTop = 0;
+function updateObStep() {
+  document.querySelectorAll('.ob-step').forEach((s, idx) => s.classList.toggle('active', idx === obStep));
+  document.getElementById('btnNext').textContent = obStep === 3 ? 'Начать 🚀' : 'Далее';
+  if(obStep === 3) calcNutrition();
 }
-function validateStep(i){
-  if(i===0) return document.getElementById('inpName').value.trim().length>0;
-  if(i===1) return +document.getElementById('inpWeight').value>0 && +document.getElementById('inpHeight').value>0;
-  if(i===2) return !!document.querySelector('.goal-card.selected');
-  return true;
-}
-['inpName','inpAge','inpWeight','inpHeight'].forEach(id=>{
-  document.getElementById(id).addEventListener('input', ()=>{ btnNext.disabled = !validateStep(obStep); btnNext.style.opacity = btnNext.disabled ? .4 : 1; });
+
+document.getElementById('btnNext').addEventListener('click', () => {
+  if(obStep < 3) { obStep++; updateObStep(); }
+  else { finishOnboarding(); }
 });
-document.querySelectorAll('#genderSeg button').forEach(b=>{
-  b.addEventListener('click', ()=>{ document.querySelectorAll('#genderSeg button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); user.gender = b.dataset.gender; });
-});
-document.querySelectorAll('#activityList .level').forEach(l=>{
-  l.addEventListener('click', ()=>{ document.querySelectorAll('#activityList .level').forEach(x=>x.classList.remove('selected')); l.classList.add('selected'); user.activity = +l.dataset.act; });
-});
-document.querySelectorAll('.goal-card').forEach(c=>{
-  c.addEventListener('click', ()=>{ document.querySelectorAll('.goal-card').forEach(x=>x.classList.remove('selected')); c.classList.add('selected'); user.goal = c.dataset.goal; btnNext.disabled = false; btnNext.style.opacity = 1; });
-});
-btnNext.addEventListener('click', ()=>{
-  if(!validateStep(obStep)) return;
-  if(obStep===0){ user.name = document.getElementById('inpName').value.trim(); user.age = +document.getElementById('inpAge').value || 16; }
-  if(obStep===1){ user.weight = +document.getElementById('inpWeight').value; user.height = +document.getElementById('inpHeight').value; }
-  if(obStep < steps.length-1){ obStep++; showStep(obStep); } else { finishOnboarding(); }
-});
-btnBack.addEventListener('click', ()=>{ if(obStep>0){ obStep--; showStep(obStep); } });
+
+document.querySelectorAll('#genderSeg button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#genderSeg button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active'); user.gender = b.dataset.gender;
+}));
+document.querySelectorAll('#activitySeg button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#activitySeg button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active'); user.activity = +b.dataset.act;
+}));
+document.querySelectorAll('#goalSeg button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#goalSeg button').forEach(x => x.classList.remove('active'));
+  b.classList.add('active'); user.goal = b.dataset.goal;
+}));
+
 function calcNutrition(){
+  user.name = document.getElementById('inpName').value.trim() || 'User';
+  user.age = +document.getElementById('inpAge').value || 16;
+  user.weight = +document.getElementById('inpWeight').value || 65;
+  user.height = +document.getElementById('inpHeight').value || 175;
+
   const {weight,height,age,gender,activity,goal} = user;
   let bmr = gender==='male' ? 10*weight + 6.25*height - 5*age + 5 : 10*weight + 6.25*height - 5*age - 161;
   let tdee = bmr * activity;
@@ -664,46 +645,36 @@ function calcNutrition(){
   const protein = Math.round(weight * 1.8);
   const fat = Math.round(weight * 0.9);
   const carbs = Math.round((kcal - protein*4 - fat*9) / 4);
+  
   document.getElementById('calcKcal').textContent = Math.round(kcal);
   document.getElementById('calcP').textContent = protein + ' г';
   document.getElementById('calcF').textContent = fat + ' г';
   document.getElementById('calcC').textContent = carbs + ' г';
+  
   user.kcal = Math.round(kcal); user.protein = protein; user.fat = fat; user.carbs = carbs;
 }
+
 function finishOnboarding(){
   if(!user.uniqueId) user.uniqueId = Math.floor(100000 + Math.random() * 900000).toString();
   saveToServer();
-  document.getElementById('onboarding').classList.add('hidden');
-  setTimeout(()=>{
-    document.getElementById('onboarding').style.display='none';
-    const app = document.getElementById('mainApp');
-    app.classList.add('visible'); app.style.display='block';
-    requestAnimationFrame(()=> app.style.opacity=1);
-    initMainApp();
-  }, 500);
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  initMainApp();
 }
 
 /* ================= ОСНОВНОЕ ================= */
 function initMainApp(){
-  const goalNames = {lose:'Похудение', gain:'Набор массы', tone:'Тонус', strength:'Сила'};
   document.getElementById('greetName').textContent = 'Привет, ' + user.name + ' 👋';
   document.getElementById('avatarInitial').textContent = user.name.charAt(0).toUpperCase();
   document.getElementById('profName').textContent = user.name;
   document.getElementById('profAge').textContent = user.age + ' лет';
-  document.getElementById('profGender').textContent = user.gender === 'male' ? 'Парень' : 'Девушка';
   document.getElementById('profWeight').textContent = user.weight + ' кг';
-  document.getElementById('profHeight').textContent = user.height + ' см';
-  document.getElementById('profGoal').textContent = goalNames[user.goal] || 'Набор массы';
   document.getElementById('profKcal').textContent = user.kcal + ' ккал';
-  updateProfileUI(); updateHomeMacros(); renderWeekGrid(); renderStreak(); renderFoodList(); renderProgress();
+  
+  updateHomeMacros(); renderWeekGrid(); renderStreak(); renderFoodList(); renderProgress();
   updateTodayWorkout();
 }
-function updateProfileUI() {
-  const now = Math.floor(Date.now() / 1000);
-  const subEl = document.getElementById('profSub');
-  if(user.sub_until > now) { subEl.textContent = `Активна (${Math.ceil((user.sub_until - now) / 86400)} дн.)`; subEl.style.color = 'var(--accent-deep)'; }
-  else { subEl.textContent = 'Не активна'; subEl.style.color = 'var(--muted)'; }
-}
+
 function updateHomeMacros(){
   const eatenKcal = todayFoods.reduce((s,f)=> s+f.kcal, 0);
   const eatenP = todayFoods.reduce((s,f)=> s+f.p, 0);
@@ -711,6 +682,7 @@ function updateHomeMacros(){
   const eatenC = todayFoods.reduce((s,f)=> s+f.c, 0);
   const left = Math.max(0, user.kcal - eatenKcal);
   const pct = user.kcal > 0 ? Math.min(100, Math.round(eatenKcal / user.kcal * 100)) : 0;
+  
   document.getElementById('kcalRing').style.setProperty('--p', pct + '%');
   document.getElementById('kcalLeft').textContent = left;
   document.getElementById('kcalEaten').innerHTML = eatenKcal + ' <small>/ ' + user.kcal + '</small>';
@@ -718,6 +690,7 @@ function updateHomeMacros(){
   document.getElementById('macroP').textContent = eatenP + ' г';
   document.getElementById('macroF').textContent = eatenF + ' г';
   document.getElementById('macroC').textContent = eatenC + ' г';
+  
   mockHistory[6] = eatenKcal;
   saveToServer();
 }
@@ -727,9 +700,15 @@ function renderWeekGrid() {
   const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
   document.getElementById('weekGrid').innerHTML = days.map(day => {
     const plan = weekPlans[day];
-    // Защита от старых форматов (если пришел просто объект без id)
-    const name = plan ? (plan.name || plan.title || 'Отдых') : 'Отдых';
-    return `<div class="plan-row"><span class="plan-day-label">${day}</span><span class="plan-name-text">${name}</span><button class="plan-add-btn" onclick="openPlanModal('${day}')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button></div>`;
+    const name = plan ? (plan.name || 'Тренировка') : 'Отдых';
+    const isRest = !plan;
+    return `
+      <div class="week-row">
+        <div class="week-day">${day}</div>
+        <div class="week-plan ${isRest ? 'empty' : ''}">${name}</div>
+        <button class="btn-icon" onclick="openPlanModal('${day}')"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+      </div>
+    `;
   }).join('');
 }
 
@@ -738,11 +717,11 @@ function openPlanModal(day) {
   currentMuscleGroup = 'chest';
   renderMuscleTabs();
   renderWorkoutOptions();
-  document.getElementById('planModal').classList.add('show');
+  openModal('modal-plan');
 }
 
 function renderMuscleTabs() {
-  const tabs = document.getElementById('muscleGroupTabs');
+  const tabs = document.getElementById('muscleTabs');
   const groups = Object.keys(EXERCISE_LIBRARY);
   const fullbodyTab = { key: 'fullbody', name: 'Всё тело' };
   const allGroups = [...groups.map(g => ({ key: g, name: EXERCISE_LIBRARY[g].name })), fullbodyTab];
@@ -760,30 +739,22 @@ function switchMuscleGroup(group) {
 
 function renderWorkoutOptions() {
   const container = document.getElementById('workoutOptionsList');
-  let workouts = [];
+  let workouts = currentMuscleGroup === 'fullbody' ? WORKOUT_CATALOG.fullbody : WORKOUT_CATALOG[currentMuscleGroup];
   
-  if (currentMuscleGroup === 'fullbody') {
-    workouts = WORKOUT_CATALOG.fullbody || [];
-  } else {
-    workouts = WORKOUT_CATALOG[currentMuscleGroup] || [];
-  }
-  
-  if (workouts.length === 0) {
-    container.innerHTML = '<p class="muted" style="text-align:center; padding:20px;">Нет тренировок для этой группы</p>';
+  if (!workouts || workouts.length === 0) {
+    container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px;">Нет тренировок</p>';
     return;
   }
   
   container.innerHTML = workouts.map(w => {
     const preview = generateWorkout(w.id, currentDuration);
-    const exCount = preview.length;
-    const sets = preview[0]?.sets || 3;
     return `
       <div class="workout-option" onclick="selectPlan('${currentPlanDay}', '${w.id}', '${w.name}')">
         <div class="wo-name">${w.name}</div>
         <div class="wo-desc">${w.desc}</div>
         <div class="wo-meta">
-          <span class="wo-badge">${exCount} упражнений</span>
-          <span class="wo-badge">${sets} подхода</span>
+          <span class="wo-badge">${preview.length} упр.</span>
+          <span class="wo-badge">${preview[0]?.sets || 3} подх.</span>
           <span class="wo-badge">${currentDuration} мин</span>
         </div>
       </div>
@@ -791,18 +762,16 @@ function renderWorkoutOptions() {
   }).join('');
 }
 
-function closePlanModal() { document.getElementById('planModal').classList.remove('show'); currentPlanDay = null; }
-
 function selectPlan(day, templateId, name){
   if (day === 'extra') {
     todayWorkouts.push({ id: templateId, name: name, duration: currentDuration, done: false });
-    closePlanModal();
+    closeModal('modal-plan');
     saveToServer();
-    toast('Тренировка добавлена на сегодня');
+    toast('Добавлено');
     updateTodayWorkout();
   } else {
     weekPlans[day] = { id: templateId, name: name };
-    closePlanModal();
+    closeModal('modal-plan');
     renderWeekGrid();
     saveToServer();
     toast('План обновлён');
@@ -810,67 +779,60 @@ function selectPlan(day, templateId, name){
   }
 }
 
-/* ================= УПРАВЛЕНИЕ ТРЕНИРОВКАМИ ДНЯ ================= */
+/* ================= ТРЕНИРОВКИ ДНЯ ================= */
 function addExtraWorkout() {
   currentPlanDay = 'extra';
   currentMuscleGroup = 'chest';
   renderMuscleTabs();
   renderWorkoutOptions();
-  document.getElementById('planModal').classList.add('show');
+  openModal('modal-plan');
 }
 
 function removeExtraWorkout(idx) {
-  if (confirm('Удалить эту тренировку?')) {
-    todayWorkouts.splice(idx, 1);
-    saveToServer();
-    updateTodayWorkout();
-  }
+  todayWorkouts.splice(idx, 1);
+  saveToServer();
+  updateTodayWorkout();
 }
 
 function updateTodayWorkout(){
   const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
   const todayName = days[new Date().getDay()];
   const plan = weekPlans[todayName];
-  const sub = document.getElementById('todayWorkout');
   const content = document.getElementById('todayPlanContent');
   
   let allWorkouts = [];
-  
-  if (plan && plan.id) {
-    allWorkouts.push({ id: plan.id, name: plan.name, duration: currentDuration, done: false, isBase: true });
-  }
-  
+  if (plan && plan.id) allWorkouts.push({ id: plan.id, name: plan.name, duration: currentDuration, done: false, isBase: true });
   todayWorkouts.forEach(w => allWorkouts.push(w));
   
   if (allWorkouts.length === 0) {
-    sub.textContent = 'Сегодня — отдых';
-    content.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Нет тренировок. Нажми «+», чтобы добавить.</p>';
+    document.getElementById('todaySub').textContent = 'Сегодня — отдых';
+    content.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px 0;">Нет тренировок. Нажми «+» чтобы добавить.</p>';
     return;
   }
   
-  sub.textContent = `Тренировок: ${allWorkouts.length}`;
+  document.getElementById('todaySub').textContent = `Запланировано: ${allWorkouts.length}`;
   
   content.innerHTML = allWorkouts.map((w, idx) => {
     const isDone = w.done;
     const isBase = w.isBase;
-    const displayIdx = isBase ? 0 : (idx); 
-    
     let preview = generateWorkout(w.id, w.duration || currentDuration);
-    let exList = preview.slice(0, 3).map(ex => `${ex.name} ${ex.sets}x${ex.reps}`).join(', ');
-    if (preview.length > 3) exList += '...';
+    let exList = preview.slice(0, 2).map(ex => ex.name).join(', ');
+    if (preview.length > 2) exList += '...';
     
     return `
       <div class="workout-day-card ${isDone ? 'done' : ''}">
         <div class="workout-day-header">
           <div class="workout-day-name">${w.name}</div>
-          <div class="workout-day-status">${isDone ? '✅ Выполнено' : ''}</div>
+          ${isDone ? '<div class="workout-day-status"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;stroke-width:3;fill:none;"><path d="M20 6L9 17l-5-5"/></svg>Готово</div>' : ''}
         </div>
         <div class="workout-day-exercises">${exList}</div>
-        ${!isBase ? `<button class="btn-workout secondary" style="padding:8px;font-size:12px;width:auto;display:inline-block;margin-bottom:8px;" onclick="removeExtraWorkout(${displayIdx - 1})">Удалить</button>` : ''}
-        ${isDone 
-          ? `<button class="workout-day-btn done" disabled>Тренировка завершена</button>`
-          : `<button class="workout-day-btn start" onclick="startWorkoutByIdx(${idx}, ${isBase})">Начать тренировку</button>`
-        }
+        <div class="workout-day-actions">
+          ${!isBase ? `<button class="workout-day-btn delete" onclick="removeExtraWorkout(${idx - (plan&&plan.id?1:0)})"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>` : ''}
+          ${isDone 
+            ? `<button class="workout-day-btn" style="background:var(--border); color:var(--text-muted); flex:1;" disabled>Завершено</button>`
+            : `<button class="workout-day-btn start" onclick="startWorkoutByIdx(${idx}, ${isBase})">Начать</button>`
+          }
+        </div>
       </div>
     `;
   }).join('');
@@ -905,24 +867,26 @@ function renderWorkoutStep() {
   document.getElementById('wsProgress').style.width = ((wsCurrentExIdx / wsExercises.length) * 100) + '%';
   document.getElementById('wsExName').textContent = ex.name;
   document.getElementById('wsExMeta').textContent = `Подход ${wsCurrentSetIdx + 1} из ${ex.sets} • ${ex.reps} повторений`;
+  
   let trackerHtml = '';
   for (let i = 0; i < ex.sets; i++) {
-    let cls = 'set-dot';
+    let cls = 'ws-set-dot';
     if (i < wsCurrentSetIdx) cls += ' done';
     if (i === wsCurrentSetIdx) cls += ' current';
     trackerHtml += `<div class="${cls}">${i+1}</div>`;
   }
   document.getElementById('wsSetTracker').innerHTML = trackerHtml;
+  
   if (ex.type === 'bodyweight') {
     document.getElementById('wsWeightControl').style.display = 'none';
   } else {
     document.getElementById('wsWeightControl').style.display = 'inline-flex';
     document.getElementById('wsWeightVal').textContent = ex.currentWeight + ' кг';
   }
+  
   const actionBtn = document.getElementById('wsActionBtn');
   if (!wsTimerInterval) {
     actionBtn.textContent = `Начать подход ${wsCurrentSetIdx + 1}`;
-    actionBtn.className = 'btn-workout primary';
     actionBtn.onclick = startSet;
     document.getElementById('wsSkipBtn').style.display = 'block';
     document.getElementById('wsTimer').textContent = '00:00';
@@ -1000,12 +964,10 @@ function changeWorkoutWeight(dir) {
 }
 
 function exitWorkout() {
-  if (confirm('Точно прервать тренировку?')) {
-    clearInterval(wsTimerInterval);
-    wsTimerInterval = null;
-    document.getElementById('workoutScreen').classList.remove('active');
-    document.body.style.overflow = '';
-  }
+  clearInterval(wsTimerInterval);
+  wsTimerInterval = null;
+  document.getElementById('workoutScreen').classList.remove('active');
+  document.body.style.overflow = '';
 }
 
 function finishWorkoutScreen() {
@@ -1014,29 +976,29 @@ function finishWorkoutScreen() {
   
   if (wsCurrentWorkoutIndex >= 0) {
     todayWorkouts[wsCurrentWorkoutIndex].done = true;
-    saveToServer();
   } else {
     const todayIdx = new Date().getDay();
     const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1;
     streakDone[dayIdx] = true;
     renderStreak();
     renderProgress();
-    saveToServer();
   }
+  saveToServer();
   
   document.getElementById('workoutScreen').innerHTML = `
     <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-      <div style="font-size: 64px; margin-bottom: 24px;">🔥</div>
-      <h2 style="font-size: 28px; margin-bottom: 12px;">Тренировка завершена!</h2>
-      <p style="color: var(--muted); margin-bottom: 32px;">Ты отлично поработал. Не забудь поесть!</p>
-      <button class="btn-workout primary" onclick="location.reload()">На главную</button>
+      <div style="width: 80px; height: 80px; border-radius: 50%; background: var(--accent-light); color: var(--accent); display: grid; place-items: center; margin-bottom: 24px;">
+        <svg viewBox="0 0 24 24" style="width: 40px; height: 40px; stroke: currentColor; stroke-width: 3; fill: none;"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <h2 style="font-size: 28px; margin-bottom: 12px;">Отличная работа!</h2>
+      <p style="color: var(--text-muted); margin-bottom: 32px; font-size: 16px;">Тренировка сохранена в дневник.</p>
+      <button class="btn primary" onclick="location.reload()" style="max-width: 200px;">Вернуться</button>
     </div>
   `;
 }
 
 /* ================= ПИТАНИЕ ================= */
-function openFoodModal(){ document.getElementById('foodModal').classList.add('show'); }
-function closeFoodModal(){ document.getElementById('foodModal').classList.remove('show'); }
+function openFoodModal() { openModal('modal-food'); }
 function addFood(){
   const name = document.getElementById('foodName').value.trim();
   const kcal100 = +document.getElementById('foodKcal').value || 0;
@@ -1044,26 +1006,28 @@ function addFood(){
   const f100 = +document.getElementById('foodF').value || 0;
   const c100 = +document.getElementById('foodC').value || 0;
   const weight = +document.getElementById('foodWeight').value || 100;
-  if(!name || kcal100 <= 0) { toast('Заполни название и ккал'); return; }
+  if(!name || kcal100 <= 0) { toast('Заполни поля'); return; }
   const ratio = weight / 100;
   todayFoods.push({ name, kcal: Math.round(kcal100 * ratio), p: Math.round(p100*ratio), f: Math.round(f100*ratio), c: Math.round(c100*ratio), weight });
-  closeFoodModal();
+  closeModal('modal-food');
   ['foodName','foodKcal','foodP','foodF','foodC','foodWeight'].forEach(id=> document.getElementById(id).value='');
-  updateHomeMacros(); renderFoodList(); toast('Продукт добавлен');
+  updateHomeMacros(); renderFoodList(); toast('Добавлено');
 }
+
 function renderFoodList(){
   const container = document.getElementById('foodItems');
-  if(todayFoods.length === 0){ container.innerHTML = '<div class="empty"><p>Ты пока ничего не добавил.</p></div>'; }
+  if(todayFoods.length === 0){ container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px 0;">Пусто</p>'; }
   else {
     container.innerHTML = todayFoods.map((f, i) => `
-      <div class="ex" style="justify-content:space-between;">
-        <div style="flex:1;"><span class="ex-name">${f.name}</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">${f.weight}г</span><div style="font-size:12px;color:var(--accent-deep);margin-top:4px;font-weight:600;">Б: ${f.p} г | Ж: ${f.f} г | У: ${f.c} г</div></div>
-        <div style="display:flex; align-items:center; gap:8px;"><span class="ex-sets">${f.kcal} ккал</span><button style="border:none;background:none;color:var(--muted);cursor:pointer;font-size:16px;" onclick="removeFood(${i})">✕</button></div>
+      <div class="week-row">
+        <div class="week-day" style="width: auto; font-weight: 700; color: var(--text-main);">${f.name}</div>
+        <div style="flex: 1; text-align: right; font-size: 13px; color: var(--text-muted); margin-right: 12px;">${f.weight}г • ${f.kcal} ккал</div>
+        <button class="btn-icon" style="background: transparent; color: var(--text-muted);" onclick="removeFood(${i})"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
       </div>
     `).join('');
   }
 }
-function removeFood(index) { todayFoods.splice(index, 1); updateHomeMacros(); renderFoodList(); toast('Продукт удалён'); }
+function removeFood(index) { todayFoods.splice(index, 1); updateHomeMacros(); renderFoodList(); }
 
 /* ================= ПРОФИЛЬ ================= */
 function openEditProfile(){
@@ -1071,52 +1035,87 @@ function openEditProfile(){
   document.getElementById('editAge').value = user.age;
   document.getElementById('editWeight').value = user.weight;
   document.getElementById('editHeight').value = user.height;
-  editGenderValue = user.gender;
-  document.querySelectorAll('#editGenderSeg button').forEach(b => b.classList.toggle('active', b.dataset.gender === editGenderValue));
-  document.getElementById('editProfileModal').classList.add('show');
+  openModal('modal-edit-profile');
 }
-function setEditGender(gender) { editGenderValue = gender; document.querySelectorAll('#editGenderSeg button').forEach(b => b.classList.toggle('active', b.dataset.gender === gender)); }
-function closeEditProfile(){ document.getElementById('editProfileModal').classList.remove('show'); }
 function saveProfile(){
-  const n = document.getElementById('editName').value.trim();
-  const a = +document.getElementById('editAge').value;
-  const w = +document.getElementById('editWeight').value;
-  const h = +document.getElementById('editHeight').value;
-  if(n) user.name = n; if(a) user.age = a; if(w) user.weight = w; if(h) user.height = h;
-  user.gender = editGenderValue;
-  calcNutrition(); saveToServer(); initMainApp(); closeEditProfile(); toast('Профиль обновлён.');
+  user.name = document.getElementById('editName').value.trim() || user.name;
+  user.age = +document.getElementById('editAge').value || user.age;
+  user.weight = +document.getElementById('editWeight').value || user.weight;
+  user.height = +document.getElementById('editHeight').value || user.height;
+  
+  // Пересчет калорий
+  const {weight,height,age,gender,activity,goal} = user;
+  let bmr = gender==='male' ? 10*weight + 6.25*height - 5*age + 5 : 10*weight + 6.25*height - 5*age - 161;
+  let tdee = bmr * activity;
+  let kcal = tdee;
+  if(goal==='lose') kcal = tdee - 400;
+  if(goal==='gain') kcal = tdee + 300;
+  user.kcal = Math.round(kcal);
+
+  saveToServer(); initMainApp(); closeModal('modal-edit-profile'); toast('Сохранено');
 }
 
-/* ================= НАВИГАЦИЯ ================= */
+/* ================= ПРОГРЕСС ================= */
+function renderProgress() {
+  document.getElementById('statStreak').textContent = streakDone.filter(Boolean).length;
+  document.getElementById('statWorkouts').textContent = streakDone.filter(Boolean).length;
+
+  const chartContainer = document.getElementById('chartKcal');
+  const maxKcal = Math.max(...mockHistory, user.kcal);
+  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+  chartContainer.innerHTML = mockHistory.map((val, i) => {
+    const heightPct = maxKcal > 0 ? (val / maxKcal * 100) : 0;
+    return `
+      <div class="bar-col">
+        <div class="bar-fill ${val===0?'zero':''}" style="height: ${heightPct}%;"></div>
+        <div class="bar-label">${days[i]}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderStreak(){
+  const container = document.getElementById('streakContainer');
+  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  container.innerHTML = days.map((d,i)=>`<div class="streak-day ${streakDone[i]?'done':''}">${d}</div>`).join('');
+}
+
+/* ================= МОДАЛКИ И НАВИГАЦИЯ ================= */
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
 function switchTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.screen===name));
-  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active', s.id===name));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active', s.id==='screen-'+name));
   window.scrollTo({top:0, behavior:'smooth'});
 }
-document.querySelectorAll('.tab').forEach(tab=>{ tab.addEventListener('click', ()=> switchTab(tab.dataset.screen)); });
 
 let toastTimer;
 function toast(msg){
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer = setTimeout(()=> t.classList.remove('show'), 2200);
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=> t.classList.remove('show'), 2000);
+}
+
+function exportData(type, format) {
+  window.location.href = `${SERVER_URL}/api/export/${format}?id=${USER_ID}&type=${type}`;
+  toast('Скачивание...');
 }
 
 /* ================= СТАРТ ================= */
 async function startApp() {
+  initTheme();
   await fetchServerData();
-  const now = Math.floor(Date.now() / 1000);
-  if(user.sub_until > 0 && user.sub_until < now) { document.getElementById('expiredScreen').style.display = 'flex'; return; }
-  document.getElementById('durationRange').value = currentDuration;
-  document.getElementById('durationLabel').textContent = currentDuration + ' мин';
+  
   const hasLocal = !!localStorage.getItem('fitplan_user');
   if(hasLocal || user.name) {
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
-    document.getElementById('mainApp').style.opacity = 1;
-    document.getElementById('mainApp').classList.add('visible');
     initMainApp();
-  } else { showStep(0); }
+  } else { 
+    updateObStep(); 
+  }
 }
 startApp();
 </script>
