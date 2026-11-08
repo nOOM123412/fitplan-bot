@@ -6,7 +6,7 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>FitPlan</title>
 <style>
-/* СТИЛИ ОСТАВЛЯЕМ ТЕ ЖЕ, ОНИ ХОРОШИЕ */
+/* ... (Стили оставляем точно такими же) ... */
 :root{ --bg1:#F4F1EC; --glass:rgba(255,255,255,.55); --glass-strong:rgba(255,255,255,.85); --border:rgba(255,255,255,.7); --text:#2E2A26; --muted:#8A8279; --accent:#7FB69D; --accent-deep:#5E9A7E; --peach:#F7D9C4; --lav:#E4DDF3; --shadow:0 8px 32px rgba(62,58,54,.08); --radius:24px; --radius-sm:16px; --ease:cubic-bezier(.22,1,.36,1); }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0;}
 html,body{height:100%;}
@@ -147,7 +147,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 
 <div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 
-<!-- ОНБОРДИНГ -->
+<!-- ОНБОРДИНГ (ОСТАВЛЯЕМ КАК БЫЛО) -->
 <div id="onboarding">
   <div class="ob-content">
     <div class="ob-progress"><div class="dot active" data-dot="0"></div><div class="dot" data-dot="1"></div><div class="dot" data-dot="2"></div><div class="dot" data-dot="3"></div></div>
@@ -229,11 +229,51 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     </div>
   </section>
 
+  <!-- ВОТ ОНА, ЖЕСТКАЯ ВЕРСТКА -->
   <section id="plan" class="screen">
     <div class="header"><div><h1>План</h1><div class="sub">Выбери тренировку на каждый день</div></div></div>
     <div class="card glass">
       <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Неделя</h2>
-      <div class="week-grid" id="weekGrid"></div>
+      
+      <div class="week-grid" id="weekGrid">
+        <!-- ДНИ ЖЕСТКО ВБИТЫ В HTML. СКРИПТ ИХ НЕ ГЕНЕРИРУЕТ -->
+        <div class="plan-row">
+          <span class="plan-day-label">Пн</span>
+          <span class="plan-name-text" id="plan-text-Пн">Отдых</span>
+          <button class="plan-add-btn" onclick="openPlanModal('Пн')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+        <div class="plan-row">
+          <span class="plan-day-label">Вт</span>
+          <span class="plan-name-text" id="plan-text-Вт">Отдых</span>
+          <button class="plan-add-btn" onclick="openPlanModal('Вт')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+        <div class="plan-row">
+          <span class="plan-day-label">Ср</span>
+          <span class="plan-name-text" id="plan-text-Ср">Отдых</span>
+          <button class="plan-add-btn" onclick="openPlanModal('Ср')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+        <div class="plan-row">
+          <span class="plan-day-label">Чт</span>
+          <span class="plan-name-text" id="plan-text-Чт">Отдых</span>
+          <button class="plan-add-btn" onclick="openPlanModal('Чт')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+        <div class="plan-row">
+          <span class="plan-day-label">Пт</span>
+          <span class="plan-name-text" id="plan-text-Пт">Отдых</span>
+          <button class="plan-add-btn" onclick="openPlanModal('Пт')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+        <div class="plan-row">
+          <span class="plan-day-label">Сб</span>
+          <span class="plan-name-text" id="plan-text-Сб">Отдых</span>
+          <button class="plan-add-btn" onclick="openPlanModal('Сб')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+        <div class="plan-row">
+          <span class="plan-day-label">Вс</span>
+          <span class="plan-name-text" id="plan-text-Вс">Отдых</span>
+          <button class="plan-add-btn" onclick="openPlanModal('Вс')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+        </div>
+      </div>
+      
     </div>
   </section>
 
@@ -506,7 +546,7 @@ function initMainApp(){
   document.getElementById('profKcal').textContent = user.kcal + ' ккал';
   document.getElementById('myId').textContent = user.uniqueId;
   
-  updateProfileUI(); updateHomeMacros(); renderWeekPlans(); renderStreak(); renderFoodList(); renderFriends();
+  updateProfileUI(); updateHomeMacros(); updatePlanTexts(); renderStreak(); renderFoodList(); renderFriends();
 }
 
 function updateProfileUI() {
@@ -539,23 +579,15 @@ function updateHomeMacros(){
   saveToServer();
 }
 
-/* ================= ПЛАН ================= */
-function renderWeekPlans(){
-  const grid = document.getElementById('weekGrid');
-  grid.innerHTML = '';
+/* ================= ОБНОВЛЕНИЕ ПЛАНОВ (ЖЕСТКИЙ HTML) ================= */
+function updatePlanTexts(){
   const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-  days.forEach(day=>{
-    const selected = weekPlans[day];
-    const div = document.createElement('div');
-    div.className = 'plan-row';
-    div.innerHTML = `
-      <span class="plan-day-label">${day}</span>
-      <span class="plan-name-text">${selected ? selected.name : 'Отдых'}</span>
-      <button class="plan-add-btn" onclick="openPlanModal('${day}')">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      </button>
-    `;
-    grid.appendChild(div);
+  days.forEach(day => {
+    const el = document.getElementById('plan-text-' + day);
+    if(el) {
+      const selected = weekPlans[day];
+      el.textContent = selected ? selected.name : 'Отдых';
+    }
   });
   updateTodayWorkout();
 }
@@ -603,7 +635,7 @@ function selectPlan(day, planName){
   const found = TRAINING_DB[day].find(o=>o.name===planName);
   if(found) weekPlans[day] = found;
   closePlanModal();
-  renderWeekPlans(); 
+  updatePlanTexts(); 
   saveToServer(); 
   toast('План на ' + day + ' обновлён');
 }
