@@ -235,7 +235,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
   <button class="btn" onclick="window.Telegram.WebApp.close()" style="max-width: 280px;">Перейти в бот</button>
 </div>
 
-<!-- ОНБОРДИНГ (сокращён для краткости, как было ранее) -->
+<!-- ОНБОРДИНГ -->
 <div id="onboarding">
   <div class="ob-content">
     <div class="ob-progress"><div class="dot active" data-dot="0"></div><div class="dot" data-dot="1"></div><div class="dot" data-dot="2"></div><div class="dot" data-dot="3"></div></div>
@@ -516,8 +516,7 @@ const WORKOUT_CATALOG = {
 let user = { name:'', age:16, gender:'male', weight:65, height:175, activity:1.375, goal:'gain', kcal:0, protein:0, fat:0, carbs:0, uniqueId:'', sub_until:0 };
 let todayFoods = [];
 let weekPlans = { 'Пн':null, 'Вт':null, 'Ср':null, 'Чт':null, 'Пт':null, 'Сб':null, 'Вс':null };
-// НОВОЕ: массив тренировок на сегодня
-let todayWorkouts = []; 
+let todayWorkouts = []; // Дополнительные тренировки на сегодня
 let streakDone = [false,false,false,false,false,false,false];
 let obStep = 0;
 let editGenderValue = 'male';
@@ -526,13 +525,12 @@ let currentDuration = 45;
 let currentMuscleGroup = 'chest';
 let mockHistory = [0,0,0,0,0,0,0];
 
-// Переменные для экрана тренировки
 let wsExercises = [];
 let wsCurrentExIdx = 0;
 let wsCurrentSetIdx = 0;
 let wsTimerInterval = null;
 let wsSeconds = 0;
-let wsCurrentWorkoutIndex = 0; // индекс тренировки в todayWorkouts
+let wsCurrentWorkoutIndex = 0; 
 
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
 const SERVER_URL = window.location.origin;
@@ -592,7 +590,7 @@ async function fetchServerData() {
       user.sub_until = data.sub_until || 0;
       if(data.foods) todayFoods = data.foods;
       if(data.plans) weekPlans = data.plans;
-      if(data.todayWorkouts) todayWorkouts = data.todayWorkouts; // загружаем дополнительные тренировки
+      if(data.todayWorkouts) todayWorkouts = data.todayWorkouts;
       if(data.streak) streakDone = data.streak;
       if(data.profile && Object.keys(data.profile).length) {
         user = { ...user, ...data.profile, sub_until: user.sub_until };
@@ -608,7 +606,7 @@ async function saveToServer() {
       profile: { name: user.name, age: user.age, gender: user.gender, weight: user.weight, height: user.height, goal: user.goal, kcal: user.kcal, uniqueId: user.uniqueId },
       foods: todayFoods,
       plans: weekPlans,
-      todayWorkouts: todayWorkouts, // сохраняем
+      todayWorkouts: todayWorkouts,
       streak: streakDone
     };
     const res = await fetch(`${SERVER_URL}/api/save`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
@@ -616,8 +614,7 @@ async function saveToServer() {
   } catch(e) { console.error(e); }
 }
 
-/* ================= ОНБОРДИНГ (сокращён) ================= */
-// ... (тот же код, что и ранее) ...
+/* ================= ОНБОРДИНГ ================= */
 const steps = document.querySelectorAll('.ob-step');
 const dots = document.querySelectorAll('.dot');
 const btnNext = document.getElementById('btnNext');
@@ -730,7 +727,9 @@ function renderWeekGrid() {
   const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
   document.getElementById('weekGrid').innerHTML = days.map(day => {
     const plan = weekPlans[day];
-    return `<div class="plan-row"><span class="plan-day-label">${day}</span><span class="plan-name-text">${plan ? plan.name : 'Отдых'}</span><button class="plan-add-btn" onclick="openPlanModal('${day}')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button></div>`;
+    // Защита от старых форматов (если пришел просто объект без id)
+    const name = plan ? (plan.name || plan.title || 'Отдых') : 'Отдых';
+    return `<div class="plan-row"><span class="plan-day-label">${day}</span><span class="plan-name-text">${name}</span><button class="plan-add-btn" onclick="openPlanModal('${day}')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button></div>`;
   }).join('');
 }
 
@@ -795,27 +794,6 @@ function renderWorkoutOptions() {
 function closePlanModal() { document.getElementById('planModal').classList.remove('show'); currentPlanDay = null; }
 
 function selectPlan(day, templateId, name){
-  weekPlans[day] = { id: templateId, name: name };
-  closePlanModal();
-  renderWeekGrid();
-  saveToServer();
-  toast('План обновлён');
-  updateTodayWorkout();
-}
-
-/* ================= НОВОЕ: УПРАВЛЕНИЕ ТРЕНИРОВКАМИ ДНЯ ================= */
-function addExtraWorkout() {
-  // Открываем модалку, но теперь это тренировка "на сегодня", а не на день недели
-  currentPlanDay = 'extra';
-  currentMuscleGroup = 'chest';
-  renderMuscleTabs();
-  renderWorkoutOptions();
-  document.getElementById('planModal').classList.add('show');
-}
-
-// Переопределяем selectPlan, чтобы поддержать добавление дополнительной тренировки
-const originalSelectPlan = selectPlan;
-selectPlan = function(day, templateId, name) {
   if (day === 'extra') {
     todayWorkouts.push({ id: templateId, name: name, duration: currentDuration, done: false });
     closePlanModal();
@@ -823,9 +801,23 @@ selectPlan = function(day, templateId, name) {
     toast('Тренировка добавлена на сегодня');
     updateTodayWorkout();
   } else {
-    originalSelectPlan(day, templateId, name);
+    weekPlans[day] = { id: templateId, name: name };
+    closePlanModal();
+    renderWeekGrid();
+    saveToServer();
+    toast('План обновлён');
+    updateTodayWorkout();
   }
-};
+}
+
+/* ================= УПРАВЛЕНИЕ ТРЕНИРОВКАМИ ДНЯ ================= */
+function addExtraWorkout() {
+  currentPlanDay = 'extra';
+  currentMuscleGroup = 'chest';
+  renderMuscleTabs();
+  renderWorkoutOptions();
+  document.getElementById('planModal').classList.add('show');
+}
 
 function removeExtraWorkout(idx) {
   if (confirm('Удалить эту тренировку?')) {
@@ -835,7 +827,6 @@ function removeExtraWorkout(idx) {
   }
 }
 
-/* ================= ТРЕНИРОВКА НА ГЛАВНОЙ ================= */
 function updateTodayWorkout(){
   const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
   const todayName = days[new Date().getDay()];
@@ -843,17 +834,14 @@ function updateTodayWorkout(){
   const sub = document.getElementById('todayWorkout');
   const content = document.getElementById('todayPlanContent');
   
-  // Собираем все тренировки на сегодня: сначала основная (из плана недели), потом дополнительные
   let allWorkouts = [];
   
   if (plan && plan.id) {
     allWorkouts.push({ id: plan.id, name: plan.name, duration: currentDuration, done: false, isBase: true });
   }
   
-  // Добавляем дополнительные
   todayWorkouts.forEach(w => allWorkouts.push(w));
   
-  // Если ничего нет — показываем пустое состояние
   if (allWorkouts.length === 0) {
     sub.textContent = 'Сегодня — отдых';
     content.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Нет тренировок. Нажми «+», чтобы добавить.</p>';
@@ -862,11 +850,10 @@ function updateTodayWorkout(){
   
   sub.textContent = `Тренировок: ${allWorkouts.length}`;
   
-  // Рендерим карточки
   content.innerHTML = allWorkouts.map((w, idx) => {
     const isDone = w.done;
     const isBase = w.isBase;
-    const displayIdx = isBase ? 0 : (idx); // индекс в todayWorkouts для удаления
+    const displayIdx = isBase ? 0 : (idx); 
     
     let preview = generateWorkout(w.id, w.duration || currentDuration);
     let exList = preview.slice(0, 3).map(ex => `${ex.name} ${ex.sets}x${ex.reps}`).join(', ');
@@ -1025,14 +1012,10 @@ function finishWorkoutScreen() {
   clearInterval(wsTimerInterval);
   wsTimerInterval = null;
   
-  // Помечаем тренировку как выполненную
   if (wsCurrentWorkoutIndex >= 0) {
-    // Это дополнительная тренировка
     todayWorkouts[wsCurrentWorkoutIndex].done = true;
-    // Если она была последней - фиксируем стрик
     saveToServer();
   } else {
-    // Это базовая тренировка из плана недели - фиксируем стрик
     const todayIdx = new Date().getDay();
     const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1;
     streakDone[dayIdx] = true;
@@ -1041,7 +1024,6 @@ function finishWorkoutScreen() {
     saveToServer();
   }
   
-  // Показываем финальный экран
   document.getElementById('workoutScreen').innerHTML = `
     <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
       <div style="font-size: 64px; margin-bottom: 24px;">🔥</div>
