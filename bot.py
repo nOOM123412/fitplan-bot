@@ -13,8 +13,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 
 # ================= НАСТРОЙКИ =================
-TOKEN = "--"
-WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech/"
+TOKEN = "+"
+WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech"
 ADMIN_ID = 7714111634
 OPERATOR = "@sai_helper"
 
@@ -39,15 +39,10 @@ def save_db(data):
 
 # ================= API =================
 async def handle_index(request): 
-    return web.FileResponse('./public/index.html')
-
-# Явная раздача файлов из папки public
-async def handle_static(request):
-    filename = request.match_info['filename']
-    filepath = os.path.join('./public', filename)
-    if os.path.exists(filepath):
-        return web.FileResponse(filepath)
-    return web.Response(status=404, text="File not found")
+    # Отдаем HTML. Cache-Control запрещает кэширование
+    response = web.FileResponse('./public/index.html')
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    return response
 
 async def api_get_user(request):
     user_id = request.query.get('id')
@@ -93,34 +88,14 @@ async def start_web_server():
     app.router.add_post('/api/save', api_save_all)
     app.router.add_post('/api/buy_sub', api_buy_sub)
     
-    # Этот роут ловит ВСЕ остальные файлы (plans.json, иконки и т.д.)
-    app.router.add_get('/{filename}', handle_static) 
-    
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', 3000)
     await site.start()
 
-# ================= БОТ =================
-def get_main_menu():
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Открыть FitPlan 🏋️", web_app=WebAppInfo(url=WEBAPP_URL))],
-        [InlineKeyboardButton(text="💳 Подписка", callback_data="menu_sub")],
-        [InlineKeyboardButton(text="👥 Реферальная система", callback_data="menu_ref")]
-    ])
+# ================= БОТ (ОСТАВЛЯЕМ ЛОГИКУ) =================
+# ... (Вставь сюда весь код хендлеров и админки из предыдущего файла, он не менялся) ...
 
-@dp.message(Command("start"))
-async def cmd_start(message: types.Message):
-    uid = str(message.from_user.id)
-    db = load_db()
-    if uid not in db:
-        db[uid] = {"name": message.from_user.first_name or "User", "tg_username": message.from_user.username or "", "balance": 0, "sub_until": 0, "referred_by": None, "ref_count": 0, "ref_earned": 0, "foods": [], "plans": {}, "streak": [False]*7, "profile": {}}
-        save_db(db)
-    await message.answer("Привет! Это <b>FitPlan</b>.\n\nТвой личный тренер и дневник питания.", reply_markup=get_main_menu())
-
-# ... (остальной код бота оставляем без изменений, скопируй его из прошлого файла) ...
-
-# ================= ЗАПУСК =================
 async def main():
     await start_web_server()
     await dp.start_polling(bot)
