@@ -20,10 +20,15 @@ import aiosqlite
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
-from load_calc import calculate_weights
 
 # ================= НАСТРОЙКИ =================
-TOKEN = "8718686711:"
+# Токен берётся из переменной окружения BOT_TOKEN.
+# На Bothost задай его в настройках бота!
+TOKEN = os.environ.get("BOT_TOKEN", "-").strip()
+
+if not TOKEN or TOKEN == "-":
+    raise ValueError("❌ Не задан BOT_TOKEN. Установи переменную окружения BOT_TOKEN в настройках Bothost или впиши токен в код.")
+
 WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech"
 ADMIN_ID = 7714111634
 OPERATOR = "@sai_helper"
@@ -250,24 +255,6 @@ async def api_export_pdf(request):
     buffer.seek(0)
     return web.Response(body=buffer.read(), content_type='application/pdf', headers={'Content-Disposition': 'attachment; filename="report.pdf"'})
 
-async def api_get_calculated_plan(request):
-    uid = request.query.get('id')
-    plan_raw = json.loads(request.query.get('plan_json', '[]'))
-    user = await get_user_full(uid)
-    if user and user['profile']['weight']:
-        calc_plan = calculate_weights(user['profile'], plan_raw)
-        return web.json_response(calc_plan)
-    return web.json_response(plan_raw)
-
-async def api_share_plan(request):
-    data = await request.json()
-    pid = str(uuid.uuid4())[:8]
-    async with aiosqlite.connect(DB_FILE) as db:
-        await db.execute("INSERT INTO custom_plans (id, owner_id, name, description, exercises_json, created_at) VALUES (?,?,?,?,?,?)",
-                         (pid, data['owner_id'], data['name'], data.get('desc',''), json.dumps(data['exercises']), datetime.utcnow().isoformat()))
-        await db.commit()
-    return web.json_response({"plan_id": pid, "link": f"{WEBAPP_URL}?plan={pid}"})
-
 async def start_web_server():
     app = web.Application()
     app.router.add_get('/', handle_index)
@@ -277,8 +264,6 @@ async def start_web_server():
     app.router.add_get('/api/history', api_get_history)
     app.router.add_get('/api/export/csv', api_export_csv)
     app.router.add_get('/api/export/pdf', api_export_pdf)
-    app.router.add_get('/api/calc_plan', api_get_calculated_plan)
-    app.router.add_post('/api/plans/share', api_share_plan)
     app.router.add_get('/{filename}', handle_static)
     
     runner = web.AppRunner(app)
@@ -384,10 +369,12 @@ class AdminState(StatesGroup):
     waiting_for_balance_user = State()
     waiting_for_balance_amount = State()
     waiting_for_broadcast = State()
+    waiting_for_reset_sub_user = State()
 
 def get_admin_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💰 Начислить баланс", callback_data="admin_add_balance")],
+        [InlineKeyboardButton(text="⛔ Обнулить подписку", callback_data="admin_reset_sub")],
         [InlineKeyboardButton(text="📋 Все пользователи", callback_data="admin_users_list")],
         [InlineKeyboardButton(text="📢 Сделать рассылку", callback_data="admin_broadcast")]
     ])
@@ -448,6 +435,36 @@ async def process_admin_amount(message: Message, state: FSMContext):
         await cmd_admin(message)
     except ValueError: await message.answer("❌ Введи число.")
     finally: await state.clear()
+
+# === НОВОЕ: ОБНУЛЕНИЕ ПОДПИСКИ ===
+@dp.callback_query(F.data == "admin_reset_sub")
+async def cb_admin_reset_sub(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id != ADMIN_ID: return
+    await callback.message.edit_text("Введи <b>Telegram ID</b> пользователя, у которого нужно обнулить подписку:")
+    await state.set_state(AdminState.waiting_for_reset_sub_user)
+
+@dp.message(AdminState.waiting_for_reset_sub_user)
+async def process_reset_sub(message: Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID: return
+    try:
+        target_id = int(message.text.strip())
+        async with aiosqlite.connect(DB_FILE) as db:
+            db.row_factory = aiosqlite.Row
+            async with db.execute("SELECT name FROM users WHERE user_id=?", (target_id,)) as cur:
+                row = await cur.fetchone()
+            if not row:
+                await message.answer("❌ Пользователь не найден.")
+                return await state.clear()
+            await db.execute("UPDATE users SET sub_until = 0 WHERE user_id = ?", (target_id,))
+            await db.commit()
+        try: await bot.send_message(target_id, "⚠️ Твоя подписка была обнулена администратором.")
+        except: pass
+        await message.answer(f"✅ Подписка пользователя <code>{target_id}</code> обнулена.")
+        await cmd_admin(message)
+    except ValueError:
+        await message.answer("❌ Введи числовой ID.")
+    finally:
+        await state.clear()
 
 @dp.callback_query(F.data == "admin_users_list")
 async def cb_admin_users_list(callback: CallbackQuery):
