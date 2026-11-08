@@ -151,12 +151,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 .workout-exercise { font-size: 13px; color: var(--text); margin-bottom: 6px; padding-left: 12px; position: relative; }
 .workout-exercise::before { content: "•"; color: var(--accent); position: absolute; left: 0; font-weight: bold; }
 .custom-plan-btn { background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 12px; width: 100%; font-weight: 600; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-
-/* Экран "Подписка истекла" */
-#expiredScreen { display: none; position: fixed; inset: 0; z-index: 200; background: var(--bg1); align-items: center; justify-content: center; text-align: center; padding: 20px; flex-direction: column; }
-#expiredScreen h2 { font-size: 24px; margin-bottom: 12px; color: var(--accent-deep); }
-#expiredScreen p { font-size: 15px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; max-width: 300px; }
-#expiredScreen .btn { max-width: 280px; }
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -164,12 +158,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 
 <div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 
-<!-- ЭКРАН ИСТЕКШЕЙ ПОДПИСКИ -->
-<div id="expiredScreen">
-  <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
-  <h2>Подписка истекла</h2>
-  <p>Твой пробный период закончился. Чтобы продолжить пользоваться приложением, продли подписку в боте.</p>
-  <button class="btn" onclick="window.Telegram.WebApp.close()">Перейти в бот</button>
+<!-- МОДАЛКА "ПОДПИСКА ИСТЕКЛА" -->
+<div class="modal-overlay" id="expiredModal">
+  <div class="modal" style="text-align:center;">
+    <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
+    <h3>Подписка истекла</h3>
+    <p style="font-size: 14px; color: var(--muted); margin-bottom: 20px;">Твой пробный период закончился. Чтобы продолжить пользоваться приложением, продли подписку в боте.</p>
+    <button class="btn" onclick="window.Telegram.WebApp.close()">Перейти в бот</button>
+  </div>
 </div>
 
 <!-- ОНБОРДИНГ -->
@@ -921,10 +917,20 @@ async function startApp() {
   
   // Проверяем подписку
   if(user.sub_until > 0 && user.sub_until < Math.floor(Date.now() / 1000)) {
-    document.getElementById('mainApp').style.display = 'none';
-    document.getElementById('onboarding').style.display = 'none';
-    document.getElementById('expiredScreen').style.display = 'flex';
-    return;
+    // Показываем модалку "подписка истекла"
+    document.getElementById('expiredModal').classList.add('show');
+    
+    // Блокируем все вкладки, кроме Профиля
+    const tabbar = document.querySelector('.tabbar-inner');
+    tabbar.addEventListener('click', (e) => {
+      const tab = e.target.closest('.tab');
+      if (tab && tab.dataset.screen !== 'profile') {
+        e.preventDefault();
+        e.stopPropagation();
+        // Показываем модалку снова, если закрыли
+        document.getElementById('expiredModal').classList.add('show');
+      }
+    }, true);
   }
   
   const hasLocal = !!localStorage.getItem('fitplan_user');
