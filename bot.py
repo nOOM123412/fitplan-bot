@@ -13,7 +13,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 
 # ================= НАСТРОЙКИ =================
-TOKEN = "+"
+TOKEN = "1"
 WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech"
 ADMIN_ID = 7714111634
 OPERATOR = "@sai_helper"
@@ -39,7 +39,6 @@ def save_db(data):
 
 # ================= API =================
 async def handle_index(request): 
-    # Отдаем HTML. Cache-Control запрещает кэширование
     response = web.FileResponse('./public/index.html')
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
     return response
@@ -87,14 +86,34 @@ async def start_web_server():
     app.router.add_get('/api/user', api_get_user)
     app.router.add_post('/api/save', api_save_all)
     app.router.add_post('/api/buy_sub', api_buy_sub)
-    
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, '0.0.0.0', 3000)
     await site.start()
 
-# ================= БОТ (ОСТАВЛЯЕМ ЛОГИКУ) =================
-# ... (Вставь сюда весь код хендлеров и админки из предыдущего файла, он не менялся) ...
+# ================= БОТ =================
+def get_main_menu():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="Открыть FitPlan 🏋️", web_app=WebAppInfo(url=WEBAPP_URL))],
+        [InlineKeyboardButton(text="💳 Подписка", callback_data="menu_sub")],
+        [InlineKeyboardButton(text="👥 Реферальная система", callback_data="menu_ref")]
+    ])
+
+@dp.message(Command("start"))
+async def cmd_start(message: types.Message):
+    uid = str(message.from_user.id)
+    db = load_db()
+    if uid not in db:
+        db[uid] = {"name": message.from_user.first_name or "User", "tg_username": message.from_user.username or "", "balance": 0, "sub_until": 0, "referred_by": None, "ref_count": 0, "ref_earned": 0, "foods": [], "plans": {}, "streak": [False]*7, "profile": {}}
+        save_db(db)
+    # Вернули приветствие
+    await message.answer(
+        "Привет! Это <b>FitPlan</b>.\n\n"
+        "Твой личный тренер и дневник питания. Нажми кнопку ниже, чтобы начать.",
+        reply_markup=get_main_menu()
+    )
+
+# ... (Остальной код бота с подписками и админкой оставляем без изменений) ...
 
 async def main():
     await start_web_server()
