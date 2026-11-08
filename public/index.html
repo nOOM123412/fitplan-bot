@@ -736,8 +736,9 @@ function toast(msg){
 
 /* ================= СТАРТ ================= */
 async function startApp() {
-  await loadPlans();
-  await fetchServerData();
+  await loadPlans(); // Ждем загрузку планов
+  await fetchServerData(); // Ждем данные с сервера
+  
   const hasLocal = !!localStorage.getItem('fitplan_user');
   
   if(hasLocal || user.name) {
@@ -745,7 +746,7 @@ async function startApp() {
     document.getElementById('mainApp').style.display = 'block';
     document.getElementById('mainApp').style.opacity = 1;
     document.getElementById('mainApp').classList.add('visible');
-    initMainApp();
+    initMainApp(); // Теперь рисуем всё, когда данные уже есть
   } else { showStep(0); }
 }
 startApp();
