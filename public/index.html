@@ -843,13 +843,13 @@ async function fetchServerData() {
 function showExpiredScreen() {
   const el = document.getElementById('expiredScreen');
   if (el) el.classList.add('show');
-  // Блокируем скролл под ним
   document.body.style.overflow = 'hidden';
 }
 
 function checkSubscription() {
   const now = Math.floor(Date.now() / 1000);
-  if (user.sub_until > 0 && user.sub_until < now) {
+  // 0 или истёкшая = блок
+  if (!user.sub_until || user.sub_until < now) {
     showExpiredScreen();
     return false;
   }
@@ -857,7 +857,7 @@ function checkSubscription() {
 }
 
 function openBotForPayment() {
-  const botUrl = "https://t.me/FitPlan_bot"; // замени на свой @username бота, если надо
+  const botUrl = "https://t.me/FitPlan_bot";
   if (window.Telegram?.WebApp?.openTelegramLink) {
     window.Telegram.WebApp.openTelegramLink(botUrl);
   } else {
@@ -1532,7 +1532,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   await fetchServerData();
 
-  // Проверяем подписку до любого рендера
+  // Жёсткая проверка подписки
   if (!checkSubscription()) return;
 
   if (user.name && user.kcal) {
