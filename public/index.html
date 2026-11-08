@@ -390,7 +390,6 @@ let obStep = 0;
 let editGenderValue = 'male';
 let currentPlanDay = null;
 
-// Флаг для кнопки "Начать/Завершить"
 let isWorkoutStarted = false;
 
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
@@ -558,7 +557,7 @@ function updateHomeMacros(){
   document.getElementById('kcalEaten').innerHTML = eatenKcal + ' <small>/ ' + user.kcal + '</small>';
   document.getElementById('kcalTarget').textContent = user.kcal;
   
-  // Обновляем БЖУ
+  // Обновляем БЖУ (с проверкой на существование элементов)
   const mp = document.getElementById('macroP');
   const mf = document.getElementById('macroF');
   const mc = document.getElementById('macroC');
@@ -769,7 +768,7 @@ function addFood(){
   // 2. Очищаем поля
   ['foodName','foodKcal','foodP','foodF','foodC','foodWeight'].forEach(id=> document.getElementById(id).value='');
   
-  // 3. Обновляем интерфейс
+  // 3. Обновляем интерфейс (единая функция)
   updateHomeMacros();
   renderFoodList();
   toast('Продукт добавлен');
