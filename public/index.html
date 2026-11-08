@@ -697,8 +697,13 @@ function initMainApp(){
   document.getElementById('profWeight').textContent = user.weight + ' кг';
   document.getElementById('profKcal').textContent = user.kcal + ' ккал';
   
-  updateHomeMacros(); renderWeekGrid(); renderStreak(); renderFoodList(); renderProgress();
-  updateTodayWorkout();
+  // Безопасная отрисовка
+  try { updateHomeMacros(); } catch(e) {}
+  try { renderWeekGrid(); } catch(e) {}
+  try { renderStreak(); } catch(e) {}
+  try { renderFoodList(); } catch(e) {}
+  try { renderProgress(); } catch(e) {}
+  try { updateTodayWorkout(); } catch(e) {}
 }
 
 function updateHomeMacros(){
