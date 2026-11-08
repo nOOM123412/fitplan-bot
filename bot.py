@@ -14,7 +14,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 
 # ================= НАСТРОЙКИ =================
-TOKEN = "1"
+TOKEN = "8718686711:AAHX4NrsVn4CfhHhMJr6Z5hsuBdvIvdfjQ"
 WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech"
 ADMIN_ID = 7714111634
 OPERATOR = "@sai_helper"
@@ -63,9 +63,16 @@ async def api_save_all(request):
     if not user_id: return web.json_response({"error": "No ID"}, status=400)
     
     db = load_db()
+    now = int(time.time())
+    
+    # ЖЕСТКАЯ ПРОВЕРКА ПОДПИСКИ
+    if user_id in db:
+        sub_until = db[user_id].get('sub_until', 0)
+        if sub_until != 0 and sub_until < now:
+            return web.json_response({"error": "Subscription expired"}, status=403)
+    
     if user_id not in db:
-        # Если пользователя нет, создаем с пробным периодом на 3 дня
-        trial_until = int(time.time()) + (3 * 24 * 60 * 60)
+        trial_until = now + (3 * 24 * 60 * 60)
         db[user_id] = {
             "name": "User", 
             "tg_username": "", 
@@ -217,11 +224,13 @@ async def cb_main_menu(callback: CallbackQuery):
 class AdminState(StatesGroup):
     waiting_for_balance_user = State()
     waiting_for_balance_amount = State()
+    waiting_for_broadcast = State()
 
 def get_admin_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="💰 Начислить баланс", callback_data="admin_add_balance")],
-        [InlineKeyboardButton(text="📋 Все пользователи", callback_data="admin_users_list")]
+        [InlineKeyboardButton(text="📋 Все пользователи", callback_data="admin_users_list")],
+        [InlineKeyboardButton(text="📢 Сделать рассылку", callback_data="admin_broadcast")]
     ])
 
 @dp.message(Command("admin"))
@@ -284,6 +293,35 @@ async def cb_admin_users_list(callback: CallbackQuery):
         text += f"👤 <b>{data.get('name', 'User')}</b>{un}\n🆔 <code>{uid}</code> | 💰 {data.get('balance', 0)} ₽\n\n"
     kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="⬅️ Назад", callback_data="admin_back")]])
     await callback.message.edit_text(text, reply_markup=kb)
+
+# --- РАССЫЛКА ---
+@dp.callback_query(F.data == "admin_broadcast")
+async def cb_admin_broadcast(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id != ADMIN_ID: return
+    await callback.message.edit_text("Введи <b>текст для рассылки</b> (он уйдет всем пользователям):")
+    await state.set_state(AdminState.waiting_for_broadcast)
+
+@dp.message(AdminState.waiting_for_broadcast)
+async def process_broadcast(message: Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID: return
+    text = message.text
+    db = load_db()
+    sent = 0
+    failed = 0
+    
+    msg = await message.answer("🔄 Начинаю рассылку...")
+    
+    for uid in db.keys():
+        try:
+            await bot.send_message(uid, text)
+            sent += 1
+            await asyncio.sleep(0.05) # Задержка, чтобы не забанил Telegram
+        except:
+            failed += 1
+            
+    await msg.edit_text(f"✅ <b>Рассылка завершена</b>\n\nОтправлено: {sent}\nОшибок: {failed}")
+    await state.clear()
+    await cmd_admin(message)
 
 @dp.callback_query(F.data == "admin_back")
 async def cb_admin_back(callback: CallbackQuery):
