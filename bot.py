@@ -20,9 +20,10 @@ import aiosqlite
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
+from load_calc import calculate_weights
 
 # ================= НАСТРОЙКИ =================
-TOKEN = "-"
+TOKEN = "8718686711:"
 WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech"
 ADMIN_ID = 7714111634
 OPERATOR = "@sai_helper"
@@ -254,7 +255,6 @@ async def api_get_calculated_plan(request):
     plan_raw = json.loads(request.query.get('plan_json', '[]'))
     user = await get_user_full(uid)
     if user and user['profile']['weight']:
-        from load_calc import calculate_weights
         calc_plan = calculate_weights(user['profile'], plan_raw)
         return web.json_response(calc_plan)
     return web.json_response(plan_raw)
@@ -306,7 +306,201 @@ async def cmd_start(message: types.Message):
                 await db.commit()
     await message.answer("Привет! Это <b>FitPlan</b>.\n\nТвой личный тренер и дневник питания.", reply_markup=get_main_menu())
 
-# ... (Остальные хендлеры подписки и админки оставляем без изменений) ...
+@dp.callback_query(F.data == "menu_sub")
+async def cb_sub_info(callback: CallbackQuery):
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT balance, sub_until FROM users WHERE user_id=?", (callback.from_user.id,)) as cur:
+            row = await cur.fetchone()
+    
+    balance = row['balance'] if row else 0
+    sub_until = row['sub_until'] if row else 0
+    now = int(time.time())
+    status = "❌ Не активна"
+    if sub_until > now:
+        days = math.ceil((sub_until - now) / 86400)
+        status = f"✅ Активна ({days} дн.)"
+    
+    text = (
+        f"💳 <b>Твоя подписка</b>\n\n"
+        f"Баланс: <b>{balance} ₽</b>\n"
+        f"Статус: <b>{status}</b>\n\n"
+        f"Стоимость подписки на 1 месяц:\n"
+        f"<s>999 ₽</s> <b>499 ₽</b> (-50% 🎉)\n\n"
+    )
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💳 Оплатить с баланса", callback_data="pay_sub")],
+        [InlineKeyboardButton(text="👨‍💻 Оператор", url=f"https://t.me/{OPERATOR.replace('@','')}")],
+        [InlineKeyboardButton(text="⬅️ Назад", callback_data="menu_main")]
+    ])
+    await callback.message.edit_text(text, reply_markup=kb)
+
+@dp.callback_query(F.data == "pay_sub")
+async def cb_pay_sub(callback: CallbackQuery):
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT balance, sub_until FROM users WHERE user_id=?", (callback.from_user.id,)) as cur:
+            row = await cur.fetchone()
+        
+        if not row:
+            return await callback.answer("Ошибка: пользователь не найден", show_alert=True)
+        
+        if row['balance'] < 499:
+            return await callback.answer("Недостаточно средств на балансе!", show_alert=True)
+        
+        new_until = max(row['sub_until'] or 0, int(time.time())) + (30 * 24 * 60 * 60)
+        await db.execute("UPDATE users SET balance = balance - 499, sub_until = ? WHERE user_id = ?", (new_until, callback.from_user.id))
+        await db.commit()
+    
+    await callback.answer("Подписка оплачена!", show_alert=True)
+    await cb_sub_info(callback)
+
+@dp.callback_query(F.data == "menu_ref")
+async def cb_ref_info(callback: CallbackQuery):
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT ref_count, ref_earned FROM users WHERE user_id=?", (callback.from_user.id,)) as cur:
+            row = await cur.fetchone()
+    
+    ref_count = row['ref_count'] if row else 0
+    ref_earned = row['ref_earned'] if row else 0
+    bot_username = (await bot.get_me()).username
+    ref_link = f"https://t.me/{bot_username}?start=ref_{callback.from_user.id}"
+    text = (f"👥 <b>Реферальная система</b>\n\nПриглашай друзей и получай <b>10%</b> с каждого их пополнения!\n\n"
+            f"Твоя ссылка:\n<code>{ref_link}</code>\n\n"
+            f"Приглашено друзей: <b>{ref_count}</b>\nЗаработано: <b>{ref_earned} ₽</b>")
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="⬅️ Назад", callback_data="menu_main")]
+    ])
+    await callback.message.edit_text(text, reply_markup=kb)
+
+@dp.callback_query(F.data == "menu_main")
+async def cb_main_menu(callback: CallbackQuery):
+    text = "Привет! Это <b>FitPlan</b>.\n\nТвой личный тренер и дневник питания."
+    await callback.message.edit_text(text, reply_markup=get_main_menu())
+
+# ================= АДМИНКА =================
+class AdminState(StatesGroup):
+    waiting_for_balance_user = State()
+    waiting_for_balance_amount = State()
+    waiting_for_broadcast = State()
+
+def get_admin_menu():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💰 Начислить баланс", callback_data="admin_add_balance")],
+        [InlineKeyboardButton(text="📋 Все пользователи", callback_data="admin_users_list")],
+        [InlineKeyboardButton(text="📢 Сделать рассылку", callback_data="admin_broadcast")]
+    ])
+
+@dp.message(Command("admin"))
+async def cmd_admin(message: Message):
+    if message.from_user.id != ADMIN_ID: return await message.answer("⛔ Нет доступа.")
+    await message.answer("👑 <b>Админ-панель</b>", reply_markup=get_admin_menu())
+
+@dp.callback_query(F.data == "admin_add_balance")
+async def cb_admin_balance(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id != ADMIN_ID: return
+    await callback.message.edit_text("Введи <b>Telegram ID</b> пользователя:")
+    await state.set_state(AdminState.waiting_for_balance_user)
+
+@dp.message(AdminState.waiting_for_balance_user)
+async def process_admin_user(message: Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID: return
+    target_id = message.text.strip()
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT name FROM users WHERE user_id=?", (int(target_id),)) as cur:
+            row = await cur.fetchone()
+    if not row:
+        await message.answer("❌ Пользователь не найден.")
+        return await state.clear()
+    await state.update_data(target_id=target_id)
+    await message.answer(f"Введи <b>сумму</b> для <code>{row['name']}</code>:")
+    await state.set_state(AdminState.waiting_for_balance_amount)
+
+@dp.message(AdminState.waiting_for_balance_amount)
+async def process_admin_amount(message: Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID: return
+    try:
+        amount = int(message.text.strip())
+        data = await state.get_data()
+        target_id = int(data['target_id'])
+        
+        async with aiosqlite.connect(DB_FILE) as db:
+            db.row_factory = aiosqlite.Row
+            async with db.execute("SELECT referred_by FROM users WHERE user_id=?", (target_id,)) as cur:
+                row = await cur.fetchone()
+            
+            ref_by = row['referred_by'] if row else None
+            await db.execute("UPDATE users SET balance = balance + ? WHERE user_id = ?", (amount, target_id))
+            
+            if ref_by:
+                bonus = int(amount * 0.10)
+                await db.execute("UPDATE users SET balance = balance + ?, ref_earned = ref_earned + ?, ref_count = ref_count + 1 WHERE user_id = ?", (bonus, bonus, ref_by))
+                try: await bot.send_message(ref_by, f"🎉 Друг пополнил баланс! Тебе +{bonus} ₽.")
+                except: pass
+            
+            await db.commit()
+        
+        try: await bot.send_message(target_id, f"🎉 Твой баланс пополнен на {amount} ₽!")
+        except: pass
+        await message.answer(f"✅ Баланс пополнен на {amount} ₽.")
+        await cmd_admin(message)
+    except ValueError: await message.answer("❌ Введи число.")
+    finally: await state.clear()
+
+@dp.callback_query(F.data == "admin_users_list")
+async def cb_admin_users_list(callback: CallbackQuery):
+    if callback.from_user.id != ADMIN_ID: return
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT * FROM users LIMIT 30") as cur:
+            users = await cur.fetchall()
+    
+    if not users: return await callback.message.edit_text("База пуста.")
+    text = "📋 <b>Пользователи:</b>\n\n"
+    for u in users:
+        un = f" (@{u['username']})" if u['username'] else ""
+        text += f"👤 <b>{u['name']}</b>{un}\n🆔 <code>{u['user_id']}</code> | 💰 {u['balance']} ₽\n\n"
+    kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="⬅️ Назад", callback_data="admin_back")]])
+    await callback.message.edit_text(text, reply_markup=kb)
+
+@dp.callback_query(F.data == "admin_broadcast")
+async def cb_admin_broadcast(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id != ADMIN_ID: return
+    await callback.message.edit_text("Введи <b>текст для рассылки</b> (он уйдет всем пользователям):")
+    await state.set_state(AdminState.waiting_for_broadcast)
+
+@dp.message(AdminState.waiting_for_broadcast)
+async def process_broadcast(message: Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID: return
+    text = message.text
+    
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT user_id FROM users") as cur:
+            users = await cur.fetchall()
+    
+    sent = 0
+    failed = 0
+    msg = await message.answer("🔄 Начинаю рассылку...")
+    
+    for u in users:
+        try:
+            await bot.send_message(u['user_id'], text)
+            sent += 1
+            await asyncio.sleep(0.05)
+        except:
+            failed += 1
+            
+    await msg.edit_text(f"✅ <b>Рассылка завершена</b>\n\nОтправлено: {sent}\nОшибок: {failed}")
+    await state.clear()
+    await cmd_admin(message)
+
+@dp.callback_query(F.data == "admin_back")
+async def cb_admin_back(callback: CallbackQuery):
+    if callback.from_user.id != ADMIN_ID: return
+    await callback.message.edit_text("👑 <b>Админ-панель</b>", reply_markup=get_admin_menu())
 
 # ================= ЗАПУСК =================
 async def main():
