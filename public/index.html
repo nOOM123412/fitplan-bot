@@ -151,6 +151,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 .workout-exercise { font-size: 13px; color: var(--text); margin-bottom: 6px; padding-left: 12px; position: relative; }
 .workout-exercise::before { content: "•"; color: var(--accent); position: absolute; left: 0; font-weight: bold; }
 .custom-plan-btn { background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 12px; width: 100%; font-weight: 600; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+/* Стили для вкладки Прогресс */
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.stat-box { background: rgba(255,255,255,0.6); padding: 16px; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.8); }
+.stat-box .sv { font-size: 24px; font-weight: 800; color: var(--accent-deep); line-height: 1; }
+.stat-box .sl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.bar-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 120px; margin-top: 16px; padding-top: 10px; border-bottom: 1px solid rgba(46,42,38,.1); }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+.bar-fill { width: 80%; background: var(--accent); border-radius: 6px 6px 0 0; transition: height 0.5s var(--ease); min-height: 2px; }
+.bar-fill.zero { background: rgba(127,182,157,.2); }
+.bar-label { font-size: 10px; color: var(--muted); font-weight: 600; }
+.export-btns { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -285,6 +296,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     <button class="btn" onclick="openFoodModal()">+ Добавить приём пищи</button>
   </section>
 
+  <!-- НОВАЯ ВКЛАДКА: ПРОГРЕСС -->
+  <section id="progress" class="screen">
+    <div class="header"><div><h1>Прогресс</h1><div class="sub">Твои результаты</div></div></div>
+    
+    <div class="card glass">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Статистика</h2>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="sv" id="statStreak">0</div><div class="sl">Дней подряд</div></div>
+        <div class="stat-box"><div class="sv" id="statWorkouts">0</div><div class="sl">Тренировок</div></div>
+      </div>
+    </div>
+
+    <div class="card glass">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>График калорий (Неделя)</h2>
+      <div class="bar-chart" id="chartKcal">
+        <!-- Столбики будут добавлены через JS -->
+      </div>
+    </div>
+
+    <div class="card glass">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>Экспорт данных</h2>
+      <div class="export-btns">
+        <button class="btn secondary" style="width:100%;" onclick="exportData('food', 'csv')">📥 Скачать питание (CSV)</button>
+        <button class="btn secondary" style="width:100%;" onclick="exportData('workout', 'csv')">📥 Скачать тренировки (CSV)</button>
+        <button class="btn" style="width:100%;" onclick="exportData('workout', 'pdf')">📄 Полный отчет (PDF)</button>
+      </div>
+    </div>
+  </section>
+
   <section id="friends" class="screen">
     <div class="header"><div><h1>Друзья</h1><div class="sub">Твой ID: <span id="myId" style="font-weight:700; color:var(--accent-deep);"></span></div></div></div>
     <div class="card glass">
@@ -326,7 +366,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
       <button class="tab active" data-screen="home"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 10l9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>Главная</button>
       <button class="tab" data-screen="plan"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>План</button>
       <button class="tab" data-screen="food"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 11h18M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>Питание</button>
-      <button class="tab" data-screen="friends"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Друзья</button>
+      <button class="tab" data-screen="progress"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-2-2-4 4"/></svg>Прогресс</button>
       <button class="tab" data-screen="profile"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Профиль</button>
     </div>
   </nav>
@@ -376,27 +416,64 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
   </div>
 </div>
 
+<!-- МОДАЛКА ШАРИНГА -->
+<div class="modal-overlay" id="shareModal">
+  <div class="modal">
+    <h3>Поделиться планом</h3>
+    <p style="font-size:14px; color:var(--muted); margin-bottom:16px;">Ссылка скопирована. Отправь её другу, и его веса пересчитаются под его профиль!</p>
+    <div class="input-wrap" style="margin-bottom:16px; background:#f5f5f5;"><input type="text" id="shareLink" readonly></div>
+    <button class="btn" onclick="closeShareModal()">Готово</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
-/* ================= ОБЩИЙ СПИСОК ТРЕНИРОВОК (15 ШТУК) ================= */
+/* ================= СПИСОК ТРЕНИРОВОК С ТИПАМИ ================= */
 const ALL_WORKOUTS = [
-  { "name": "Отдых", "desc": "Полный отдых. Восстановление мышц.", "exercises": [] },
-  { "name": "Грудь + Трицепс (База)", "desc": "Классическая программа для верха тела. Акцент на жимовые движения.", "exercises": ["Жим штанги лёжа 4×8", "Жим гантелей на наклонной 3×10", "Разводка гантелей 3×12", "Французский жим 3×10"] },
-  { "name": "Спина + Бицепс", "desc": "Тяговые упражнения для ширины и толщины спины.", "exercises": ["Подтягивания 4×6", "Тяга штанги в наклоне 4×8", "Тяга верхнего блока 3×10", "Подъём штанги на бицепс 3×10"] },
-  { "name": "Ноги (Квадрицепс)", "desc": "Проработка передней поверхности бедра. Тяжёлая база.", "exercises": ["Приседания со штангой 4×8", "Жим ногами 4×10", "Разгибания ног в тренажёре 3×12", "Выпады с гантелями 3×10"] },
-  { "name": "Плечи + Трапеция", "desc": "Развитие дельтовидных мышц и трапеции. Для широких плеч.", "exercises": ["Жим штанги стоя 4×10", "Махи гантелями в стороны 3×12", "Шраги со штангой 3×15", "Обратные разводки 3×12"] },
-  { "name": "Руки (Бицепс + Трицепс)", "desc": "Суперсеты на руки для максимального памп-эффекта.", "exercises": ["Подъём на бицепс 4×10", "Разгибание на трицепс 4×10", "Молотки 3×12", "Французский жим 3×10"] },
-  { "name": "Ноги (Бицепс бедра)", "desc": "Задняя поверхность бедра и ягодицы. Для силы и формы.", "exercises": ["Румынская тяга 4×8", "Сгибания ног лёжа 3×12", "Ягодичный мост 4×15", "Отведения ноги в кроссовере 3×15"] },
-  { "name": "Грудь (Верх)", "desc": "Акцент на верхнюю часть грудных мышц. Визуально расширяет грудь.", "exercises": ["Жим в наклоне головой вверх 4×8", "Разводка в наклоне 3×12", "Кроссовер сверху вниз 3×15", "Отжимания ногами на скамье 3×12"] },
-  { "name": "Кардио + Пресс", "desc": "Сжигаем жир и укрепляем кор. Отличная тренировка для похудения.", "exercises": ["Бег на дорожке 20 мин", "Скручивания 3×20", "Подъём ног в висе 3×15", "Планка 3×60 сек"] },
-  { "name": "Функционал (Всё тело)", "desc": "Круговая тренировка для выносливости и сжигания жира.", "exercises": ["Бёрпи 3×15", "Приседания с собственным весом 3×20", "Отжимания 3×15", "Планка 3×45 сек"] },
-  { "name": "Растяжка + Восстановление", "desc": "Йога и стретчинг. Снимаем напряжение в мышцах.", "exercises": ["Наклоны вперёд 3×30 сек", "Скрутка позвоночника 3×30 сек", "Поза собаки мордой вниз 3×1 мин", "Дыхание 5 мин"] },
-  { "name": "Изоляция рук (Добивка)", "desc": "Лёгкая тренировка на руки для прорисовки рельефа.", "exercises": ["Подъём на бицепс 3×15", "Разгибание на блоке 3×15", "Концентрированные подъёмы 3×12", "Отжимания узким хватом 3×15"] },
-  { "name": "Спина (Широчайшие)", "desc": "Тяги для создания V-образной формы. Для визуальной талии.", "exercises": ["Тяга верхнего блока 4×10", "Тяга гантели 4×10", "Пуловер 3×12", "Подтягивания обратным хватом 3×8"] },
-  { "name": "Ноги (Взрывные)", "desc": "Прыжковые упражнения для развития взрывной силы.", "exercises": ["Выпрыгивания из приседа 4×10", "Зашагивания на платформу 3×12", "Приседания с прыжком 3×15", "Прыжки на скакалке 3×2 мин"] },
-  { "name": "Пресс (Круговая)", "desc": "Интенсивная проработка всех мышц кора.", "exercises": ["Скручивания 3×30", "Подъём ног 3×20", "Боковые наклоны 3×20", "Планка 3×90 сек"] },
-  { "name": "Кардио (Длительное)", "desc": "Тренировка выносливости. Для восстановления и жиросжигания.", "exercises": ["Бег 40 мин", "Ходьба 20 мин", "Растяжка 10 мин"] }
+  { name: "Отдых", desc: "Полный отдых. Восстановление мышц.", exercises: [] },
+  { name: "Грудь + Трицепс (База)", desc: "Классическая программа для верха тела.", exercises: [
+    {name: "Жим штанги лёжа", sets: 4, reps: 8, type: "barbell", base_ratio: 0.5},
+    {name: "Жим гантелей на наклонной", sets: 3, reps: 10, type: "dumbbell", base_ratio: 0.2},
+    {name: "Разводка гантелей", sets: 3, reps: 12, type: "dumbbell", base_ratio: 0.1},
+    {name: "Французский жим", sets: 3, reps: 10, type: "barbell", base_ratio: 0.25}
+  ]},
+  { name: "Спина + Бицепс", desc: "Тяговые упражнения для спины.", exercises: [
+    {name: "Подтягивания", sets: 4, reps: 6, type: "bodyweight"},
+    {name: "Тяга штанги в наклоне", sets: 4, reps: 8, type: "barbell", base_ratio: 0.4},
+    {name: "Тяга верхнего блока", sets: 3, reps: 10, type: "machine", base_ratio: 0.35},
+    {name: "Подъём штанги на бицепс", sets: 3, reps: 10, type: "barbell", base_ratio: 0.25}
+  ]},
+  { name: "Ноги (Квадрицепс)", desc: "Проработка передней поверхности бедра.", exercises: [
+    {name: "Приседания со штангой", sets: 4, reps: 8, type: "barbell", base_ratio: 0.6},
+    {name: "Жим ногами", sets: 4, reps: 10, type: "machine", base_ratio: 1.2},
+    {name: "Разгибания ног", sets: 3, reps: 12, type: "machine", base_ratio: 0.3},
+    {name: "Выпады с гантелями", sets: 3, reps: 10, type: "dumbbell", base_ratio: 0.15}
+  ]},
+  { name: "Плечи + Трапеция", desc: "Для широких плеч.", exercises: [
+    {name: "Жим штанги стоя", sets: 4, reps: 10, type: "barbell", base_ratio: 0.3},
+    {name: "Махи гантелями в стороны", sets: 3, reps: 12, type: "dumbbell", base_ratio: 0.05},
+    {name: "Шраги со штангой", sets: 3, reps: 15, type: "barbell", base_ratio: 0.5},
+    {name: "Обратные разводки", sets: 3, reps: 12, type: "dumbbell", base_ratio: 0.05}
+  ]},
+  { name: "Руки (Бицепс + Трицепс)", desc: "Суперсеты на руки.", exercises: [
+    {name: "Подъём на бицепс", sets: 4, reps: 10, type: "barbell", base_ratio: 0.25},
+    {name: "Разгибание на трицепс", sets: 4, reps: 10, type: "machine", base_ratio: 0.25},
+    {name: "Молотки", sets: 3, reps: 12, type: "dumbbell", base_ratio: 0.1},
+    {name: "Французский жим", sets: 3, reps: 10, type: "barbell", base_ratio: 0.2}
+  ]},
+  { name: "Кардио + Пресс", desc: "Сжигаем жир.", exercises: [
+    {name: "Бег на дорожке", desc: "20 мин", type: "cardio"},
+    {name: "Скручивания", sets: 3, reps: 20, type: "bodyweight"},
+    {name: "Подъём ног в висе", sets: 3, reps: 15, type: "bodyweight"},
+    {name: "Планка", desc: "3x60 сек", type: "bodyweight"}
+  ]},
+  { name: "Функционал (Всё тело)", desc: "Круговая тренировка.", exercises: [
+    {name: "Бёрпи", sets: 3, reps: 15, type: "bodyweight"},
+    {name: "Приседания", sets: 3, reps: 20, type: "bodyweight"},
+    {name: "Отжимания", sets: 3, reps: 15, type: "bodyweight"},
+    {name: "Планка", desc: "3x45 сек", type: "bodyweight"}
+  ]}
 ];
 
 /* ================= ПЕРЕМЕННЫЕ ================= */
@@ -408,11 +485,33 @@ let friends = [];
 let obStep = 0;
 let editGenderValue = 'male';
 let currentPlanDay = null;
-
 let isWorkoutStarted = false;
+
+// Статистика для графиков
+let mockHistory = [0,0,0,0,0,0,0]; 
 
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
 const SERVER_URL = window.location.origin;
+
+/* ================= УМНЫЙ РАСЧЕТ ВЕСОВ ================= */
+function calculateWeights(exercises) {
+  const bw = user.weight || 65;
+  const sexMult = user.gender === 'male' ? 1.0 : 0.75;
+  let goalMult = 1.0;
+  if (user.goal === 'lose' || user.goal === 'tone') goalMult = 0.9;
+  if (user.goal === 'gain' || user.goal === 'strength') goalMult = 1.1;
+
+  return exercises.map(ex => {
+    if (ex.type === 'bodyweight' || ex.type === 'cardio') {
+      return `${ex.name} ${ex.sets ? ex.sets+'x'+ex.reps : (ex.desc||'')}`;
+    }
+    const ratio = ex.base_ratio || 0.2;
+    let weight = bw * ratio * sexMult * goalMult;
+    const step = ex.type === 'barbell' ? 2.5 : 2.0;
+    weight = Math.max(step, Math.round(weight / step) * step);
+    return `${ex.name} — ${weight} кг ${ex.sets}x${ex.reps}`;
+  });
+}
 
 /* ================= СЕРВЕР ================= */
 async function fetchServerData() {
@@ -443,7 +542,6 @@ async function saveToServer() {
     const res = await fetch(`${SERVER_URL}/api/save`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
     
     if(res.status === 403) {
-      // Если сервер вернул 403 (подписка истекла), показываем экран блокировки
       document.getElementById('expiredScreen').style.display = 'flex';
     }
   } catch(e) { console.error(e); }
@@ -548,11 +646,11 @@ function initMainApp(){
   document.getElementById('profGender').textContent = user.gender === 'male' ? 'Парень' : 'Девушка';
   document.getElementById('profWeight').textContent = user.weight + ' кг';
   document.getElementById('profHeight').textContent = user.height + ' см';
-  document.getElementById('profGoal').textContent = goalNames[user.goal];
+  document.getElementById('profGoal').textContent = goalNames[user.goal] || 'Набор массы';
   document.getElementById('profKcal').textContent = user.kcal + ' ккал';
   document.getElementById('myId').textContent = user.uniqueId;
   
-  updateProfileUI(); updateHomeMacros(); updatePlanTexts(); renderStreak(); renderFoodList(); renderFriends();
+  updateProfileUI(); updateHomeMacros(); updatePlanTexts(); renderStreak(); renderFoodList(); renderFriends(); renderProgress();
 }
 
 function updateProfileUI() {
@@ -592,7 +690,45 @@ function updateHomeMacros(){
     if(mc) mc.textContent = eatenC + ' г';
   } catch(e) { console.error("Error updating macros", e); }
   
+  mockHistory[6] = eatenKcal; // Обновляем график за сегодня
   saveToServer();
+}
+
+/* ================= ВКЛАДКА ПРОГРЕСС ================= */
+function renderProgress() {
+  // Стрик и тренировки
+  const totalWorkouts = streakDone.filter(Boolean).length;
+  const currentStreak = streakDone.filter(Boolean).length; // Упрощенно
+  document.getElementById('statStreak').textContent = currentStreak;
+  document.getElementById('statWorkouts').textContent = totalWorkouts;
+
+  // Рисуем график калорий
+  const chartContainer = document.getElementById('chartKcal');
+  chartContainer.innerHTML = '';
+  const maxKcal = Math.max(...mockHistory, user.kcal);
+  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+  mockHistory.forEach((val, i) => {
+    const heightPct = maxKcal > 0 ? (val / maxKcal * 100) : 0;
+    const col = document.createElement('div');
+    col.className = 'bar-col';
+    col.innerHTML = `
+      <div class="bar-fill ${val===0?'zero':''}" style="height: ${heightPct}%;"></div>
+      <div class="bar-label">${days[i]}</div>
+    `;
+    chartContainer.appendChild(col);
+  });
+}
+
+/* ================= ЭКСПОРТ ================= */
+function exportData(type, format) {
+  if (format === 'csv') {
+    window.location.href = `${SERVER_URL}/api/export/csv?id=${USER_ID}&type=${type}`;
+    toast('Скачивание CSV...');
+  } else if (format === 'pdf') {
+    window.location.href = `${SERVER_URL}/api/export/pdf?id=${USER_ID}`;
+    toast('Генерация PDF...');
+  }
 }
 
 /* ================= ОБНОВЛЕНИЕ ПЛАНОВ ================= */
@@ -630,9 +766,11 @@ function renderPlanModalList(searchQuery = '') {
     
     let exercisesHtml = '';
     if(plan.exercises && plan.exercises.length > 0) {
+      // УМНЫЙ РАСЧЕТ ВЕСОВ ЗДЕСЬ
+      const calculated = calculateWeights(plan.exercises);
       exercisesHtml = '<div class="workout-details" id="details-' + plan.name.replace(/\s/g, '') + '">' + 
-        plan.exercises.map(ex => `<div class="workout-exercise">${ex}</div>`).join('') + 
-        '<div style="margin-top:12px; font-size:12px; color:var(--accent); font-weight:600;">💪 Отличный выбор! Вперёд к результату.</div>' +
+        calculated.map(ex => `<div class="workout-exercise">${ex}</div>`).join('') + 
+        '<div style="margin-top:12px; font-size:12px; color:var(--accent); font-weight:600;">💪 Веса подобраны под твой профиль</div>' +
         '</div>';
     }
     
@@ -642,7 +780,10 @@ function renderPlanModalList(searchQuery = '') {
         <div class="workout-desc">${plan.desc}</div>
         ${exercisesHtml}
       </div>
-      <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" onclick="event.stopPropagation(); toggleDetails('details-${plan.name.replace(/\s/g, '')}', this)"><path d="M6 9l6 6 6-6"/></svg>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button style="border:none;background:rgba(127,182,157,.1);color:var(--accent-deep);padding:6px 10px;border-radius:8px;font-size:12px;font-weight:600;" onclick="event.stopPropagation(); sharePlan('${plan.name}')">🔗</button>
+        <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" onclick="event.stopPropagation(); toggleDetails('details-${plan.name.replace(/\s/g, '')}', this)"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
     `;
     
     content.appendChild(div);
@@ -688,13 +829,16 @@ function updateTodayWorkout(){
   if(plan && plan.name !== 'Отдых'){
     sub.textContent = 'Сегодня — ' + plan.name;
     
+    // Умный расчет весов для главной
+    const calculated = calculateWeights(plan.exercises);
+    
     content.innerHTML = `
       <div class="ex" style="border-bottom:none; padding-bottom:0;">
         <span class="ex-name">${plan.name}</span>
         <span class="ex-sets">${plan.exercises.length} упр.</span>
       </div>
       <div style="margin-top:12px;">
-        ${plan.exercises.map(e => `<div style="font-size:13px; color:var(--muted); margin-bottom:4px;">• ${e}</div>`).join('')}
+        ${calculated.map(e => `<div style="font-size:13px; color:var(--muted); margin-bottom:4px;">• ${e}</div>`).join('')}
       </div>
     `;
     
@@ -717,6 +861,7 @@ function updateTodayWorkout(){
         streakDone[dayIdx] = true; 
         isWorkoutStarted = false;
         renderStreak(); 
+        renderProgress();
         saveToServer(); 
         toast('Тренировка засчитана! Молодец!'); 
         updateTodayWorkout();
@@ -734,6 +879,34 @@ function renderStreak(){
   const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
   container.innerHTML = days.map((d,i)=>`<div class="day ${streakDone[i]?'done':''}">${d}</div>`).join('');
 }
+
+/* ================= ШАРИНГ ПЛАНОВ ================= */
+async function sharePlan(planName) {
+  const plan = ALL_WORKOUTS.find(p => p.name === planName);
+  if (!plan) return;
+
+  try {
+    const res = await fetch(`${SERVER_URL}/api/plans/share`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        owner_id: USER_ID,
+        name: plan.name,
+        desc: plan.desc,
+        exercises: plan.exercises
+      })
+    });
+    const data = await res.json();
+    
+    document.getElementById('shareLink').value = data.link;
+    document.getElementById('shareModal').classList.add('show');
+    navigator.clipboard.writeText(data.link);
+    toast('Ссылка скопирована!');
+  } catch(e) {
+    toast('Ошибка при создании ссылки');
+  }
+}
+function closeShareModal() { document.getElementById('shareModal').classList.remove('show'); }
 
 /* ================= СВОЙ ПЛАН ================= */
 function openCustomPlanModal() {
@@ -754,8 +927,15 @@ function saveCustomPlan() {
   
   if(!name) return toast('Введи название');
   
-  const exercises = exStr.split(',').map(e => e.trim()).filter(e => e);
-  
+  const exercises = exStr.split(',').map(e => {
+    // Пытаемся распарсить "Жим 4x10"
+    const match = e.trim().match(/(.+)\s+(\d+)x(\d+)/);
+    if (match) {
+      return { name: match[1], sets: +match[2], reps: +match[3], type: "dumbbell", base_ratio: 0.2 };
+    }
+    return { name: e.trim(), type: "bodyweight" };
+  }).filter(e => e.name);
+
   const newPlan = { name, desc: desc || 'Свой план', exercises };
   ALL_WORKOUTS.push(newPlan);
   
@@ -918,12 +1098,10 @@ function toast(msg){
 async function startApp() {
   await fetchServerData();
   
-  // ЖЕСТКАЯ ПРОВЕРКА ПОДПИСКИ ПРИ СТАРТЕ
   const now = Math.floor(Date.now() / 1000);
   if(user.sub_until > 0 && user.sub_until < now) {
-    // Показываем экран блокировки на весь экран
     document.getElementById('expiredScreen').style.display = 'flex';
-    return; // Прекращаем инициализацию, показываем только заглушку
+    return;
   }
   
   const hasLocal = !!localStorage.getItem('fitplan_user');
