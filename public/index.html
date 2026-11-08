@@ -154,7 +154,7 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 28px; height:
 .tab.active { color: var(--accent-deep); background: var(--accent-light); }
 .tab.active svg { transform: scale(1.1); }
 
-/* ================= ЭКРАН ТРЕНИРОВКИ (СЖАТЫЙ) ================= */
+/* ================= ЭКРАН ТРЕНИРОВКИ ================= */
 #workoutScreen { position: fixed; inset: 0; z-index: 1000; background: var(--bg); background-image: var(--bg-gradient); display: none; flex-direction: column; padding: var(--safe-top) 20px calc(20px + var(--safe-bottom)); max-width: 480px; margin: 0 auto; overflow-y: auto; }
 #workoutScreen.active { display: flex; animation: slideUp 0.45s var(--ease); }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -188,7 +188,7 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 28px; height:
 .modal-header h3 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
 .modal-scroll { overflow-y: auto; flex: 1; padding-bottom: 20px; }
 
-/* ФИКС СКРОЛЛБАРА В ТАБАХ */
+/* УБИРАЕМ ЛИНИЮ СКРОЛЛА В ТАБАХ */
 .muscle-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 16px; -ms-overflow-style: none; scrollbar-width: none; }
 .muscle-tabs::-webkit-scrollbar { display: none; width: 0; height: 0; }
 
@@ -716,12 +716,15 @@ async function fetchServerData() {
     const res = await fetch(`${SERVER_URL}/api/user?id=${USER_ID}`);
     if(res.ok) {
       const data = await res.json();
+      
+      // Защита от затирания данных пустышками
       user.sub_until = data.sub_until || 0;
-      if(data.foods) todayFoods = data.foods;
-      if(data.plans) weekPlans = data.plans;
-      if(data.customWorkouts) customWorkouts = data.customWorkouts;
-      if(data.todayWorkouts) todayWorkouts = data.todayWorkouts;
-      if(data.streak) streakDone = data.streak;
+      if(data.foods && data.foods.length > 0) todayFoods = data.foods;
+      if(data.plans && Object.keys(data.plans).length > 0) weekPlans = data.plans;
+      if(data.customWorkouts && data.customWorkouts.length > 0) customWorkouts = data.customWorkouts;
+      if(data.todayWorkouts && data.todayWorkouts.length > 0) todayWorkouts = data.todayWorkouts;
+      if(data.streak && data.streak.length > 0) streakDone = data.streak;
+      
       if(data.profile && Object.keys(data.profile).length) {
         user = { ...user, ...data.profile, sub_until: user.sub_until };
       }
@@ -746,17 +749,16 @@ async function saveToServer() {
 }
 
 /* ================= ОНБОРДИНГ ================= */
+// ... (код онбординга без изменений) ...
 function updateObStep() {
   document.querySelectorAll('.ob-step').forEach((s, idx) => s.classList.toggle('active', idx === obStep));
   document.getElementById('btnNext').textContent = obStep === 3 ? 'Начать 🚀' : 'Далее';
   if(obStep === 3) calcNutrition();
 }
-
 document.getElementById('btnNext').addEventListener('click', () => {
   if(obStep < 3) { obStep++; updateObStep(); }
   else { finishOnboarding(); }
 });
-
 document.querySelectorAll('#genderSeg button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('#genderSeg button').forEach(x => x.classList.remove('active'));
   b.classList.add('active'); user.gender = b.dataset.gender;
@@ -769,13 +771,11 @@ document.querySelectorAll('#goalSeg button').forEach(b => b.addEventListener('cl
   document.querySelectorAll('#goalSeg button').forEach(x => x.classList.remove('active'));
   b.classList.add('active'); user.goal = b.dataset.goal;
 }));
-
 function calcNutrition(){
   user.name = document.getElementById('inpName').value.trim() || 'User';
   user.age = +document.getElementById('inpAge').value || 16;
   user.weight = +document.getElementById('inpWeight').value || 65;
   user.height = +document.getElementById('inpHeight').value || 175;
-
   const {weight,height,age,gender,activity,goal} = user;
   let bmr = gender==='male' ? 10*weight + 6.25*height - 5*age + 5 : 10*weight + 6.25*height - 5*age - 161;
   let tdee = bmr * activity;
@@ -785,15 +785,12 @@ function calcNutrition(){
   const protein = Math.round(weight * 1.8);
   const fat = Math.round(weight * 0.9);
   const carbs = Math.round((kcal - protein*4 - fat*9) / 4);
-  
   document.getElementById('calcKcal').textContent = Math.round(kcal);
   document.getElementById('calcP').textContent = protein + ' г';
   document.getElementById('calcF').textContent = fat + ' г';
   document.getElementById('calcC').textContent = carbs + ' г';
-  
   user.kcal = Math.round(kcal); user.protein = protein; user.fat = fat; user.carbs = carbs;
 }
-
 function finishOnboarding(){
   if(!user.uniqueId) user.uniqueId = Math.floor(100000 + Math.random() * 900000).toString();
   saveToServer();
@@ -944,7 +941,7 @@ function selectPlan(day, templateId, name){
     weekPlans[day] = { id: templateId, name: name };
     closeModal('modal-plan');
     renderWeekGrid();
-    saveToServer();
+    saveToServer(); // Ждем сохранения
     toast('План обновлён');
     updateTodayWorkout();
   }
