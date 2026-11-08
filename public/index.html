@@ -139,36 +139,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 .food-macros-row .input-wrap input{text-align:center; width: 100%;}
 .modal .btn {flex: none; width: 100%; margin-top: 8px; padding: 15px;}
 .modal .btn.secondary {width: auto;}
-.workout-item { padding: 12px 14px; background: rgba(255,255,255,0.5); border-radius: 12px; margin-bottom: 8px; cursor: pointer; border: 1px solid rgba(46,42,38,0.08); transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
-.workout-item:hover { background: #fff; }
-.workout-info { flex: 1; }
-.workout-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-.workout-desc { font-size: 12px; color: var(--muted); line-height: 1.3; }
-.arrow-icon { width: 20px; height: 20px; stroke: var(--muted); transition: transform 0.3s; }
-.workout-item.open .arrow-icon { transform: rotate(180deg); stroke: var(--accent); }
-.workout-details { display: none; padding-top: 12px; margin-top: 12px; border-top: 1px solid rgba(46,42,38,0.06); }
-.workout-item.open .workout-details { display: block; animation: fadeUp .3s var(--ease); }
-.workout-exercise { font-size: 13px; color: var(--text); margin-bottom: 6px; padding-left: 12px; position: relative; }
-.workout-exercise::before { content: "•"; color: var(--accent); position: absolute; left: 0; font-weight: bold; }
-.custom-plan-btn { background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 12px; width: 100%; font-weight: 600; cursor: pointer; margin-bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-
-/* Стили для вкладки Прогресс */
-.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-.stat-box { background: rgba(255,255,255,0.6); padding: 16px; border-radius: 16px; text-align: center; border: 1px solid rgba(255,255,255,0.8); }
-.stat-box .sv { font-size: 24px; font-weight: 800; color: var(--accent-deep); line-height: 1; }
-.stat-box .sl { font-size: 12px; color: var(--muted); margin-top: 4px; }
-.bar-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 120px; margin-top: 16px; padding-top: 10px; border-bottom: 1px solid rgba(46,42,38,.1); }
-.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
-.bar-fill { width: 80%; background: var(--accent); border-radius: 6px 6px 0 0; transition: height 0.5s var(--ease); min-height: 2px; }
-.bar-fill.zero { background: rgba(127,182,157,.2); }
-.bar-label { font-size: 10px; color: var(--muted); font-weight: 600; }
-.export-btns { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
-
-/* Стили для длительности и веса */
+.muscle-group-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; }
+.muscle-tab { flex: none; padding: 10px 16px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--glass-strong); font-weight: 600; color: var(--muted); cursor: pointer; white-space: nowrap; transition: all 0.2s; font-size: 14px; }
+.muscle-tab.active { border-color: var(--accent); background: rgba(127,182,157,.15); color: var(--accent-deep); }
+.workout-option { padding: 14px; background: rgba(255,255,255,0.5); border-radius: 14px; margin-bottom: 10px; cursor: pointer; border: 1px solid rgba(46,42,38,0.08); transition: all 0.2s; }
+.workout-option:hover { background: #fff; border-color: var(--accent); }
+.workout-option .wo-name { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.workout-option .wo-desc { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 8px; }
+.workout-option .wo-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+.wo-badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: rgba(127,182,157,.12); color: var(--accent-deep); }
 .duration-selector { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
 .duration-btn { flex: none; padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--glass-strong); font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
 .duration-btn.active { border-color: var(--accent); background: rgba(127,182,157,.15); color: var(--accent-deep); }
-
 .exercise-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(46,42,38,.06); }
 .exercise-row:last-child { border-bottom: none; }
 .ex-name-block { flex: 1; }
@@ -178,27 +160,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 .weight-btn { width: 28px; height: 28px; border-radius: 8px; border: none; background: #fff; color: var(--text); font-size: 18px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,.05); display: grid; place-items: center; }
 .weight-btn:active { transform: scale(0.95); }
 .weight-val { font-size: 14px; font-weight: 700; color: var(--accent-deep); min-width: 40px; text-align: center; }
-
 /* ЭКРАН ТРЕНИРОВКИ */
-#workoutScreen {
-  position: fixed; inset: 0; z-index: 1000;
-  background: var(--bg1);
-  display: none; flex-direction: column;
-  padding: env(safe-area-inset-top) 16px calc(16px + env(safe-area-inset-bottom));
-  max-width: 480px; margin: 0 auto;
-  overflow-y: auto;
-}
+#workoutScreen { position: fixed; inset: 0; z-index: 1000; background: var(--bg1); display: none; flex-direction: column; padding: env(safe-area-inset-top) 16px calc(16px + env(safe-area-inset-bottom)); max-width: 480px; margin: 0 auto; overflow-y: auto; }
 #workoutScreen.active { display: flex; animation: slideUp .3s var(--ease); }
 @keyframes slideUp { from{transform: translateY(100%);} to{transform: translateY(0);} }
-
 .workout-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
 .workout-header h2 { font-size: 18px; font-weight: 700; }
 .close-workout { width: 32px; height: 32px; border-radius: 50%; background: rgba(0,0,0,0.05); border: none; display: grid; place-items: center; cursor: pointer; }
 .close-workout svg { width: 18px; height: 18px; stroke: var(--text); }
-
 .workout-progress-bar { height: 6px; background: rgba(46,42,38,.1); border-radius: 3px; margin-bottom: 24px; overflow: hidden; }
 .workout-progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.3s var(--ease); }
-
 .workout-card { background: #fff; border-radius: 24px; padding: 24px; box-shadow: 0 8px 32px rgba(0,0,0,.06); text-align: center; margin-bottom: auto; }
 .workout-ex-name { font-size: 24px; font-weight: 800; margin-bottom: 8px; line-height: 1.2; }
 .workout-ex-meta { font-size: 15px; color: var(--muted); margin-bottom: 24px; }
@@ -206,17 +177,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 .set-dot { width: 40px; height: 40px; border-radius: 12px; background: rgba(46,42,38,.05); display: grid; place-items: center; font-weight: 700; color: var(--muted); transition: all 0.3s; }
 .set-dot.done { background: var(--accent); color: #fff; }
 .set-dot.current { border: 2px solid var(--accent); color: var(--accent-deep); }
-
 .workout-timer { font-size: 48px; font-weight: 800; color: var(--text); font-variant-numeric: tabular-nums; margin-bottom: 24px; }
 .workout-timer.running { color: var(--accent-deep); }
-
 .btn-workout { width: 100%; padding: 20px; border-radius: 16px; font-size: 18px; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
 .btn-workout.primary { background: var(--accent); color: #fff; box-shadow: 0 8px 24px rgba(127,182,157,.4); }
 .btn-workout.secondary { background: rgba(46,42,38,.05); color: var(--text); }
 .btn-workout:active { transform: scale(0.98); }
 .btn-workout:disabled { opacity: 0.5; box-shadow: none; }
-
 .rest-timer-text { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 8px; }
+
+/* Новые стили для списка тренировок дня */
+.workout-day-card { padding: 14px; border-radius: 14px; background: rgba(255,255,255,0.5); border: 1px solid rgba(46,42,38,0.08); margin-bottom: 10px; }
+.workout-day-card.done { background: rgba(127,182,157,0.1); border-color: var(--accent); }
+.workout-day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.workout-day-name { font-size: 15px; font-weight: 700; }
+.workout-day-status { font-size: 12px; font-weight: 600; color: var(--accent-deep); }
+.workout-day-exercises { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 10px; }
+.workout-day-btn { width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: 700; font-size: 14px; cursor: pointer; }
+.workout-day-btn.start { background: var(--accent); color: #fff; }
+.workout-day-btn.done { background: rgba(127,182,157,0.2); color: var(--accent-deep); }
+.header-add-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; border: none; font-size: 22px; font-weight: 700; cursor: pointer; display: grid; place-items: center; box-shadow: 0 4px 12px rgba(127,182,157,.3); }
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -228,32 +208,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 <div id="workoutScreen">
   <div class="workout-header">
     <h2 id="wsTitle">Тренировка</h2>
-    <button class="close-workout" onclick="exitWorkout()">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </button>
+    <button class="close-workout" onclick="exitWorkout()"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
   </div>
-  <div class="workout-progress-bar">
-    <div class="workout-progress-fill" id="wsProgress" style="width: 0%;"></div>
-  </div>
-
+  <div class="workout-progress-bar"><div class="workout-progress-fill" id="wsProgress" style="width: 0%;"></div></div>
   <div class="workout-card">
     <div class="workout-ex-name" id="wsExName">Упражнение</div>
     <div class="workout-ex-meta" id="wsExMeta">3 подхода × 10 повторений</div>
-    
-    <div class="workout-set-tracker" id="wsSetTracker">
-      <!-- Точки подходов -->
-    </div>
-
+    <div class="workout-set-tracker" id="wsSetTracker"></div>
     <div class="workout-timer" id="wsTimer">00:00</div>
-    
     <div id="wsWeightControl" class="weight-control" style="justify-content: center; margin-bottom: 24px; display: inline-flex;">
       <button class="weight-btn" onclick="changeWorkoutWeight(-1)">−</button>
       <div class="weight-val" id="wsWeightVal" style="font-size: 20px; min-width: 60px;">0 кг</div>
       <button class="weight-btn" onclick="changeWorkoutWeight(1)">+</button>
     </div>
-
     <div class="rest-timer-text" id="wsRestText" style="display: none;">Отдых: <span id="wsRestTimer">60</span> сек</div>
-
     <button class="btn-workout primary" id="wsActionBtn" onclick="handleWorkoutAction()">Начать подход</button>
     <button class="btn-workout secondary" id="wsSkipBtn" onclick="skipExercise()" style="display: none;">Пропустить упражнение</button>
   </div>
@@ -267,7 +235,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
   <button class="btn" onclick="window.Telegram.WebApp.close()" style="max-width: 280px;">Перейти в бот</button>
 </div>
 
-<!-- ОНБОРДИНГ -->
+<!-- ОНБОРДИНГ (сокращён для краткости, как было ранее) -->
 <div id="onboarding">
   <div class="ob-content">
     <div class="ob-progress"><div class="dot active" data-dot="0"></div><div class="dot" data-dot="1"></div><div class="dot" data-dot="2"></div><div class="dot" data-dot="3"></div></div>
@@ -313,9 +281,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
           <div class="macro"><div class="mv" id="calcC">0 г</div><div class="ml">Углеводы</div></div>
         </div>
       </div>
-      <div style="margin-top: 20px; text-align: center; font-size: 14px; color: var(--accent); font-weight: 600;">
-        🎁 Твой пробный период на 3 дня активирован!
-      </div>
+      <div style="margin-top: 20px; text-align: center; font-size: 14px; color: var(--accent); font-weight: 600;">🎁 Твой пробный период на 3 дня активирован!</div>
     </div>
   </div>
   <div class="ob-footer">
@@ -342,13 +308,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
         <div class="macro"><div class="mv" id="macroF">0 г</div><div class="ml">Жиры</div></div>
       </div>
     </div>
-    
-    <!-- БЛОК ТРЕНИРОВКИ НА СЕГОДНЯ -->
     <div class="card glass" id="todayPlanCard">
-      <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 4v16M18 4v16M4 7h4M16 7h4M4 17h4M16 17h4M8 12h8"/></svg>Тренировка на сегодня</h2>
+      <h2 style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="display:flex; align-items:center; gap:8px;"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 4v16M18 4v16M4 7h4M16 7h4M4 17h4M16 17h4M8 12h8"/></svg>Тренировки на сегодня</span>
+        <button class="header-add-btn" onclick="addExtraWorkout()">+</button>
+      </h2>
       <div id="todayPlanContent"></div>
     </div>
-    
     <div class="card glass">
       <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Стрик</h2>
       <div class="streak" id="streakContainer"></div>
@@ -357,8 +323,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 
   <section id="plan" class="screen">
     <div class="header"><div><h1>План</h1><div class="sub">Выбери тренировку на каждый день</div></div></div>
-    
-    <!-- ВЫБОР ДЛИТЕЛЬНОСТИ (СЛАЙДЕР) -->
     <div class="card glass" style="padding: 16px;">
       <h2 style="margin-bottom: 8px;">Длительность тренировки</h2>
       <div style="display: flex; align-items: center; gap: 12px;">
@@ -367,13 +331,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
       </div>
       <p style="font-size: 12px; color: var(--muted); margin-top: 8px;">От этого зависит количество упражнений и подходов.</p>
     </div>
-
     <div class="card glass">
       <h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Неделя</h2>
-      <div class="input-wrap" style="margin-bottom:12px; padding:10px 14px;">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input type="text" id="planSearch" placeholder="Поиск тренировки..." oninput="filterPlans()">
-      </div>
       <div class="week-grid" id="weekGrid"></div>
     </div>
   </section>
@@ -387,7 +346,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
     <button class="btn" onclick="openFoodModal()">+ Добавить приём пищи</button>
   </section>
 
-  <!-- ВКЛАДКА: ПРОГРЕСС -->
   <section id="progress" class="screen">
     <div class="header"><div><h1>Прогресс</h1><div class="sub">Твои результаты</div></div></div>
     <div class="card glass">
@@ -440,6 +398,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 </div>
 
 <!-- МОДАЛКИ -->
+<div class="modal-overlay" id="planModal">
+  <div class="modal" style="max-width: 420px;">
+    <h3>Выбрать тренировку</h3>
+    <div class="muscle-group-tabs" id="muscleGroupTabs"></div>
+    <div id="workoutOptionsList" style="max-height: 55vh; overflow-y: auto;"></div>
+    <button class="btn secondary" style="width:100%; margin-top:16px;" onclick="closePlanModal()">Закрыть</button>
+  </div>
+</div>
+
 <div class="modal-overlay" id="foodModal">
   <div class="modal">
     <h3>Добавить продукт</h3>
@@ -463,88 +430,101 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
   </div>
 </div>
 
-<div class="modal-overlay" id="planModal">
-  <div class="modal">
-    <h3>Выбрать тренировку</h3>
-    <button class="custom-plan-btn" onclick="openCustomPlanModal()">+ Создать свой план</button>
-    <div id="planModalContent" style="max-height: 50vh; overflow-y: auto;"></div>
-    <button class="btn secondary" style="width:100%; margin-top:16px;" onclick="closePlanModal()">Закрыть</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="customPlanModal">
-  <div class="modal">
-    <h3>Свой план</h3>
-    <div class="field"><label>Название</label><div class="input-wrap"><input type="text" id="customName" placeholder="Например: Моя тренировка"></div></div>
-    <div class="field"><label>Описание</label><div class="input-wrap"><input type="text" id="customDesc" placeholder="Кратко о тренировке"></div></div>
-    <div class="field"><label>Упражнения (через запятую)</label><div class="input-wrap"><input type="text" id="customEx" placeholder="Жим лёжа 4x10, Разводка 3x12"></div></div>
-    <div style="display:flex; gap:8px; margin-top:20px;"><button class="btn secondary" style="flex:1;" onclick="closeCustomPlanModal()">Отмена</button><button class="btn" style="flex:2;" onclick="saveCustomPlan()">Сохранить</button></div>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <script>
 /* ================= БАЗА УПРАЖНЕНИЙ ================= */
-const BASE_EXERCISES = {
-  chest: [
-    { name: "Жим штанги лёжа", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 },
-    { name: "Жим гантелей на наклонной", type: "dumbbell", ratio: 0.2, minW: 4, step: 2 },
-    { name: "Разводка гантелей", type: "dumbbell", ratio: 0.1, minW: 4, step: 2 },
-    { name: "Отжимания от пола", type: "bodyweight", ratio: 0 }
-  ],
-  back: [
-    { name: "Подтягивания", type: "bodyweight", ratio: 0 },
-    { name: "Тяга штанги в наклоне", type: "barbell", ratio: 0.4, minW: 20, step: 2.5 },
-    { name: "Тяга верхнего блока", type: "machine", ratio: 0.35, minW: 15, step: 5 },
-    { name: "Тяга гантели одной рукой", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 }
-  ],
-  legs: [
-    { name: "Приседания со штангой", type: "barbell", ratio: 0.6, minW: 20, step: 2.5 },
-    { name: "Выпады с гантелями", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
-    { name: "Жим ногами", type: "machine", ratio: 1.0, minW: 40, step: 10 },
-    { name: "Румынская тяга", type: "barbell", ratio: 0.45, minW: 20, step: 2.5 }
-  ],
-  shoulders: [
-    { name: "Жим штанги стоя", type: "barbell", ratio: 0.3, minW: 15, step: 2.5 },
-    { name: "Махи гантелями в стороны", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 },
-    { name: "Шраги со штангой", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 },
-    { name: "Обратные разводки", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 }
-  ],
-  arms: [
-    { name: "Подъём штанги на бицепс", type: "barbell", ratio: 0.25, minW: 10, step: 2.5 },
-    { name: "Французский жим", type: "barbell", ratio: 0.2, minW: 10, step: 2.5 },
-    { name: "Молотки", type: "dumbbell", ratio: 0.1, minW: 2, step: 2 },
-    { name: "Разгибание на трицепс", type: "machine", ratio: 0.25, minW: 10, step: 5 }
-  ],
-  core: [
-    { name: "Скручивания", type: "bodyweight", ratio: 0 },
-    { name: "Планка", type: "bodyweight", ratio: 0 },
-    { name: "Подъём ног в висе", type: "bodyweight", ratio: 0 },
-    { name: "Боковые наклоны", type: "bodyweight", ratio: 0 }
-  ]
+const EXERCISE_LIBRARY = {
+  chest: { name: "Грудь", exercises: [
+    { name: "Жим штанги лёжа", type: "barbell", ratio: 0.5, minW: 20, step: 2.5, desc: "Базовое движение для массы груди" },
+    { name: "Жим гантелей на наклонной", type: "dumbbell", ratio: 0.2, minW: 4, step: 2, desc: "Акцент на верхнюю часть груди" },
+    { name: "Разводка гантелей", type: "dumbbell", ratio: 0.1, minW: 4, step: 2, desc: "Изолирующее движение для растяжения" },
+    { name: "Отжимания от пола", type: "bodyweight", ratio: 0, desc: "Базовое упражнение с собственным весом" },
+    { name: "Жим в кроссовере", type: "machine", ratio: 0.15, minW: 10, step: 5, desc: "Постоянное напряжение в грудных" }
+  ]},
+  back: { name: "Спина", exercises: [
+    { name: "Подтягивания", type: "bodyweight", ratio: 0, desc: "Лучшее упражнение для ширины спины" },
+    { name: "Тяга штанги в наклоне", type: "barbell", ratio: 0.4, minW: 20, step: 2.5, desc: "Толщина спины, акцент на широчайшие" },
+    { name: "Тяга верхнего блока", type: "machine", ratio: 0.35, minW: 15, step: 5, desc: "Безопасная альтернатива подтягиваниям" },
+    { name: "Тяга гантели одной рукой", type: "dumbbell", ratio: 0.15, minW: 4, step: 2, desc: "Проработка спины по одной стороне" },
+    { name: "Гиперэкстензия", type: "bodyweight", ratio: 0, desc: "Укрепление поясницы и разгибателей" }
+  ]},
+  legs: { name: "Ноги", exercises: [
+    { name: "Приседания со штангой", type: "barbell", ratio: 0.6, minW: 20, step: 2.5, desc: "Король упражнений для ног" },
+    { name: "Жим ногами", type: "machine", ratio: 1.0, minW: 40, step: 10, desc: "Тяжёлая нагрузка на квадрицепс" },
+    { name: "Румынская тяга", type: "barbell", ratio: 0.45, minW: 20, step: 2.5, desc: "Бицепс бедра и ягодицы" },
+    { name: "Выпады с гантелями", type: "dumbbell", ratio: 0.15, minW: 4, step: 2, desc: "Односторонняя нагрузка, баланс" },
+    { name: "Сгибания ног лёжа", type: "machine", ratio: 0.25, minW: 10, step: 5, desc: "Изоляция бицепса бедра" }
+  ]},
+  shoulders: { name: "Плечи", exercises: [
+    { name: "Жим штанги стоя", type: "barbell", ratio: 0.3, minW: 15, step: 2.5, desc: "Базовое движение для дельт" },
+    { name: "Махи гантелями в стороны", type: "dumbbell", ratio: 0.05, minW: 2, step: 2, desc: "Средняя дельта, ширина плеч" },
+    { name: "Шраги со штангой", type: "barbell", ratio: 0.5, minW: 20, step: 2.5, desc: "Трапеции и верх спины" },
+    { name: "Обратные разводки", type: "dumbbell", ratio: 0.05, minW: 2, step: 2, desc: "Задняя дельта, осанка" }
+  ]},
+  arms: { name: "Руки", exercises: [
+    { name: "Подъём штанги на бицепс", type: "barbell", ratio: 0.25, minW: 10, step: 2.5, desc: "Классика для бицепса" },
+    { name: "Французский жим", type: "barbell", ratio: 0.2, minW: 10, step: 2.5, desc: "Трицепс, акцент на длинную головку" },
+    { name: "Молотки", type: "dumbbell", ratio: 0.1, minW: 2, step: 2, desc: "Брахиалис, толщина рук" },
+    { name: "Разгибание на трицепс", type: "machine", ratio: 0.25, minW: 10, step: 5, desc: "Изоляция трицепса" }
+  ]},
+  core: { name: "Кор", exercises: [
+    { name: "Скручивания", type: "bodyweight", ratio: 0, desc: "Прямая мышца живота" },
+    { name: "Планка", type: "bodyweight", ratio: 0, desc: "Статическая нагрузка на весь кор" },
+    { name: "Подъём ног в висе", type: "bodyweight", ratio: 0, desc: "Нижняя часть пресса" },
+    { name: "Боковые наклоны", type: "bodyweight", ratio: 0, desc: "Косые мышцы живота" }
+  ]}
 };
 
-const WORKOUT_TEMPLATES = {
-  "Грудь + Трицепс": { focus: ["chest", "arms"], desc: "Проработка верха тела. Жимовые движения." },
-  "Спина + Бицепс": { focus: ["back", "arms"], desc: "Тяговые движения для ширины спины." },
-  "Ноги (Полная)": { focus: ["legs"], desc: "База для ног: квадрицепс, бицепс бедра, ягодицы." },
-  "Плечи + Трапеция": { focus: ["shoulders"], desc: "Дельты и трапеции. Для широких плеч." },
-  "Руки (Изоляция)": { focus: ["arms"], desc: "Бицепс и трицепс. Памп и рельеф." },
-  "Функционал (Всё тело)": { focus: ["legs", "chest", "back", "core"], desc: "Круговая тренировка на выносливость." },
-  "Кардио + Пресс": { focus: ["core"], desc: "Жиросжигание и укрепление кора." }
+const WORKOUT_CATALOG = {
+  chest: [
+    { id: "chest_base", name: "Грудь: База", focus: ["chest"], desc: "Тяжёлые жимовые движения. Для массы и силы." },
+    { id: "chest_pump", name: "Грудь: Памп", focus: ["chest"], desc: "Многоповторка и изоляция. Для кровенаполнения." },
+    { id: "chest_upper", name: "Грудь: Верх", focus: ["chest"], desc: "Акцент на верхнюю часть грудных." },
+    { id: "push_full", name: "Жимовой день (Грудь+Плечи+Трицепс)", focus: ["chest", "shoulders", "arms"], desc: "Все жимовые движения в одной тренировке." }
+  ],
+  back: [
+    { id: "back_width", name: "Спина: Ширина", focus: ["back"], desc: "Тяги сверху и подтягивания. V-образная форма." },
+    { id: "back_thickness", name: "Спина: Толщина", focus: ["back"], desc: "Тяги к поясу. Масса и плотность спины." },
+    { id: "pull_full", name: "Тяговый день (Спина+Бицепс)", focus: ["back", "arms"], desc: "Все тяговые движения + бицепс." }
+  ],
+  legs: [
+    { id: "legs_quad", name: "Ноги: Квадрицепс", focus: ["legs"], desc: "Приседания и жимы. Передняя поверхность бедра." },
+    { id: "legs_ham", name: "Ноги: Бицепс бедра", focus: ["legs"], desc: "Румынская тяга и сгибания. Задняя поверхность." },
+    { id: "legs_full", name: "Ноги: Полная", focus: ["legs"], desc: "Все группы мышц ног за одну тренировку." },
+    { id: "legs_pump", name: "Ноги: Памп", focus: ["legs"], desc: "Многоповторка для пампа и выносливости." }
+  ],
+  shoulders: [
+    { id: "shoulders_base", name: "Плечи: База", focus: ["shoulders"], desc: "Жимы и тяги для дельт." },
+    { id: "shoulders_pump", name: "Плечи: Памп", focus: ["shoulders"], desc: "Махи и изоляция. Средняя и задняя дельта." }
+  ],
+  arms: [
+    { id: "arms_biceps", name: "Руки: Бицепс", focus: ["arms"], desc: "Подъёмы на бицепс всех вариаций." },
+    { id: "arms_triceps", name: "Руки: Трицепс", focus: ["arms"], desc: "Разгибания и жимы узким хватом." },
+    { id: "arms_full", name: "Руки: Полная", focus: ["arms"], desc: "Бицепс + трицепс. Суперсеты." }
+  ],
+  core: [
+    { id: "core_strength", name: "Кор: Сила", focus: ["core"], desc: "Статика и динамика для мышц живота." }
+  ],
+  fullbody: [
+    { id: "fb_beginner", name: "Всё тело: Новичок", focus: ["legs", "chest", "back"], desc: "Базовые движения для всего тела. 3 раза в неделю." },
+    { id: "fb_functional", name: "Всё тело: Функционал", focus: ["legs", "chest", "back", "core"], desc: "Круговая тренировка на выносливость." }
+  ]
 };
 
 /* ================= ПЕРЕМЕННЫЕ ================= */
 let user = { name:'', age:16, gender:'male', weight:65, height:175, activity:1.375, goal:'gain', kcal:0, protein:0, fat:0, carbs:0, uniqueId:'', sub_until:0 };
 let todayFoods = [];
 let weekPlans = { 'Пн':null, 'Вт':null, 'Ср':null, 'Чт':null, 'Пт':null, 'Сб':null, 'Вс':null };
+// НОВОЕ: массив тренировок на сегодня
+let todayWorkouts = []; 
 let streakDone = [false,false,false,false,false,false,false];
 let obStep = 0;
 let editGenderValue = 'male';
 let currentPlanDay = null;
 let currentDuration = 45;
-let mockHistory = [0,0,0,0,0,0,0]; 
+let currentMuscleGroup = 'chest';
+let mockHistory = [0,0,0,0,0,0,0];
 
 // Переменные для экрана тренировки
 let wsExercises = [];
@@ -552,23 +532,31 @@ let wsCurrentExIdx = 0;
 let wsCurrentSetIdx = 0;
 let wsTimerInterval = null;
 let wsSeconds = 0;
-let wsIsResting = false;
+let wsCurrentWorkoutIndex = 0; // индекс тренировки в todayWorkouts
 
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
 const SERVER_URL = window.location.origin;
 
 /* ================= ГЕНЕРАЦИЯ ТРЕНИРОВКИ ================= */
-function generateWorkout(templateName, duration) {
-  const template = WORKOUT_TEMPLATES[templateName] || WORKOUT_TEMPLATES["Функционал (Всё тело)"];
-  let pool = [];
-  template.focus.forEach(group => { pool = pool.concat(BASE_EXERCISES[group] || []); });
+function generateWorkout(templateId, duration) {
+  let template = null;
+  for (const group of Object.values(WORKOUT_CATALOG)) {
+    const found = group.find(t => t.id === templateId);
+    if (found) { template = found; break; }
+  }
+  if (!template) template = WORKOUT_CATALOG.fullbody[0];
   
-  // Логика расчета объема
+  let pool = [];
+  template.focus.forEach(group => {
+    if (EXERCISE_LIBRARY[group]) pool = pool.concat(EXERCISE_LIBRARY[group].exercises);
+  });
+  
   let count, sets;
   if (duration <= 30) { count = 3; sets = 3; }
   else if (duration <= 60) { count = 5; sets = 3; }
   else if (duration <= 90) { count = 7; sets = 4; }
-  else { count = 9; sets = 4; } // Для 2-3 часов
+  else if (duration <= 120) { count = 9; sets = 4; }
+  else { count = 11; sets = 5; }
   
   const shuffled = pool.sort(() => 0.5 - Math.random());
   const selected = shuffled.slice(0, Math.min(count, shuffled.length));
@@ -581,7 +569,6 @@ function generateWorkout(templateName, duration) {
       let goalMult = 1.0;
       if (user.goal === 'lose' || user.goal === 'tone') goalMult = 0.9;
       if (user.goal === 'gain' || user.goal === 'strength') goalMult = 1.1;
-      
       weight = bw * (ex.ratio || 0.3) * sexMult * goalMult;
       const step = ex.step || 2.5;
       weight = Math.max(ex.minW || step, Math.round(weight / step) * step);
@@ -593,7 +580,6 @@ function generateWorkout(templateName, duration) {
 function updateDurationLabel(val) {
   currentDuration = +val;
   document.getElementById('durationLabel').textContent = val + ' мин';
-  // Пересчитываем тренировку на сегодня, если она еще не начата
   updateTodayWorkout();
 }
 
@@ -606,6 +592,7 @@ async function fetchServerData() {
       user.sub_until = data.sub_until || 0;
       if(data.foods) todayFoods = data.foods;
       if(data.plans) weekPlans = data.plans;
+      if(data.todayWorkouts) todayWorkouts = data.todayWorkouts; // загружаем дополнительные тренировки
       if(data.streak) streakDone = data.streak;
       if(data.profile && Object.keys(data.profile).length) {
         user = { ...user, ...data.profile, sub_until: user.sub_until };
@@ -621,6 +608,7 @@ async function saveToServer() {
       profile: { name: user.name, age: user.age, gender: user.gender, weight: user.weight, height: user.height, goal: user.goal, kcal: user.kcal, uniqueId: user.uniqueId },
       foods: todayFoods,
       plans: weekPlans,
+      todayWorkouts: todayWorkouts, // сохраняем
       streak: streakDone
     };
     const res = await fetch(`${SERVER_URL}/api/save`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
@@ -628,12 +616,12 @@ async function saveToServer() {
   } catch(e) { console.error(e); }
 }
 
-/* ================= ОНБОРДИНГ (СОКРАЩЕН ДЛЯ КРАТКОСТИ) ================= */
+/* ================= ОНБОРДИНГ (сокращён) ================= */
+// ... (тот же код, что и ранее) ...
 const steps = document.querySelectorAll('.ob-step');
 const dots = document.querySelectorAll('.dot');
 const btnNext = document.getElementById('btnNext');
 const btnBack = document.getElementById('btnBack');
-
 function showStep(i){
   steps.forEach((s,idx)=> s.classList.toggle('active', idx===i));
   dots.forEach((d,idx)=>{ d.classList.toggle('active', idx===i); d.classList.toggle('done', idx<i); });
@@ -669,7 +657,6 @@ btnNext.addEventListener('click', ()=>{
   if(obStep < steps.length-1){ obStep++; showStep(obStep); } else { finishOnboarding(); }
 });
 btnBack.addEventListener('click', ()=>{ if(obStep>0){ obStep--; showStep(obStep); } });
-
 function calcNutrition(){
   const {weight,height,age,gender,activity,goal} = user;
   let bmr = gender==='male' ? 10*weight + 6.25*height - 5*age + 5 : 10*weight + 6.25*height - 5*age - 161;
@@ -680,14 +667,12 @@ function calcNutrition(){
   const protein = Math.round(weight * 1.8);
   const fat = Math.round(weight * 0.9);
   const carbs = Math.round((kcal - protein*4 - fat*9) / 4);
-  
   document.getElementById('calcKcal').textContent = Math.round(kcal);
   document.getElementById('calcP').textContent = protein + ' г';
   document.getElementById('calcF').textContent = fat + ' г';
   document.getElementById('calcC').textContent = carbs + ' г';
   user.kcal = Math.round(kcal); user.protein = protein; user.fat = fat; user.carbs = carbs;
 }
-
 function finishOnboarding(){
   if(!user.uniqueId) user.uniqueId = Math.floor(100000 + Math.random() * 900000).toString();
   saveToServer();
@@ -713,18 +698,15 @@ function initMainApp(){
   document.getElementById('profHeight').textContent = user.height + ' см';
   document.getElementById('profGoal').textContent = goalNames[user.goal] || 'Набор массы';
   document.getElementById('profKcal').textContent = user.kcal + ' ккал';
-  
   updateProfileUI(); updateHomeMacros(); renderWeekGrid(); renderStreak(); renderFoodList(); renderProgress();
   updateTodayWorkout();
 }
-
 function updateProfileUI() {
   const now = Math.floor(Date.now() / 1000);
   const subEl = document.getElementById('profSub');
-  if(user.sub_until > now) { subEl.textContent = `Активна (${Math.ceil((user.sub_until - now) / 86400)} дн.)`; subEl.style.color = 'var(--accent-deep)'; } 
+  if(user.sub_until > now) { subEl.textContent = `Активна (${Math.ceil((user.sub_until - now) / 86400)} дн.)`; subEl.style.color = 'var(--accent-deep)'; }
   else { subEl.textContent = 'Не активна'; subEl.style.color = 'var(--muted)'; }
 }
-
 function updateHomeMacros(){
   const eatenKcal = todayFoods.reduce((s,f)=> s+f.kcal, 0);
   const eatenP = todayFoods.reduce((s,f)=> s+f.p, 0);
@@ -732,7 +714,6 @@ function updateHomeMacros(){
   const eatenC = todayFoods.reduce((s,f)=> s+f.c, 0);
   const left = Math.max(0, user.kcal - eatenKcal);
   const pct = user.kcal > 0 ? Math.min(100, Math.round(eatenKcal / user.kcal * 100)) : 0;
-  
   document.getElementById('kcalRing').style.setProperty('--p', pct + '%');
   document.getElementById('kcalLeft').textContent = left;
   document.getElementById('kcalEaten').innerHTML = eatenKcal + ' <small>/ ' + user.kcal + '</small>';
@@ -740,7 +721,6 @@ function updateHomeMacros(){
   document.getElementById('macroP').textContent = eatenP + ' г';
   document.getElementById('macroF').textContent = eatenF + ' г';
   document.getElementById('macroC').textContent = eatenC + ' г';
-  
   mockHistory[6] = eatenKcal;
   saveToServer();
 }
@@ -750,73 +730,194 @@ function renderWeekGrid() {
   const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
   document.getElementById('weekGrid').innerHTML = days.map(day => {
     const plan = weekPlans[day];
-    return `
-      <div class="plan-row">
-        <span class="plan-day-label">${day}</span>
-        <span class="plan-name-text">${plan ? plan.name : 'Отдых'}</span>
-        <button class="plan-add-btn" onclick="openPlanModal('${day}')">
-          <svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
-        </button>
-      </div>
-    `;
+    return `<div class="plan-row"><span class="plan-day-label">${day}</span><span class="plan-name-text">${plan ? plan.name : 'Отдых'}</span><button class="plan-add-btn" onclick="openPlanModal('${day}')"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg></button></div>`;
   }).join('');
 }
 
 function openPlanModal(day) {
   currentPlanDay = day;
-  document.getElementById('planSearch').value = '';
-  renderPlanModalList('');
+  currentMuscleGroup = 'chest';
+  renderMuscleTabs();
+  renderWorkoutOptions();
   document.getElementById('planModal').classList.add('show');
 }
-function renderPlanModalList(searchQuery = '') {
-  const content = document.getElementById('planModalContent');
-  content.innerHTML = '';
-  Object.keys(WORKOUT_TEMPLATES).filter(n => n.toLowerCase().includes(searchQuery.toLowerCase())).forEach(name => {
-    const div = document.createElement('div');
-    div.className = 'workout-item';
-    div.innerHTML = `<div class="workout-info" onclick="selectPlan('${currentPlanDay}', '${name}')"><div class="workout-name">${name}</div><div class="workout-desc">${WORKOUT_TEMPLATES[name].desc}</div></div>`;
-    content.appendChild(div);
-  });
-}
-function filterPlans() { renderPlanModalList(document.getElementById('planSearch').value); }
-function closePlanModal() { document.getElementById('planModal').classList.remove('show'); currentPlanDay = null; }
-function selectPlan(day, planName){
-  weekPlans[day] = { name: planName };
-  closePlanModal(); renderWeekGrid(); saveToServer(); toast('План обновлён'); updateTodayWorkout();
+
+function renderMuscleTabs() {
+  const tabs = document.getElementById('muscleGroupTabs');
+  const groups = Object.keys(EXERCISE_LIBRARY);
+  const fullbodyTab = { key: 'fullbody', name: 'Всё тело' };
+  const allGroups = [...groups.map(g => ({ key: g, name: EXERCISE_LIBRARY[g].name })), fullbodyTab];
+  
+  tabs.innerHTML = allGroups.map(g => 
+    `<button class="muscle-tab ${g.key === currentMuscleGroup ? 'active' : ''}" onclick="switchMuscleGroup('${g.key}')">${g.name}</button>`
+  ).join('');
 }
 
-/* ================= ЭКРАН ТРЕНИРОВКИ (WORKOUT SCREEN) ================= */
-function startWorkout() {
-  const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-  const todayPlan = weekPlans[days[new Date().getDay()]];
-  if (!todayPlan) return;
+function switchMuscleGroup(group) {
+  currentMuscleGroup = group;
+  renderMuscleTabs();
+  renderWorkoutOptions();
+}
+
+function renderWorkoutOptions() {
+  const container = document.getElementById('workoutOptionsList');
+  let workouts = [];
   
-  wsExercises = generateWorkout(todayPlan.name, currentDuration);
+  if (currentMuscleGroup === 'fullbody') {
+    workouts = WORKOUT_CATALOG.fullbody || [];
+  } else {
+    workouts = WORKOUT_CATALOG[currentMuscleGroup] || [];
+  }
+  
+  if (workouts.length === 0) {
+    container.innerHTML = '<p class="muted" style="text-align:center; padding:20px;">Нет тренировок для этой группы</p>';
+    return;
+  }
+  
+  container.innerHTML = workouts.map(w => {
+    const preview = generateWorkout(w.id, currentDuration);
+    const exCount = preview.length;
+    const sets = preview[0]?.sets || 3;
+    return `
+      <div class="workout-option" onclick="selectPlan('${currentPlanDay}', '${w.id}', '${w.name}')">
+        <div class="wo-name">${w.name}</div>
+        <div class="wo-desc">${w.desc}</div>
+        <div class="wo-meta">
+          <span class="wo-badge">${exCount} упражнений</span>
+          <span class="wo-badge">${sets} подхода</span>
+          <span class="wo-badge">${currentDuration} мин</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function closePlanModal() { document.getElementById('planModal').classList.remove('show'); currentPlanDay = null; }
+
+function selectPlan(day, templateId, name){
+  weekPlans[day] = { id: templateId, name: name };
+  closePlanModal();
+  renderWeekGrid();
+  saveToServer();
+  toast('План обновлён');
+  updateTodayWorkout();
+}
+
+/* ================= НОВОЕ: УПРАВЛЕНИЕ ТРЕНИРОВКАМИ ДНЯ ================= */
+function addExtraWorkout() {
+  // Открываем модалку, но теперь это тренировка "на сегодня", а не на день недели
+  currentPlanDay = 'extra';
+  currentMuscleGroup = 'chest';
+  renderMuscleTabs();
+  renderWorkoutOptions();
+  document.getElementById('planModal').classList.add('show');
+}
+
+// Переопределяем selectPlan, чтобы поддержать добавление дополнительной тренировки
+const originalSelectPlan = selectPlan;
+selectPlan = function(day, templateId, name) {
+  if (day === 'extra') {
+    todayWorkouts.push({ id: templateId, name: name, duration: currentDuration, done: false });
+    closePlanModal();
+    saveToServer();
+    toast('Тренировка добавлена на сегодня');
+    updateTodayWorkout();
+  } else {
+    originalSelectPlan(day, templateId, name);
+  }
+};
+
+function removeExtraWorkout(idx) {
+  if (confirm('Удалить эту тренировку?')) {
+    todayWorkouts.splice(idx, 1);
+    saveToServer();
+    updateTodayWorkout();
+  }
+}
+
+/* ================= ТРЕНИРОВКА НА ГЛАВНОЙ ================= */
+function updateTodayWorkout(){
+  const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const todayName = days[new Date().getDay()];
+  const plan = weekPlans[todayName];
+  const sub = document.getElementById('todayWorkout');
+  const content = document.getElementById('todayPlanContent');
+  
+  // Собираем все тренировки на сегодня: сначала основная (из плана недели), потом дополнительные
+  let allWorkouts = [];
+  
+  if (plan && plan.id) {
+    allWorkouts.push({ id: plan.id, name: plan.name, duration: currentDuration, done: false, isBase: true });
+  }
+  
+  // Добавляем дополнительные
+  todayWorkouts.forEach(w => allWorkouts.push(w));
+  
+  // Если ничего нет — показываем пустое состояние
+  if (allWorkouts.length === 0) {
+    sub.textContent = 'Сегодня — отдых';
+    content.innerHTML = '<p class="muted" style="text-align:center;padding:20px;">Нет тренировок. Нажми «+», чтобы добавить.</p>';
+    return;
+  }
+  
+  sub.textContent = `Тренировок: ${allWorkouts.length}`;
+  
+  // Рендерим карточки
+  content.innerHTML = allWorkouts.map((w, idx) => {
+    const isDone = w.done;
+    const isBase = w.isBase;
+    const displayIdx = isBase ? 0 : (idx); // индекс в todayWorkouts для удаления
+    
+    let preview = generateWorkout(w.id, w.duration || currentDuration);
+    let exList = preview.slice(0, 3).map(ex => `${ex.name} ${ex.sets}x${ex.reps}`).join(', ');
+    if (preview.length > 3) exList += '...';
+    
+    return `
+      <div class="workout-day-card ${isDone ? 'done' : ''}">
+        <div class="workout-day-header">
+          <div class="workout-day-name">${w.name}</div>
+          <div class="workout-day-status">${isDone ? '✅ Выполнено' : ''}</div>
+        </div>
+        <div class="workout-day-exercises">${exList}</div>
+        ${!isBase ? `<button class="btn-workout secondary" style="padding:8px;font-size:12px;width:auto;display:inline-block;margin-bottom:8px;" onclick="removeExtraWorkout(${displayIdx - 1})">Удалить</button>` : ''}
+        ${isDone 
+          ? `<button class="workout-day-btn done" disabled>Тренировка завершена</button>`
+          : `<button class="workout-day-btn start" onclick="startWorkoutByIdx(${idx}, ${isBase})">Начать тренировку</button>`
+        }
+      </div>
+    `;
+  }).join('');
+}
+
+function startWorkoutByIdx(idx, isBase) {
+  const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const todayName = days[new Date().getDay()];
+  const plan = weekPlans[todayName];
+  
+  let allWorkouts = [];
+  if (plan && plan.id) allWorkouts.push({ id: plan.id, name: plan.name, duration: currentDuration, done: false, isBase: true });
+  todayWorkouts.forEach(w => allWorkouts.push(w));
+  
+  const workout = allWorkouts[idx];
+  if (!workout) return;
+  
+  wsExercises = generateWorkout(workout.id, workout.duration || currentDuration);
   wsCurrentExIdx = 0;
   wsCurrentSetIdx = 0;
+  wsCurrentWorkoutIndex = isBase ? -1 : (idx - (plan && plan.id ? 1 : 0));
   
-  document.getElementById('wsTitle').textContent = todayPlan.name;
+  document.getElementById('wsTitle').textContent = workout.name;
   document.getElementById('workoutScreen').classList.add('active');
-  document.body.style.overflow = 'hidden'; // Блокируем скролл основного экрана
-  
+  document.body.style.overflow = 'hidden';
   renderWorkoutStep();
 }
 
 function renderWorkoutStep() {
   const ex = wsExercises[wsCurrentExIdx];
-  if (!ex) {
-    // Тренировка окончена
-    finishWorkoutScreen();
-    return;
-  }
-
-  // Прогресс бар
+  if (!ex) { finishWorkoutScreen(); return; }
   document.getElementById('wsProgress').style.width = ((wsCurrentExIdx / wsExercises.length) * 100) + '%';
-  
   document.getElementById('wsExName').textContent = ex.name;
   document.getElementById('wsExMeta').textContent = `Подход ${wsCurrentSetIdx + 1} из ${ex.sets} • ${ex.reps} повторений`;
-  
-  // Трекер подходов
   let trackerHtml = '';
   for (let i = 0; i < ex.sets; i++) {
     let cls = 'set-dot';
@@ -825,27 +926,18 @@ function renderWorkoutStep() {
     trackerHtml += `<div class="${cls}">${i+1}</div>`;
   }
   document.getElementById('wsSetTracker').innerHTML = trackerHtml;
-
-  // Вес
   if (ex.type === 'bodyweight') {
     document.getElementById('wsWeightControl').style.display = 'none';
   } else {
     document.getElementById('wsWeightControl').style.display = 'inline-flex';
     document.getElementById('wsWeightVal').textContent = ex.currentWeight + ' кг';
   }
-
-  // Кнопки и таймер
   const actionBtn = document.getElementById('wsActionBtn');
-  const skipBtn = document.getElementById('wsSkipBtn');
-  
   if (!wsTimerInterval) {
-    // Ожидание начала подхода
     actionBtn.textContent = `Начать подход ${wsCurrentSetIdx + 1}`;
     actionBtn.className = 'btn-workout primary';
     actionBtn.onclick = startSet;
-    skipBtn.style.display = 'block';
-    skipBtn.textContent = 'Пропустить упражнение';
-    
+    document.getElementById('wsSkipBtn').style.display = 'block';
     document.getElementById('wsTimer').textContent = '00:00';
     document.getElementById('wsTimer').classList.remove('running');
   }
@@ -857,7 +949,6 @@ function startSet() {
   document.getElementById('wsActionBtn').textContent = 'Завершить подход';
   document.getElementById('wsActionBtn').onclick = endSet;
   document.getElementById('wsSkipBtn').style.display = 'none';
-  
   wsTimerInterval = setInterval(() => {
     wsSeconds++;
     const m = Math.floor(wsSeconds / 60).toString().padStart(2, '0');
@@ -869,39 +960,31 @@ function startSet() {
 function endSet() {
   clearInterval(wsTimerInterval);
   wsTimerInterval = null;
-  
   const ex = wsExercises[wsCurrentExIdx];
   wsCurrentSetIdx++;
-
   if (wsCurrentSetIdx >= ex.sets) {
-    // Все подходы сделаны. Предлагаем перейти к следующему упражнению.
     document.getElementById('wsActionBtn').textContent = 'Следующее упражнение';
     document.getElementById('wsActionBtn').onclick = nextExercise;
     document.getElementById('wsTimer').classList.remove('running');
     document.getElementById('wsTimer').textContent = 'Готово!';
   } else {
-    // Отдых перед следующим подходом
-    startRest(60); // 60 сек отдыха
+    startRest(60);
   }
 }
 
 function startRest(seconds) {
-  wsIsResting = true;
   document.getElementById('wsRestText').style.display = 'block';
   document.getElementById('wsActionBtn').disabled = true;
-  
   let restLeft = seconds;
   document.getElementById('wsRestTimer').textContent = restLeft;
-  
   const restInt = setInterval(() => {
     restLeft--;
     document.getElementById('wsRestTimer').textContent = restLeft;
     if (restLeft <= 0) {
       clearInterval(restInt);
-      wsIsResting = false;
       document.getElementById('wsRestText').style.display = 'none';
       document.getElementById('wsActionBtn').disabled = false;
-      renderWorkoutStep(); // Перерисовываем кнопку для следующего подхода
+      renderWorkoutStep();
     }
   }, 1000);
 }
@@ -923,16 +1006,14 @@ function skipExercise() {
 function changeWorkoutWeight(dir) {
   const ex = wsExercises[wsCurrentExIdx];
   if (!ex || ex.type === 'bodyweight') return;
-  
   const newW = ex.currentWeight + (dir * ex.step);
   if (newW < ex.minW || newW > 300) return;
-  
   ex.currentWeight = newW;
   document.getElementById('wsWeightVal').textContent = newW + ' кг';
 }
 
 function exitWorkout() {
-  if (confirm('Точно прервать тренировку? Прогресс не сохранится.')) {
+  if (confirm('Точно прервать тренировку?')) {
     clearInterval(wsTimerInterval);
     wsTimerInterval = null;
     document.getElementById('workoutScreen').classList.remove('active');
@@ -944,78 +1025,36 @@ function finishWorkoutScreen() {
   clearInterval(wsTimerInterval);
   wsTimerInterval = null;
   
+  // Помечаем тренировку как выполненную
+  if (wsCurrentWorkoutIndex >= 0) {
+    // Это дополнительная тренировка
+    todayWorkouts[wsCurrentWorkoutIndex].done = true;
+    // Если она была последней - фиксируем стрик
+    saveToServer();
+  } else {
+    // Это базовая тренировка из плана недели - фиксируем стрик
+    const todayIdx = new Date().getDay();
+    const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1;
+    streakDone[dayIdx] = true;
+    renderStreak();
+    renderProgress();
+    saveToServer();
+  }
+  
+  // Показываем финальный экран
   document.getElementById('workoutScreen').innerHTML = `
     <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
       <div style="font-size: 64px; margin-bottom: 24px;">🔥</div>
       <h2 style="font-size: 28px; margin-bottom: 12px;">Тренировка завершена!</h2>
       <p style="color: var(--muted); margin-bottom: 32px;">Ты отлично поработал. Не забудь поесть!</p>
-      <button class="btn-workout primary" onclick="closeFinishedWorkout()">На главную</button>
+      <button class="btn-workout primary" onclick="location.reload()">На главную</button>
     </div>
   `;
-}
-
-function closeFinishedWorkout() {
-  const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-  const todayIdx = new Date().getDay();
-  const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1;
-  streakDone[dayIdx] = true;
-  
-  renderStreak();
-  renderProgress();
-  saveToServer();
-  
-  // Восстанавливаем исходный HTML экрана тренировки для следующего раза
-  location.reload();
-}
-
-/* ================= ТРЕНИРОВКА НА ГЛАВНОЙ ================= */
-function updateTodayWorkout(){
-  const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-  const todayName = days[new Date().getDay()];
-  const plan = weekPlans[todayName];
-  const sub = document.getElementById('todayWorkout');
-  const content = document.getElementById('todayPlanContent');
-  
-  if(plan && plan.name !== 'Отдых'){
-    sub.textContent = 'Сегодня — ' + plan.name;
-    
-    // Просто показываем список упражнений, генерация будет при старте
-    const preview = generateWorkout(plan.name, currentDuration);
-    
-    let exHtml = preview.map(ex => `
-      <div class="exercise-row">
-        <div class="ex-name-block">
-          <div class="ex-title">${ex.name}</div>
-          <div class="ex-meta">${ex.sets} подхода × ${ex.reps} повторений</div>
-        </div>
-        <div class="weight-val">${ex.type === 'bodyweight' ? 'Свой вес' : ex.weight + ' кг'}</div>
-      </div>
-    `).join('');
-    
-    content.innerHTML = exHtml;
-    
-    const btn = document.createElement('button'); 
-    btn.className = 'btn'; 
-    btn.style.marginTop = '16px'; 
-    btn.textContent = `Начать тренировку (${currentDuration} мин)`;
-    btn.onclick = startWorkout;
-    content.appendChild(btn);
-  } else {
-    sub.textContent = 'Сегодня — отдых'; 
-    content.innerHTML = '<p class="muted">План не выбран или сегодня отдых. Перейди в раздел «План».</p>';
-  }
-}
-
-function renderStreak(){
-  const container = document.getElementById('streakContainer');
-  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-  container.innerHTML = days.map((d,i)=>`<div class="day ${streakDone[i]?'done':''}">${d}</div>`).join('');
 }
 
 /* ================= ПИТАНИЕ ================= */
 function openFoodModal(){ document.getElementById('foodModal').classList.add('show'); }
 function closeFoodModal(){ document.getElementById('foodModal').classList.remove('show'); }
-
 function addFood(){
   const name = document.getElementById('foodName').value.trim();
   const kcal100 = +document.getElementById('foodKcal').value || 0;
@@ -1023,36 +1062,25 @@ function addFood(){
   const f100 = +document.getElementById('foodF').value || 0;
   const c100 = +document.getElementById('foodC').value || 0;
   const weight = +document.getElementById('foodWeight').value || 100;
-  
   if(!name || kcal100 <= 0) { toast('Заполни название и ккал'); return; }
   const ratio = weight / 100;
   todayFoods.push({ name, kcal: Math.round(kcal100 * ratio), p: Math.round(p100*ratio), f: Math.round(f100*ratio), c: Math.round(c100*ratio), weight });
-  closeFoodModal(); 
+  closeFoodModal();
   ['foodName','foodKcal','foodP','foodF','foodC','foodWeight'].forEach(id=> document.getElementById(id).value='');
   updateHomeMacros(); renderFoodList(); toast('Продукт добавлен');
 }
-
 function renderFoodList(){
   const container = document.getElementById('foodItems');
-  if(todayFoods.length === 0){
-    container.innerHTML = '<div class="empty"><p>Ты пока ничего не добавил.</p></div>';
-  } else {
+  if(todayFoods.length === 0){ container.innerHTML = '<div class="empty"><p>Ты пока ничего не добавил.</p></div>'; }
+  else {
     container.innerHTML = todayFoods.map((f, i) => `
       <div class="ex" style="justify-content:space-between;">
-        <div style="flex:1;">
-          <span class="ex-name">${f.name}</span>
-          <span style="font-size:12px;color:var(--muted);margin-left:8px;">${f.weight}г</span>
-          <div style="font-size:12px;color:var(--accent-deep);margin-top:4px;font-weight:600;">Б: ${f.p} г | Ж: ${f.f} г | У: ${f.c} г</div>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px;">
-          <span class="ex-sets">${f.kcal} ккал</span>
-          <button style="border:none;background:none;color:var(--muted);cursor:pointer;font-size:16px;" onclick="removeFood(${i})">✕</button>
-        </div>
+        <div style="flex:1;"><span class="ex-name">${f.name}</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">${f.weight}г</span><div style="font-size:12px;color:var(--accent-deep);margin-top:4px;font-weight:600;">Б: ${f.p} г | Ж: ${f.f} г | У: ${f.c} г</div></div>
+        <div style="display:flex; align-items:center; gap:8px;"><span class="ex-sets">${f.kcal} ккал</span><button style="border:none;background:none;color:var(--muted);cursor:pointer;font-size:16px;" onclick="removeFood(${i})">✕</button></div>
       </div>
     `).join('');
   }
 }
-
 function removeFood(index) { todayFoods.splice(index, 1); updateHomeMacros(); renderFoodList(); toast('Продукт удалён'); }
 
 /* ================= ПРОФИЛЬ ================= */
@@ -1072,10 +1100,7 @@ function saveProfile(){
   const a = +document.getElementById('editAge').value;
   const w = +document.getElementById('editWeight').value;
   const h = +document.getElementById('editHeight').value;
-  if(n) user.name = n;
-  if(a) user.age = a;
-  if(w) user.weight = w;
-  if(h) user.height = h;
+  if(n) user.name = n; if(a) user.age = a; if(w) user.weight = w; if(h) user.height = h;
   user.gender = editGenderValue;
   calcNutrition(); saveToServer(); initMainApp(); closeEditProfile(); toast('Профиль обновлён.');
 }
@@ -1099,15 +1124,9 @@ function toast(msg){
 async function startApp() {
   await fetchServerData();
   const now = Math.floor(Date.now() / 1000);
-  if(user.sub_until > 0 && user.sub_until < now) {
-    document.getElementById('expiredScreen').style.display = 'flex';
-    return;
-  }
-  
-  // Устанавливаем начальное значение слайдера
+  if(user.sub_until > 0 && user.sub_until < now) { document.getElementById('expiredScreen').style.display = 'flex'; return; }
   document.getElementById('durationRange').value = currentDuration;
   document.getElementById('durationLabel').textContent = currentDuration + ' мин';
-
   const hasLocal = !!localStorage.getItem('fitplan_user');
   if(hasLocal || user.name) {
     document.getElementById('onboarding').style.display = 'none';
