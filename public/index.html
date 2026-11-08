@@ -154,28 +154,29 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 28px; height:
 .tab.active { color: var(--accent-deep); background: var(--accent-light); }
 .tab.active svg { transform: scale(1.1); }
 
-/* ================= ЭКРАН ТРЕНИРОВКИ ================= */
-#workoutScreen { position: fixed; inset: 0; z-index: 1000; background: var(--bg); background-image: var(--bg-gradient); display: none; flex-direction: column; padding: var(--safe-top) 20px calc(20px + var(--safe-bottom)); max-width: 480px; margin: 0 auto; }
+/* ================= ЭКРАН ТРЕНИРОВКИ (СЖАТЫЙ) ================= */
+#workoutScreen { position: fixed; inset: 0; z-index: 1000; background: var(--bg); background-image: var(--bg-gradient); display: none; flex-direction: column; padding: var(--safe-top) 20px calc(20px + var(--safe-bottom)); max-width: 480px; margin: 0 auto; overflow-y: auto; }
 #workoutScreen.active { display: flex; animation: slideUp 0.45s var(--ease); }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.ws-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; }
-.ws-progress-bar { height: 8px; background: var(--glass-border); border-radius: 4px; margin-bottom: 28px; overflow: hidden; }
-.ws-progress-fill { height: 100%; background: var(--accent-gradient); border-radius: 4px; transition: width 0.4s var(--ease); }
-.ws-card { background: var(--glass); backdrop-filter: blur(30px) saturate(200%); border-radius: 32px; padding: 40px 28px; box-shadow: var(--shadow); text-align: center; margin-bottom: auto; border: 1px solid var(--glass-border); position: relative; overflow: hidden; }
+.ws-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; flex-shrink: 0; }
+.ws-progress-bar { height: 6px; background: var(--glass-border); border-radius: 3px; margin-bottom: 20px; overflow: hidden; flex-shrink: 0; }
+.ws-progress-fill { height: 100%; background: var(--accent-gradient); border-radius: 3px; transition: width 0.4s var(--ease); }
+.ws-card { background: var(--glass); backdrop-filter: blur(30px) saturate(200%); border-radius: 32px; padding: 32px 24px; box-shadow: var(--shadow); text-align: center; border: 1px solid var(--glass-border); position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; flex: 1; max-height: 75vh; }
 .ws-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 100%; background: var(--glass-shine); opacity: 0.5; pointer-events: none; }
 .ws-card > * { position: relative; z-index: 1; }
-.ws-ex-name { font-size: 32px; font-weight: 800; margin-bottom: 12px; line-height: 1.1; letter-spacing: -0.5px; }
-.ws-ex-meta { font-size: 16px; color: var(--text-muted); margin-bottom: 36px; font-weight: 600; }
-.ws-set-tracker { display: flex; justify-content: center; gap: 14px; margin-bottom: 36px; }
-.ws-set-dot { width: 48px; height: 48px; border-radius: 14px; background: var(--glass-strong); display: grid; place-items: center; font-weight: 800; font-size: 16px; color: var(--text-muted); transition: all 0.3s var(--ease); border: 2px solid var(--glass-border); }
+.ws-ex-name { font-size: 28px; font-weight: 800; margin-bottom: 8px; line-height: 1.1; letter-spacing: -0.5px; }
+.ws-ex-meta { font-size: 15px; color: var(--text-muted); margin-bottom: 24px; font-weight: 600; }
+.ws-set-tracker { display: flex; justify-content: center; gap: 12px; margin-bottom: 24px; }
+.ws-set-dot { width: 44px; height: 44px; border-radius: 12px; background: var(--glass-strong); display: grid; place-items: center; font-weight: 800; font-size: 15px; color: var(--text-muted); transition: all 0.3s var(--ease); border: 2px solid var(--glass-border); }
 .ws-set-dot.done { background: var(--accent-gradient); color: #fff; border-color: transparent; box-shadow: 0 6px 16px rgba(52, 199, 89, 0.4); transform: scale(1.05); }
 .ws-set-dot.current { border: 3px solid var(--accent); color: var(--accent-deep); background: transparent; transform: scale(1.1); }
-.ws-timer { font-size: 64px; font-weight: 800; color: var(--text-main); font-variant-numeric: tabular-nums; margin-bottom: 36px; letter-spacing: -3px; }
+.ws-timer { font-size: 56px; font-weight: 800; color: var(--text-main); font-variant-numeric: tabular-nums; margin-bottom: 24px; letter-spacing: -3px; }
 .ws-timer.running { color: var(--accent); }
-.ws-weight-control { display: inline-flex; align-items: center; gap: 20px; background: var(--glass-strong); padding: 10px 20px; border-radius: 20px; margin-bottom: 36px; border: 1px solid var(--glass-border); box-shadow: var(--shadow-sm); }
-.ws-weight-btn { width: 40px; height: 40px; border-radius: 12px; border: none; background: var(--bg); color: var(--text-main); font-size: 24px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s var(--ease); display: grid; place-items: center; }
+.ws-weight-control { display: inline-flex; align-items: center; gap: 16px; background: var(--glass-strong); padding: 8px 16px; border-radius: 18px; margin: 0 auto 24px auto; border: 1px solid var(--glass-border); box-shadow: var(--shadow-sm); }
+.ws-weight-btn { width: 36px; height: 36px; border-radius: 10px; border: none; background: var(--bg); color: var(--text-main); font-size: 22px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s var(--ease); display: grid; place-items: center; }
 .ws-weight-btn:active { transform: scale(0.85); }
-.ws-weight-val { font-size: 24px; font-weight: 800; min-width: 80px; text-align: center; }
+.ws-weight-val { font-size: 22px; font-weight: 800; min-width: 70px; text-align: center; }
+.ws-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
 
 /* ================= МОДАЛКИ ================= */
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
@@ -183,12 +184,14 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 28px; height:
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .modal { background: var(--glass-strong); backdrop-filter: blur(40px) saturate(200%); border-radius: 32px 32px 0 0; padding: 28px 24px; width: 100%; max-width: 480px; max-height: 90vh; display: flex; flex-direction: column; animation: slideUpModal 0.45s var(--ease); border-top: 1px solid var(--glass-border); }
 @keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-shrink: 0; }
 .modal-header h3 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; }
 .modal-scroll { overflow-y: auto; flex: 1; padding-bottom: 20px; }
 
-.muscle-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 20px; margin-bottom: 20px; scrollbar-width: none; }
-.muscle-tabs::-webkit-scrollbar { display: none; }
+/* ФИКС СКРОЛЛБАРА В ТАБАХ */
+.muscle-tabs { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 16px; -ms-overflow-style: none; scrollbar-width: none; }
+.muscle-tabs::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
 .muscle-tab { flex: none; padding: 12px 20px; border-radius: 20px; border: 1px solid var(--glass-border); background: var(--glass); font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; transition: all 0.3s var(--ease); font-size: 15px; }
 .muscle-tab.active { border-color: transparent; background: var(--accent-gradient); color: #fff; box-shadow: 0 4px 12px rgba(52, 199, 89, 0.3); }
 
@@ -241,18 +244,22 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 28px; height:
   </div>
   <div class="ws-progress-bar"><div class="ws-progress-fill" id="wsProgress" style="width: 0%;"></div></div>
   <div class="ws-card">
-    <div class="ws-ex-name" id="wsExName">Упражнение</div>
-    <div class="ws-ex-meta" id="wsExMeta">3 подхода × 10 повторений</div>
-    <div class="ws-set-tracker" id="wsSetTracker"></div>
-    <div class="ws-timer" id="wsTimer">00:00</div>
-    <div id="wsWeightControl" class="ws-weight-control">
-      <button class="ws-weight-btn" onclick="changeWorkoutWeight(-1)">−</button>
-      <div class="ws-weight-val" id="wsWeightVal">0 кг</div>
-      <button class="ws-weight-btn" onclick="changeWorkoutWeight(1)">+</button>
+    <div>
+      <div class="ws-ex-name" id="wsExName">Упражнение</div>
+      <div class="ws-ex-meta" id="wsExMeta">3 подхода × 10 повторений</div>
+      <div class="ws-set-tracker" id="wsSetTracker"></div>
+      <div class="ws-timer" id="wsTimer">00:00</div>
+      <div id="wsWeightControl" class="ws-weight-control">
+        <button class="ws-weight-btn" onclick="changeWorkoutWeight(-1)">−</button>
+        <div class="ws-weight-val" id="wsWeightVal">0 кг</div>
+        <button class="ws-weight-btn" onclick="changeWorkoutWeight(1)">+</button>
+      </div>
+      <div id="wsRestText" style="font-size: 15px; color: var(--text-muted); margin-bottom: 16px; display: none; font-weight: 600;">Отдых: <span id="wsRestTimer" style="font-weight: 800; color: var(--accent);">60</span> сек</div>
     </div>
-    <div id="wsRestText" style="font-size: 15px; color: var(--text-muted); margin-bottom: 20px; display: none; font-weight: 600;">Отдых: <span id="wsRestTimer" style="font-weight: 800; color: var(--accent);">60</span> сек</div>
-    <button class="btn primary" id="wsActionBtn" onclick="handleWorkoutAction()">Начать подход</button>
-    <button class="btn secondary" id="wsSkipBtn" onclick="skipExercise()" style="margin-top: 14px; display: none;">Пропустить упражнение</button>
+    <div class="ws-buttons">
+      <button class="btn primary" id="wsActionBtn" onclick="handleWorkoutAction()">Начать подход</button>
+      <button class="btn secondary" id="wsSkipBtn" onclick="skipExercise()" style="display: none; padding: 14px; font-size: 15px;">Пропустить упражнение</button>
+    </div>
   </div>
 </div>
 
@@ -589,7 +596,7 @@ const WORKOUT_CATALOG = {
 let user = { name:'', age:16, gender:'male', weight:65, height:175, activity:1.375, goal:'gain', kcal:0, protein:0, fat:0, carbs:0, uniqueId:'', sub_until:0 };
 let todayFoods = [];
 let weekPlans = { 'Пн':null, 'Вт':null, 'Ср':null, 'Чт':null, 'Пт':null, 'Сб':null, 'Вс':null };
-let customWorkouts = []; // Для сохранения своих тренировок
+let customWorkouts = [];
 let todayWorkouts = [];
 let streakDone = [false,false,false,false,false,false,false];
 let obStep = 0;
@@ -622,10 +629,8 @@ function initTheme() {
 
 /* ================= ГЕНЕРАЦИЯ ТРЕНИРОВКИ ================= */
 function generateWorkout(templateId, duration) {
-  // 1. Проверяем, может это своя тренировка?
   const custom = customWorkouts.find(w => w.id === templateId);
   if (custom) {
-    // Парсим упражнения из строки
     let exercises = custom.exercises.split(',').map(e => e.trim()).filter(e => e);
     let count, sets;
     if (duration <= 30) { count = 3; sets = 3; }
@@ -633,12 +638,10 @@ function generateWorkout(templateId, duration) {
     else { count = 7; sets = 4; }
     
     return exercises.slice(0, count).map(exStr => {
-      // Пытаемся вытащить название и подходы (например "Жим 4x10")
       const match = exStr.match(/(.+?)(?:\s+(\d+)[xх](\d+))?$/);
       let name = match ? match[1].trim() : exStr;
       let reps = match && match[3] ? +match[3] : 10;
       
-      // Пытаемся найти в базе, чтобы взять тип
       let type = 'dumbbell', ratio = 0.2, minW = 4, step = 2;
       for (const group of Object.values(EXERCISE_LIBRARY)) {
         const found = group.exercises.find(e => e.name.toLowerCase().includes(name.toLowerCase()));
@@ -659,7 +662,6 @@ function generateWorkout(templateId, duration) {
     });
   }
 
-  // 2. Обычная генерация из каталога
   let template = null;
   for (const group of Object.values(WORKOUT_CATALOG)) {
     const found = group.find(t => t.id === templateId);
@@ -982,7 +984,6 @@ function saveCustomPlan() {
   closeModal('modal-custom-plan');
   toast('Тренировка создана!');
   
-  // Если создавали из модалки выбора, сразу выбираем её
   if (customPlanTarget === 'select') {
     selectPlan(currentPlanDay, newPlan.id, newPlan.name);
   }
@@ -1206,8 +1207,10 @@ function finishWorkoutScreen() {
   `;
 }
 
-/* ================= ПИТАНИЕ ================= */
+/* ================= ИСПРАВЛЕННОЕ ПИТАНИЕ ================= */
 function openFoodModal() { openModal('modal-food'); }
+function closeFoodModal() { closeModal('modal-food'); }
+
 function addFood(){
   const name = document.getElementById('foodName').value.trim();
   const kcal100 = +document.getElementById('foodKcal').value || 0;
@@ -1215,23 +1218,41 @@ function addFood(){
   const f100 = +document.getElementById('foodF').value || 0;
   const c100 = +document.getElementById('foodC').value || 0;
   const weight = +document.getElementById('foodWeight').value || 100;
-  if(!name || kcal100 <= 0) { toast('Заполни поля'); return; }
+  
+  if(!name || kcal100 <= 0) { toast('Заполни название и калории'); return; }
+  
   const ratio = weight / 100;
-  todayFoods.push({ name, kcal: Math.round(kcal100 * ratio), p: Math.round(p100*ratio), f: Math.round(f100*ratio), c: Math.round(c100*ratio), weight });
-  closeModal('modal-food');
+  todayFoods.push({ 
+    name, 
+    kcal: Math.round(kcal100 * ratio), 
+    p: Math.round(p100 * ratio), 
+    f: Math.round(f100 * ratio), 
+    c: Math.round(c100 * ratio), 
+    weight 
+  });
+  
   ['foodName','foodKcal','foodP','foodF','foodC','foodWeight'].forEach(id=> document.getElementById(id).value='');
-  updateHomeMacros(); renderFoodList(); toast('Добавлено');
+  
+  closeModal('modal-food');
+  updateHomeMacros(); 
+  renderFoodList(); 
+  toast('Продукт добавлен');
 }
 
 function renderFoodList(){
   const container = document.getElementById('foodItems');
-  if(todayFoods.length === 0){ container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px 0;">Пусто</p>'; }
-  else {
+  if(todayFoods.length === 0){ 
+    container.innerHTML = '<p style="text-align:center; color:var(--text-muted); padding:20px 0; font-weight:500;">Ты пока ничего не добавил</p>'; 
+  } else {
     container.innerHTML = todayFoods.map((f, i) => `
       <div class="week-row">
-        <div class="week-day" style="width: auto; font-weight: 800; color: var(--text-main);">${f.name}</div>
-        <div style="flex: 1; text-align: right; font-size: 14px; color: var(--text-muted); margin-right: 16px; font-weight: 600;">${f.weight}г • ${f.kcal} ккал</div>
-        <button class="btn-icon" style="background: transparent; color: var(--text-muted);" onclick="removeFood(${i})"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+        <div class="week-day" style="width: auto; font-weight: 800; color: var(--text-main); font-size: 15px;">${f.name}</div>
+        <div style="flex: 1; text-align: right; font-size: 13px; color: var(--text-muted); margin-right: 16px; font-weight: 600;">
+          ${f.weight}г • Б:${f.p} Ж:${f.f} У:${f.c} • ${f.kcal} ккал
+        </div>
+        <button class="btn-icon" style="background: transparent; color: #ff3b30;" onclick="removeFood(${i})">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
       </div>
     `).join('');
   }
