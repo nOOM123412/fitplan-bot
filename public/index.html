@@ -695,21 +695,32 @@ function updateHomeMacros(){
   saveToServer();
 }
 
-/* ================= НЕДЕЛЬНЫЙ ПЛАН ================= */
+/* ================= ИСПРАВЛЕННЫЙ НЕДЕЛЬНЫЙ ПЛАН ================= */
 function renderWeekGrid() {
   const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-  document.getElementById('weekGrid').innerHTML = days.map(day => {
-    const plan = weekPlans[day];
-    const name = plan ? (plan.name || 'Тренировка') : 'Отдых';
-    const isRest = !plan;
-    return `
+  const container = document.getElementById('weekGrid');
+  if (!container) return;
+  
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const day = days[i];
+    // Безопасное извлечение названия
+    let name = 'Отдых';
+    if (weekPlans && weekPlans[day] && weekPlans[day].name) {
+      name = weekPlans[day].name;
+    }
+    
+    html += `
       <div class="week-row">
         <div class="week-day">${day}</div>
-        <div class="week-plan ${isRest ? 'empty' : ''}">${name}</div>
-        <button class="btn-icon" onclick="openPlanModal('${day}')"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+        <div class="week-plan ${name === 'Отдых' ? 'empty' : ''}">${name}</div>
+        <button class="btn-icon" onclick="openPlanModal('${day}')">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
       </div>
     `;
-  }).join('');
+  }
+  container.innerHTML = html;
 }
 
 function openPlanModal(day) {
@@ -1055,7 +1066,21 @@ function saveProfile(){
   saveToServer(); initMainApp(); closeModal('modal-edit-profile'); toast('Сохранено');
 }
 
-/* ================= ПРОГРЕСС ================= */
+/* ================= ИСПРАВЛЕННЫЙ СТРИК ================= */
+function renderStreak(){
+  const container = document.getElementById('streakContainer');
+  if (!container) return;
+  
+  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  let html = '';
+  for(let i=0; i<7; i++) {
+    // Проверка на true, если данных нет - false
+    const isDone = streakDone && streakDone[i] === true;
+    html += `<div class="streak-day ${isDone ? 'done' : ''}">${days[i]}</div>`;
+  }
+  container.innerHTML = html;
+}
+
 function renderProgress() {
   document.getElementById('statStreak').textContent = streakDone.filter(Boolean).length;
   document.getElementById('statWorkouts').textContent = streakDone.filter(Boolean).length;
@@ -1073,12 +1098,6 @@ function renderProgress() {
       </div>
     `;
   }).join('');
-}
-
-function renderStreak(){
-  const container = document.getElementById('streakContainer');
-  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
-  container.innerHTML = days.map((d,i)=>`<div class="streak-day ${streakDone[i]?'done':''}">${d}</div>`).join('');
 }
 
 /* ================= МОДАЛКИ И НАВИГАЦИЯ ================= */
