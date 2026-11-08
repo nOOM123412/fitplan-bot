@@ -14,7 +14,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.storage.memory import MemoryStorage
 
 # ================= НАСТРОЙКИ =================
-TOKEN = "2"
+TOKEN = "1"
 WEBAPP_URL = "https://bot-1794065452-4003-noom.bothost.tech"
 ADMIN_ID = 7714111634
 OPERATOR = "@sai_helper"
@@ -64,7 +64,17 @@ async def api_save_all(request):
     
     db = load_db()
     if user_id not in db:
-        db[user_id] = {"name": "User", "tg_username": "", "balance": 0, "sub_until": 0, "referred_by": None, "ref_count": 0, "ref_earned": 0}
+        # Если пользователя нет, создаем с пробным периодом на 3 дня
+        trial_until = int(time.time()) + (3 * 24 * 60 * 60)
+        db[user_id] = {
+            "name": "User", 
+            "tg_username": "", 
+            "balance": 0, 
+            "sub_until": trial_until, 
+            "referred_by": None, 
+            "ref_count": 0, 
+            "ref_earned": 0
+        }
     
     if 'profile' in data: db[user_id]['profile'] = data['profile']
     if 'foods' in data: db[user_id]['foods'] = data['foods']
@@ -72,7 +82,7 @@ async def api_save_all(request):
     if 'streak' in data: db[user_id]['streak'] = data['streak']
     
     save_db(db)
-    return web.json_response({"status": "ok"})
+    return web.json_response({"status": "ok", "sub_until": db[user_id].get('sub_until', 0)})
 
 async def api_buy_sub(request):
     data = await request.json()
@@ -114,7 +124,20 @@ async def cmd_start(message: types.Message):
     uid = str(message.from_user.id)
     db = load_db()
     if uid not in db:
-        db[uid] = {"name": message.from_user.first_name or "User", "tg_username": message.from_user.username or "", "balance": 0, "sub_until": 0, "referred_by": None, "ref_count": 0, "ref_earned": 0, "foods": [], "plans": {}, "streak": [False]*7, "profile": {}}
+        trial_until = int(time.time()) + (3 * 24 * 60 * 60)
+        db[uid] = {
+            "name": message.from_user.first_name or "User", 
+            "tg_username": message.from_user.username or "", 
+            "balance": 0, 
+            "sub_until": trial_until, 
+            "referred_by": None, 
+            "ref_count": 0, 
+            "ref_earned": 0, 
+            "foods": [], 
+            "plans": {}, 
+            "streak": [False]*7, 
+            "profile": {}
+        }
         save_db(db)
     await message.answer(
         "Привет! Это <b>FitPlan</b>.\n\n"
