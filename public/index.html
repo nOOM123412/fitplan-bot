@@ -6,7 +6,6 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>FitPlan</title>
 <style>
-/* ... (ВСЕ СТИЛИ КРОМЕ ЛОГИКИ ПИТАНИЯ ОСТАВЛЯЕМ БЕЗ ИЗМЕНЕНИЙ) ... */
 :root{ --bg1:#F4F1EC; --glass:rgba(255,255,255,.55); --glass-strong:rgba(255,255,255,.85); --border:rgba(255,255,255,.7); --text:#2E2A26; --muted:#8A8279; --accent:#7FB69D; --accent-deep:#5E9A7E; --peach:#F7D9C4; --lav:#E4DDF3; --shadow:0 8px 32px rgba(62,58,54,.08); --radius:24px; --radius-sm:16px; --ease:cubic-bezier(.22,1,.36,1); }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0;}
 html,body{height:100%;}
@@ -553,19 +552,23 @@ function updateHomeMacros(){
   const pct = user.kcal > 0 ? Math.min(100, Math.round(eatenKcal / user.kcal * 100)) : 0;
   
   // Обновляем калории
-  document.getElementById('kcalRing').style.setProperty('--p', pct + '%');
-  document.getElementById('kcalLeft').textContent = left;
-  document.getElementById('kcalEaten').innerHTML = eatenKcal + ' <small>/ ' + user.kcal + '</small>';
-  document.getElementById('kcalTarget').textContent = user.kcal;
+  try {
+    document.getElementById('kcalRing').style.setProperty('--p', pct + '%');
+    document.getElementById('kcalLeft').textContent = left;
+    document.getElementById('kcalEaten').innerHTML = eatenKcal + ' <small>/ ' + user.kcal + '</small>';
+    document.getElementById('kcalTarget').textContent = user.kcal;
+  } catch(e) { console.error("Error updating kcal", e); }
   
   // Обновляем БЖУ (с проверкой на существование элементов)
-  const mp = document.getElementById('macroP');
-  const mf = document.getElementById('macroF');
-  const mc = document.getElementById('macroC');
-  
-  if(mp) mp.textContent = eatenP + ' г';
-  if(mf) mf.textContent = eatenF + ' г';
-  if(mc) mc.textContent = eatenC + ' г';
+  try {
+    const mp = document.getElementById('macroP');
+    const mf = document.getElementById('macroF');
+    const mc = document.getElementById('macroC');
+    
+    if(mp) mp.textContent = eatenP + ' г';
+    if(mf) mf.textContent = eatenF + ' г';
+    if(mc) mc.textContent = eatenC + ' г';
+  } catch(e) { console.error("Error updating macros", e); }
   
   saveToServer();
 }
