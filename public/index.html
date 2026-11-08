@@ -6,7 +6,6 @@
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <title>FitPlan</title>
 <style>
-/* ... ВСЕ СТИЛИ КРОМЕ МОДАЛКИ ОСТАВЛЯЕМ КАК БЫЛИ ... */
 :root{ --bg1:#F4F1EC; --glass:rgba(255,255,255,.55); --glass-strong:rgba(255,255,255,.85); --border:rgba(255,255,255,.7); --text:#2E2A26; --muted:#8A8279; --accent:#7FB69D; --accent-deep:#5E9A7E; --peach:#F7D9C4; --lav:#E4DDF3; --shadow:0 8px 32px rgba(62,58,54,.08); --radius:24px; --radius-sm:16px; --ease:cubic-bezier(.22,1,.36,1); }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0;}
 html,body{height:100%;}
@@ -127,41 +126,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 @keyframes fadeUp{from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);}}
 .toast{position:fixed; bottom:calc(100px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%) translateY(20px); background:var(--glass-strong); border:1px solid var(--border); border-radius:16px; padding:12px 20px; font-size:14px; font-weight:600; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:all .4s var(--ease); z-index:200; white-space:nowrap;}
 .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
-
-/* СУПЕР-ИСПРАВЛЕНИЕ МОДАЛКИ */
-.modal-overlay {
-  position: fixed; 
-  inset: 0; 
-  background: rgba(0,0,0,0.6);
-  z-index: 999; 
-  display: none; 
-  align-items: center; 
-  justify-content: center; 
-  padding: 15px;
-}
-.modal-overlay.show {
-  display: flex;
-}
-.modal {
-  background: #ffffff;
-  border-radius: 20px; 
-  padding: 20px; 
-  width: 100%; 
-  max-width: 380px; /* Уменьшили ширину */
-  box-shadow: 0 20px 60px rgba(0,0,0,.3); 
-  animation: modalIn .3s var(--ease); 
-  max-height: 90vh; 
-  overflow-y: auto;
-}
+.modal-overlay{position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:999; display:none; align-items:center; justify-content:center; padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal{background: #ffffff; border-radius:var(--radius); padding:24px; width:100%; max-width:380px; box-shadow:0 20px 60px rgba(0,0,0,.2); animation:modalIn .3s var(--ease); max-height: 90vh; overflow-y: auto;}
 @keyframes modalIn{from{opacity:0; transform:scale(.95) translateY(10px);} to{opacity:1; transform:scale(1) translateY(0);}}
 .modal h3{font-size:18px; margin-bottom:16px;}
-.modal .field{margin-bottom:12px; display:flex; flex-direction:column; gap:4px;}
-.modal .input-wrap{padding:10px 12px; background: #fff; border: 1px solid #ddd; }
+.modal .field{margin-bottom:14px; display:flex; flex-direction:column; gap:6px;}
+.modal .input-wrap{padding:12px 14px; background: #fff; border: 1px solid #ddd;}
 .modal .input-wrap input{font-size:15px;}
-.food-macros-row{display:flex; gap:6px;}
-.food-macros-row .input-wrap{flex:1; padding:8px; justify-content:center; min-width: 0; /* Важно, чтобы не вылезало */ }
+.food-macros-row{display:flex; gap:8px;}
+.food-macros-row .input-wrap{flex:1; padding:10px; justify-content:center; min-width: 0;}
 .food-macros-row .input-wrap input{text-align:center; width: 100%;}
-.modal .btn {flex: none; width: 100%; margin-top: 6px; padding: 14px;}
+.modal .btn {flex: none; width: 100%; margin-top: 8px; padding: 15px;}
 .modal .btn.secondary {width: auto;}
 .workout-item { padding: 12px 14px; background: rgba(255,255,255,0.5); border-radius: 12px; margin-bottom: 8px; cursor: pointer; border: 1px solid rgba(46,42,38,0.08); transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
 .workout-item:hover { background: #fff; }
@@ -389,7 +365,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 <div class="toast" id="toast"></div>
 
 <script>
-/* СКРИПТ ОСТАЕТСЯ БЕЗ ИЗМЕНЕНИЙ, ОН РАБОЧИЙ */
+/* ================= ОБЩИЙ СПИСОК ТРЕНИРОВОК ================= */
 const ALL_WORKOUTS = [
   { "name": "Отдых", "desc": "Полный отдых. Восстановление мышц.", "exercises": [] },
   { "name": "Грудь + Трицепс (База)", "desc": "Классическая программа для верха тела. Акцент на жимовые движения.", "exercises": ["Жим штанги лёжа 4×8", "Жим гантелей на наклонной 3×10", "Разводка гантелей 3×12", "Французский жим 3×10"] },
@@ -404,6 +380,7 @@ const ALL_WORKOUTS = [
   { "name": "Растяжка + Восстановление", "desc": "Йога и стретчинг.", "exercises": ["Наклоны вперёд 3×30 сек", "Скрутка позвоночника 3×30 сек", "Поза собаки мордой вниз 3×1 мин", "Дыхание 5 мин"] }
 ];
 
+/* ================= ПЕРЕМЕННЫЕ ================= */
 let user = { name:'', age:16, gender:'male', weight:65, height:175, activity:1.375, goal:'gain', kcal:0, protein:0, fat:0, carbs:0, uniqueId:'', sub_until:0 };
 let todayFoods = [];
 let weekPlans = { 'Пн':null, 'Вт':null, 'Ср':null, 'Чт':null, 'Пт':null, 'Сб':null, 'Вс':null };
@@ -413,64 +390,518 @@ let obStep = 0;
 let editGenderValue = 'male';
 let currentPlanDay = null;
 
+// Флаг для кнопки "Начать/Завершить"
+let isWorkoutStarted = false;
+
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
 const SERVER_URL = window.location.origin;
 
-async function fetchServerData() { try { const res = await fetch(`${SERVER_URL}/api/user?id=${USER_ID}`); if(res.ok) { const data = await res.json(); user.sub_until = data.sub_until || 0; if(data.foods) todayFoods = data.foods; if(data.plans) weekPlans = data.plans; if(data.streak) streakDone = data.streak; if(data.profile && Object.keys(data.profile).length) { user = { ...user, ...data.profile, sub_until: user.sub_until }; } } } catch(e) { console.error('API Error', e); } }
-async function saveToServer() { try { const data = { id: USER_ID, profile: { name: user.name, age: user.age, gender: user.gender, weight: user.weight, height: user.height, goal: user.goal, kcal: user.kcal, uniqueId: user.uniqueId }, foods: todayFoods, plans: weekPlans, streak: streakDone }; await fetch(`${SERVER_URL}/api/save`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) }); } catch(e) { console.error(e); } }
+/* ================= СЕРВЕР ================= */
+async function fetchServerData() {
+  try {
+    const res = await fetch(`${SERVER_URL}/api/user?id=${USER_ID}`);
+    if(res.ok) {
+      const data = await res.json();
+      user.sub_until = data.sub_until || 0;
+      if(data.foods) todayFoods = data.foods;
+      if(data.plans) weekPlans = data.plans;
+      if(data.streak) streakDone = data.streak;
+      if(data.profile && Object.keys(data.profile).length) {
+        user = { ...user, ...data.profile, sub_until: user.sub_until };
+      }
+    }
+  } catch(e) { console.error('API Error', e); }
+}
 
-const steps = document.querySelectorAll('.ob-step'); const dots = document.querySelectorAll('.dot'); const btnNext = document.getElementById('btnNext'); const btnBack = document.getElementById('btnBack');
-function hideKeyboard() { document.activeElement.blur(); if (window.Telegram?.WebApp?.HapticFeedback) window.Telegram.WebApp.HapticFeedback.impactOccurred('light'); }
-function showStep(i){ hideKeyboard(); steps.forEach((s,idx)=> s.classList.toggle('active', idx===i)); dots.forEach((d,idx)=>{ d.classList.toggle('active', idx===i); d.classList.toggle('done', idx<i); }); btnBack.classList.toggle('hidden', i===0); btnNext.textContent = i===steps.length-1 ? 'Начать 🚀' : 'Далее'; if(i===steps.length-1) calcNutrition(); btnNext.disabled = !validateStep(i); btnNext.style.opacity = btnNext.disabled ? .4 : 1; document.querySelector('.ob-content').scrollTop = 0; }
-function validateStep(i){ if(i===0) return document.getElementById('inpName').value.trim().length>0; if(i===1) return +document.getElementById('inpWeight').value>0 && +document.getElementById('inpHeight').value>0; if(i===2) return !!document.querySelector('.goal-card.selected'); return true; }
-['inpName','inpAge','inpWeight','inpHeight'].forEach(id=>{ document.getElementById(id).addEventListener('input', ()=>{ btnNext.disabled = !validateStep(obStep); btnNext.style.opacity = btnNext.disabled ? .4 : 1; }); });
-document.querySelectorAll('#genderSeg button').forEach(b=>{ b.addEventListener('click', ()=>{ document.querySelectorAll('#genderSeg button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); user.gender = b.dataset.gender; }); });
-document.querySelectorAll('#activityList .level').forEach(l=>{ l.addEventListener('click', ()=>{ document.querySelectorAll('#activityList .level').forEach(x=>x.classList.remove('selected')); l.classList.add('selected'); user.activity = +l.dataset.act; }); });
-document.querySelectorAll('.goal-card').forEach(c=>{ c.addEventListener('click', ()=>{ document.querySelectorAll('.goal-card').forEach(x=>x.classList.remove('selected')); c.classList.add('selected'); user.goal = c.dataset.goal; btnNext.disabled = false; btnNext.style.opacity = 1; }); });
-btnNext.addEventListener('click', ()=>{ hideKeyboard(); if(!validateStep(obStep)) return; if(obStep===0){ user.name = document.getElementById('inpName').value.trim(); user.age = +document.getElementById('inpAge').value || 16; } if(obStep===1){ user.weight = +document.getElementById('inpWeight').value; user.height = +document.getElementById('inpHeight').value; } if(obStep < steps.length-1){ obStep++; showStep(obStep); } else { finishOnboarding(); } });
+async function saveToServer() {
+  try {
+    const data = {
+      id: USER_ID,
+      profile: { name: user.name, age: user.age, gender: user.gender, weight: user.weight, height: user.height, goal: user.goal, kcal: user.kcal, uniqueId: user.uniqueId },
+      foods: todayFoods,
+      plans: weekPlans,
+      streak: streakDone
+    };
+    await fetch(`${SERVER_URL}/api/save`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
+  } catch(e) { console.error(e); }
+}
+
+/* ================= ОНБОРДИНГ ================= */
+const steps = document.querySelectorAll('.ob-step');
+const dots = document.querySelectorAll('.dot');
+const btnNext = document.getElementById('btnNext');
+const btnBack = document.getElementById('btnBack');
+
+function hideKeyboard() {
+  document.activeElement.blur();
+  if (window.Telegram?.WebApp?.HapticFeedback) window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+}
+
+function showStep(i){
+  hideKeyboard();
+  steps.forEach((s,idx)=> s.classList.toggle('active', idx===i));
+  dots.forEach((d,idx)=>{ d.classList.toggle('active', idx===i); d.classList.toggle('done', idx<i); });
+  btnBack.classList.toggle('hidden', i===0);
+  btnNext.textContent = i===steps.length-1 ? 'Начать 🚀' : 'Далее';
+  if(i===steps.length-1) calcNutrition();
+  btnNext.disabled = !validateStep(i);
+  btnNext.style.opacity = btnNext.disabled ? .4 : 1;
+  document.querySelector('.ob-content').scrollTop = 0;
+}
+
+function validateStep(i){
+  if(i===0) return document.getElementById('inpName').value.trim().length>0;
+  if(i===1) return +document.getElementById('inpWeight').value>0 && +document.getElementById('inpHeight').value>0;
+  if(i===2) return !!document.querySelector('.goal-card.selected');
+  return true;
+}
+
+['inpName','inpAge','inpWeight','inpHeight'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', ()=>{ btnNext.disabled = !validateStep(obStep); btnNext.style.opacity = btnNext.disabled ? .4 : 1; });
+});
+
+document.querySelectorAll('#genderSeg button').forEach(b=>{
+  b.addEventListener('click', ()=>{ document.querySelectorAll('#genderSeg button').forEach(x=>x.classList.remove('active')); b.classList.add('active'); user.gender = b.dataset.gender; });
+});
+
+document.querySelectorAll('#activityList .level').forEach(l=>{
+  l.addEventListener('click', ()=>{ document.querySelectorAll('#activityList .level').forEach(x=>x.classList.remove('selected')); l.classList.add('selected'); user.activity = +l.dataset.act; });
+});
+
+document.querySelectorAll('.goal-card').forEach(c=>{
+  c.addEventListener('click', ()=>{ document.querySelectorAll('.goal-card').forEach(x=>x.classList.remove('selected')); c.classList.add('selected'); user.goal = c.dataset.goal; btnNext.disabled = false; btnNext.style.opacity = 1; });
+});
+
+btnNext.addEventListener('click', ()=>{
+  hideKeyboard();
+  if(!validateStep(obStep)) return;
+  if(obStep===0){ user.name = document.getElementById('inpName').value.trim(); user.age = +document.getElementById('inpAge').value || 16; }
+  if(obStep===1){ user.weight = +document.getElementById('inpWeight').value; user.height = +document.getElementById('inpHeight').value; }
+  if(obStep < steps.length-1){ obStep++; showStep(obStep); } else { finishOnboarding(); }
+});
+
 btnBack.addEventListener('click', ()=>{ hideKeyboard(); if(obStep>0){ obStep--; showStep(obStep); } });
 
-function calcNutrition(){ const {weight,height,age,gender,activity,goal} = user; let bmr = gender==='male' ? 10*weight + 6.25*height - 5*age + 5 : 10*weight + 6.25*height - 5*age - 161; let tdee = bmr * activity; let kcal = tdee; if(goal==='lose') kcal = tdee - 400; if(goal==='gain') kcal = tdee + 300; const protein = Math.round(weight * 1.8); const fat = Math.round(weight * 0.9); const carbs = Math.round((kcal - protein*4 - fat*9) / 4); document.getElementById('calcKcal').textContent = Math.round(kcal); document.getElementById('calcP').textContent = protein + ' г'; document.getElementById('calcF').textContent = fat + ' г'; document.getElementById('calcC').textContent = carbs + ' г'; user.kcal = Math.round(kcal); user.protein = protein; user.fat = fat; user.carbs = carbs; }
-function finishOnboarding(){ if(!user.uniqueId) user.uniqueId = Math.floor(100000 + Math.random() * 900000).toString(); saveToServer(); document.getElementById('onboarding').classList.add('hidden'); setTimeout(()=>{ document.getElementById('onboarding').style.display='none'; const app = document.getElementById('mainApp'); app.classList.add('visible'); app.style.display='block'; requestAnimationFrame(()=> app.style.opacity=1); initMainApp(); }, 500); }
-function initMainApp(){ const goalNames = {lose:'Похудение', gain:'Набор массы', tone:'Тонус', strength:'Сила'}; document.getElementById('greetName').textContent = 'Привет, ' + user.name + ' 👋'; document.getElementById('avatarInitial').textContent = user.name.charAt(0).toUpperCase(); document.getElementById('profName').textContent = user.name; document.getElementById('profAge').textContent = user.age + ' лет'; document.getElementById('profGender').textContent = user.gender === 'male' ? 'Парень' : 'Девушка'; document.getElementById('profWeight').textContent = user.weight + ' кг'; document.getElementById('profHeight').textContent = user.height + ' см'; document.getElementById('profGoal').textContent = goalNames[user.goal]; document.getElementById('profKcal').textContent = user.kcal + ' ккал'; document.getElementById('myId').textContent = user.uniqueId; updateProfileUI(); updateHomeMacros(); updatePlanTexts(); renderStreak(); renderFoodList(); renderFriends(); }
-function updateProfileUI() { const now = Math.floor(Date.now() / 1000); const subEl = document.getElementById('profSub'); if(user.sub_until > now) { subEl.textContent = `Активна (${Math.ceil((user.sub_until - now) / 86400)} дн.)`; subEl.style.color = 'var(--accent-deep)'; } else { subEl.textContent = 'Не активна'; subEl.style.color = 'var(--muted)'; } }
-function updateHomeMacros(){ const eatenKcal = todayFoods.reduce((s,f)=> s+f.kcal, 0); const eatenP = todayFoods.reduce((s,f)=> s+f.p, 0); const eatenF = todayFoods.reduce((s,f)=> s+f.f, 0); const eatenC = todayFoods.reduce((s,f)=> s+f.c, 0); const left = Math.max(0, user.kcal - eatenKcal); const pct = user.kcal > 0 ? Math.min(100, Math.round(eatenKcal / user.kcal * 100)) : 0; document.getElementById('kcalRing').style.setProperty('--p', pct + '%'); document.getElementById('kcalLeft').textContent = left; document.getElementById('kcalEaten').innerHTML = eatenKcal + ' <small>/ ' + user.kcal + '</small>'; document.getElementById('kcalTarget').textContent = user.kcal; document.getElementById('macroP').textContent = eatenP + ' г'; document.getElementById('macroF').textContent = eatenF + ' г'; document.getElementById('macroC').textContent = eatenC + ' г'; saveToServer(); }
+function calcNutrition(){
+  const {weight,height,age,gender,activity,goal} = user;
+  let bmr = gender==='male' ? 10*weight + 6.25*height - 5*age + 5 : 10*weight + 6.25*height - 5*age - 161;
+  let tdee = bmr * activity;
+  let kcal = tdee;
+  if(goal==='lose') kcal = tdee - 400;
+  if(goal==='gain') kcal = tdee + 300;
+  const protein = Math.round(weight * 1.8);
+  const fat = Math.round(weight * 0.9);
+  const carbs = Math.round((kcal - protein*4 - fat*9) / 4);
+  
+  document.getElementById('calcKcal').textContent = Math.round(kcal);
+  document.getElementById('calcP').textContent = protein + ' г';
+  document.getElementById('calcF').textContent = fat + ' г';
+  document.getElementById('calcC').textContent = carbs + ' г';
+  
+  user.kcal = Math.round(kcal);
+  user.protein = protein; user.fat = fat; user.carbs = carbs;
+}
 
-function updatePlanTexts(){ const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс']; days.forEach(day => { const el = document.getElementById('plan-text-' + day); if(el) { const selected = weekPlans[day]; el.textContent = selected ? selected.name : 'Отдых'; } }); updateTodayWorkout(); }
-function openPlanModal(day) { currentPlanDay = day; document.getElementById('planSearch').value = ''; renderPlanModalList(''); document.getElementById('planModal').classList.add('show'); }
-function renderPlanModalList(searchQuery = '') { const content = document.getElementById('planModalContent'); content.innerHTML = ''; const filtered = ALL_WORKOUTS.filter(w => w.name.toLowerCase().includes(searchQuery.toLowerCase()) || w.desc.toLowerCase().includes(searchQuery.toLowerCase())); filtered.forEach(plan => { const div = document.createElement('div'); div.className = 'workout-item'; let exercisesHtml = ''; if(plan.exercises && plan.exercises.length > 0) { exercisesHtml = '<div class="workout-details" id="details-' + plan.name.replace(/\s/g, '') + '">' + plan.exercises.map(ex => `<div class="workout-exercise">${ex}</div>`).join('') + '<div style="margin-top:12px; font-size:12px; color:var(--accent); font-weight:600;">💪 Отличный выбор! Вперёд к результату.</div>' + '</div>'; } div.innerHTML = `<div class="workout-info" onclick="selectPlan('${currentPlanDay}', '${plan.name}')"><div class="workout-name">${plan.name}</div><div class="workout-desc">${plan.desc}</div>${exercisesHtml}</div><svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" onclick="event.stopPropagation(); toggleDetails('details-${plan.name.replace(/\s/g, '')}', this)"><path d="M6 9l6 6 6-6"/></svg>`; content.appendChild(div); }); }
-function toggleDetails(id, arrow) { const details = document.getElementById(id); if(details) { const isOpen = details.style.display === 'block'; details.style.display = isOpen ? 'none' : 'block'; arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)'; } }
-function filterPlans() { const query = document.getElementById('planSearch').value; renderPlanModalList(query); }
-function closePlanModal() { document.getElementById('planModal').classList.remove('show'); currentPlanDay = null; }
-function selectPlan(day, planName){ const found = ALL_WORKOUTS.find(o=>o.name===planName); if(found) weekPlans[day] = found; closePlanModal(); updatePlanTexts(); saveToServer(); toast('План на ' + day + ' обновлён'); }
-function updateTodayWorkout(){ const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб']; const todayIdx = new Date().getDay(); const todayName = days[todayIdx]; const plan = weekPlans[todayName]; const sub = document.getElementById('todayWorkout'); const content = document.getElementById('todayPlanContent'); if(plan && plan.name !== 'Отдых'){ sub.textContent = 'Сегодня — ' + plan.name; content.innerHTML = `<div class="ex" style="border-bottom:none; padding-bottom:0;"><span class="ex-name">${plan.name}</span><span class="ex-sets">${plan.exercises.length} упр.</span></div><div style="margin-top:12px;">${plan.exercises.map(e => `<div style="font-size:13px; color:var(--muted); margin-bottom:4px;">• ${e}</div>`).join('')}</div>`; const btn = document.createElement('button'); btn.className = 'btn'; btn.style.marginTop = '16px'; btn.textContent = 'Завершить тренировку'; btn.onclick = ()=>{ const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1; streakDone[dayIdx] = true; renderStreak(); saveToServer(); toast('Тренировка засчитана! 💪'); }; content.appendChild(btn); } else { sub.textContent = 'Сегодня — отдых'; content.innerHTML = '<p class="muted">План не выбран или сегодня отдых. Перейди в раздел «План».</p>'; } }
-function renderStreak(){ const container = document.getElementById('streakContainer'); const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс']; container.innerHTML = days.map((d,i)=>`<div class="day ${streakDone[i]?'done':''}">${d}</div>`).join(''); }
+function finishOnboarding(){
+  if(!user.uniqueId) user.uniqueId = Math.floor(100000 + Math.random() * 900000).toString();
+  saveToServer();
+  document.getElementById('onboarding').classList.add('hidden');
+  setTimeout(()=>{
+    document.getElementById('onboarding').style.display='none';
+    const app = document.getElementById('mainApp');
+    app.classList.add('visible'); app.style.display='block';
+    requestAnimationFrame(()=> app.style.opacity=1);
+    initMainApp();
+  }, 500);
+}
 
-function openCustomPlanModal() { document.getElementById('customName').value = ''; document.getElementById('customDesc').value = ''; document.getElementById('customEx').value = ''; document.getElementById('customPlanModal').classList.add('show'); }
-function closeCustomPlanModal() { document.getElementById('customPlanModal').classList.remove('show'); }
-function saveCustomPlan() { const name = document.getElementById('customName').value.trim(); const desc = document.getElementById('customDesc').value.trim(); const exStr = document.getElementById('customEx').value.trim(); if(!name) return toast('Введи название'); const exercises = exStr.split(',').map(e => e.trim()).filter(e => e); const newPlan = { name, desc: desc || 'Свой план', exercises }; ALL_WORKOUTS.push(newPlan); selectPlan(currentPlanDay, name); closeCustomPlanModal(); toast('Свой план создан и выбран!'); }
+/* ================= ОСНОВНОЕ ================= */
+function initMainApp(){
+  const goalNames = {lose:'Похудение', gain:'Набор массы', tone:'Тонус', strength:'Сила'};
+  document.getElementById('greetName').textContent = 'Привет, ' + user.name + ' 👋';
+  document.getElementById('avatarInitial').textContent = user.name.charAt(0).toUpperCase();
+  document.getElementById('profName').textContent = user.name;
+  document.getElementById('profAge').textContent = user.age + ' лет';
+  document.getElementById('profGender').textContent = user.gender === 'male' ? 'Парень' : 'Девушка';
+  document.getElementById('profWeight').textContent = user.weight + ' кг';
+  document.getElementById('profHeight').textContent = user.height + ' см';
+  document.getElementById('profGoal').textContent = goalNames[user.goal];
+  document.getElementById('profKcal').textContent = user.kcal + ' ккал';
+  document.getElementById('myId').textContent = user.uniqueId;
+  
+  updateProfileUI(); updateHomeMacros(); updatePlanTexts(); renderStreak(); renderFoodList(); renderFriends();
+}
 
+function updateProfileUI() {
+  const now = Math.floor(Date.now() / 1000);
+  const subEl = document.getElementById('profSub');
+  if(user.sub_until > now) {
+    subEl.textContent = `Активна (${Math.ceil((user.sub_until - now) / 86400)} дн.)`;
+    subEl.style.color = 'var(--accent-deep)';
+  } else {
+    subEl.textContent = 'Не активна';
+    subEl.style.color = 'var(--muted)';
+  }
+}
+
+function updateHomeMacros(){
+  const eatenKcal = todayFoods.reduce((s,f)=> s+f.kcal, 0);
+  const eatenP = todayFoods.reduce((s,f)=> s+f.p, 0);
+  const eatenF = todayFoods.reduce((s,f)=> s+f.f, 0);
+  const eatenC = todayFoods.reduce((s,f)=> s+f.c, 0);
+  const left = Math.max(0, user.kcal - eatenKcal);
+  const pct = user.kcal > 0 ? Math.min(100, Math.round(eatenKcal / user.kcal * 100)) : 0;
+  
+  document.getElementById('kcalRing').style.setProperty('--p', pct + '%');
+  document.getElementById('kcalLeft').textContent = left;
+  document.getElementById('kcalEaten').innerHTML = eatenKcal + ' <small>/ ' + user.kcal + '</small>';
+  document.getElementById('kcalTarget').textContent = user.kcal;
+  document.getElementById('macroP').textContent = eatenP + ' г';
+  document.getElementById('macroF').textContent = eatenF + ' г';
+  document.getElementById('macroC').textContent = eatenC + ' г';
+  saveToServer();
+}
+
+/* ================= ОБНОВЛЕНИЕ ПЛАНОВ ================= */
+function updatePlanTexts(){
+  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  days.forEach(day => {
+    const el = document.getElementById('plan-text-' + day);
+    if(el) {
+      const selected = weekPlans[day];
+      el.textContent = selected ? selected.name : 'Отдых';
+    }
+  });
+  updateTodayWorkout();
+}
+
+function openPlanModal(day) {
+  currentPlanDay = day;
+  document.getElementById('planSearch').value = '';
+  renderPlanModalList('');
+  document.getElementById('planModal').classList.add('show');
+}
+
+function renderPlanModalList(searchQuery = '') {
+  const content = document.getElementById('planModalContent');
+  content.innerHTML = '';
+  
+  const filtered = ALL_WORKOUTS.filter(w => 
+    w.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    w.desc.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+  
+  filtered.forEach(plan => {
+    const div = document.createElement('div');
+    div.className = 'workout-item';
+    
+    let exercisesHtml = '';
+    if(plan.exercises && plan.exercises.length > 0) {
+      exercisesHtml = '<div class="workout-details" id="details-' + plan.name.replace(/\s/g, '') + '">' + 
+        plan.exercises.map(ex => `<div class="workout-exercise">${ex}</div>`).join('') + 
+        '<div style="margin-top:12px; font-size:12px; color:var(--accent); font-weight:600;">💪 Отличный выбор! Вперёд к результату.</div>' +
+        '</div>';
+    }
+    
+    div.innerHTML = `
+      <div class="workout-info" onclick="selectPlan('${currentPlanDay}', '${plan.name}')">
+        <div class="workout-name">${plan.name}</div>
+        <div class="workout-desc">${plan.desc}</div>
+        ${exercisesHtml}
+      </div>
+      <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" onclick="event.stopPropagation(); toggleDetails('details-${plan.name.replace(/\s/g, '')}', this)"><path d="M6 9l6 6 6-6"/></svg>
+    `;
+    
+    content.appendChild(div);
+  });
+}
+
+function toggleDetails(id, arrow) {
+  const details = document.getElementById(id);
+  if(details) {
+    const isOpen = details.style.display === 'block';
+    details.style.display = isOpen ? 'none' : 'block';
+    arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+  }
+}
+
+function filterPlans() {
+  const query = document.getElementById('planSearch').value;
+  renderPlanModalList(query);
+}
+
+function closePlanModal() {
+  document.getElementById('planModal').classList.remove('show');
+  currentPlanDay = null;
+}
+
+function selectPlan(day, planName){
+  const found = ALL_WORKOUTS.find(o=>o.name===planName);
+  if(found) weekPlans[day] = found;
+  closePlanModal();
+  updatePlanTexts(); 
+  saveToServer(); 
+  toast('План на ' + day + ' обновлён');
+}
+
+function updateTodayWorkout(){
+  const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const todayIdx = new Date().getDay();
+  const todayName = days[todayIdx];
+  const plan = weekPlans[todayName];
+  const sub = document.getElementById('todayWorkout');
+  const content = document.getElementById('todayPlanContent');
+  
+  if(plan && plan.name !== 'Отдых'){
+    sub.textContent = 'Сегодня — ' + plan.name;
+    
+    content.innerHTML = `
+      <div class="ex" style="border-bottom:none; padding-bottom:0;">
+        <span class="ex-name">${plan.name}</span>
+        <span class="ex-sets">${plan.exercises.length} упр.</span>
+      </div>
+      <div style="margin-top:12px;">
+        ${plan.exercises.map(e => `<div style="font-size:13px; color:var(--muted); margin-bottom:4px;">• ${e}</div>`).join('')}
+      </div>
+    `;
+    
+    const btn = document.createElement('button'); 
+    btn.className = 'btn'; 
+    btn.style.marginTop = '16px'; 
+    
+    if(!isWorkoutStarted) {
+      btn.textContent = 'Начать тренировку';
+      btn.onclick = () => {
+        isWorkoutStarted = true;
+        toast('Тренировка началась! 💪');
+        updateTodayWorkout(); 
+      };
+    } else {
+      btn.textContent = 'Завершить тренировку';
+      btn.classList.add('secondary');
+      btn.onclick = () => { 
+        const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1; 
+        streakDone[dayIdx] = true; 
+        isWorkoutStarted = false;
+        renderStreak(); 
+        saveToServer(); 
+        toast('Тренировка засчитана! Молодец!'); 
+        updateTodayWorkout();
+      };
+    }
+    content.appendChild(btn);
+  } else {
+    sub.textContent = 'Сегодня — отдых'; 
+    content.innerHTML = '<p class="muted">План не выбран или сегодня отдых. Перейди в раздел «План».</p>';
+  }
+}
+
+function renderStreak(){
+  const container = document.getElementById('streakContainer');
+  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+  container.innerHTML = days.map((d,i)=>`<div class="day ${streakDone[i]?'done':''}">${d}</div>`).join('');
+}
+
+/* ================= СВОЙ ПЛАН ================= */
+function openCustomPlanModal() {
+  document.getElementById('customName').value = '';
+  document.getElementById('customDesc').value = '';
+  document.getElementById('customEx').value = '';
+  document.getElementById('customPlanModal').classList.add('show');
+}
+
+function closeCustomPlanModal() {
+  document.getElementById('customPlanModal').classList.remove('show');
+}
+
+function saveCustomPlan() {
+  const name = document.getElementById('customName').value.trim();
+  const desc = document.getElementById('customDesc').value.trim();
+  const exStr = document.getElementById('customEx').value.trim();
+  
+  if(!name) return toast('Введи название');
+  
+  const exercises = exStr.split(',').map(e => e.trim()).filter(e => e);
+  
+  const newPlan = { name, desc: desc || 'Свой план', exercises };
+  ALL_WORKOUTS.push(newPlan);
+  
+  selectPlan(currentPlanDay, name);
+  closeCustomPlanModal();
+  toast('Свой план создан и выбран!');
+}
+
+/* ================= ПИТАНИЕ (СВЯЗКА ИСПРАВЛЕНА) ================= */
 function openFoodModal(){ document.getElementById('foodModal').classList.add('show'); }
 function closeFoodModal(){ document.getElementById('foodModal').classList.remove('show'); }
-function addFood(){ const name = document.getElementById('foodName').value.trim(); const kcal100 = +document.getElementById('foodKcal').value || 0; const p100 = +document.getElementById('foodP').value || 0; const f100 = +document.getElementById('foodF').value || 0; const c100 = +document.getElementById('foodC').value || 0; const weight = +document.getElementById('foodWeight').value || 100; if(!name || kcal100 <= 0) { toast('Заполни название и ккал'); return; } const ratio = weight / 100; todayFoods.push({ name, kcal: Math.round(kcal100 * ratio), p: Math.round(p100*ratio), f: Math.round(f100*ratio), c: Math.round(c100*ratio), weight }); updateHomeMacros(); renderFoodList(); closeFoodModal(); toast('Продукт добавлен'); ['foodName','foodKcal','foodP','foodF','foodC','foodWeight'].forEach(id=> document.getElementById(id).value=''); }
-function renderFoodList(){ const container = document.getElementById('foodItems'); if(todayFoods.length === 0){ container.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg><p>Ты пока ничего не добавил.<br>Добавь продукт, и я посчитаю КБЖУ.</p></div>'; } else { container.innerHTML = todayFoods.map((f, i) => `<div class="ex" style="justify-content:space-between;"><div style="flex:1;"><span class="ex-name">${f.name}</span><span style="font-size:12px;color:var(--muted);margin-left:8px;">${f.weight}г</span><div style="font-size:12px;color:var(--accent-deep);margin-top:4px;font-weight:600;">Б: ${f.p} г | Ж: ${f.f} г | У: ${f.c} г</div></div><div style="display:flex; align-items:center; gap:8px;"><span class="ex-sets">${f.kcal} ккал</span><button style="border:none;background:none;color:var(--muted);cursor:pointer;font-size:16px;" onclick="removeFood(${i})">✕</button></div></div>`).join(''); } }
-function removeFood(index) { todayFoods.splice(index, 1); updateHomeMacros(); renderFoodList(); toast('Продукт удалён'); }
 
-let searchType = 'id'; function switchSearch(type){ searchType = type; document.querySelectorAll('#searchSeg button').forEach((b, i) => b.classList.toggle('active', (type==='id' && i===0) || (type==='tg' && i===1))); document.getElementById('friendSearchInput').placeholder = type === 'id' ? 'Введи 6 цифр...' : 'Введи @username...'; }
-function findFriend(){ const val = document.getElementById('friendSearchInput').value.trim(); if(!val) return toast('Введи данные для поиска'); if(friends.find(f => f.id === val || f.tg === val)) return toast('Этот друг уже добавлен'); const displayName = searchType === 'tg' ? val : 'Друг ' + val; friends.push({ id: searchType === 'id' ? val : Math.floor(100000 + Math.random()*900000).toString(), tg: searchType === 'tg' ? val : '', name: displayName, streak: Math.floor(Math.random() * 7) }); saveToServer(); renderFriends(); document.getElementById('friendSearchInput').value = ''; toast('Друг добавлен!'); }
-function renderFriends(){ const container = document.getElementById('friendsContainer'); if(friends.length === 0){ container.innerHTML = '<div class="empty" style="padding:16px 0;"><p>Пока никого нет. Добавь друга по ID или юзернейму.</p></div>'; } else { container.innerHTML = friends.map((f, i) => `<div class="rank" style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid rgba(46,42,38,.06);"><div style="width:32px; height:32px; border-radius:10px; background:var(--accent); display:grid; place-items:center; font-weight:800; color:#fff; font-size:14px;">${f.name.charAt(0).toUpperCase()}</div><div style="flex:1; font-size:15px; font-weight:600;">${f.name}</div><div style="font-size:14px; font-weight:700; color:var(--accent-deep);">${f.streak} дн.</div><div style="cursor:pointer; color:var(--muted); padding:4px;" onclick="removeFriend(${i})">✕</div></div>`).join(''); } }
+function addFood(){
+  const name = document.getElementById('foodName').value.trim();
+  const kcal100 = +document.getElementById('foodKcal').value || 0;
+  const p100 = +document.getElementById('foodP').value || 0;
+  const f100 = +document.getElementById('foodF').value || 0;
+  const c100 = +document.getElementById('foodC').value || 0;
+  const weight = +document.getElementById('foodWeight').value || 100;
+  
+  if(!name || kcal100 <= 0) { toast('Заполни название и ккал'); return; }
+  
+  const ratio = weight / 100;
+  todayFoods.push({ 
+    name, 
+    kcal: Math.round(kcal100 * ratio), 
+    p: Math.round(p100*ratio), 
+    f: Math.round(f100*ratio), 
+    c: Math.round(c100*ratio), 
+    weight 
+  });
+  
+  // 1. Сначала закрываем модалку
+  closeFoodModal(); 
+  
+  // 2. Очищаем поля
+  ['foodName','foodKcal','foodP','foodF','foodC','foodWeight'].forEach(id=> document.getElementById(id).value='');
+  
+  // 3. Обновляем интерфейс (макросы и список)
+  try {
+    updateHomeMacros();
+    renderFoodList();
+    toast('Продукт добавлен');
+  } catch(e) {
+    console.error("Ошибка обновления интерфейса", e);
+    toast('Продукт добавлен (ошибка обновления)');
+  }
+}
+
+function renderFoodList(){
+  const container = document.getElementById('foodItems');
+  if(todayFoods.length === 0){
+    container.innerHTML = '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 15s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg><p>Ты пока ничего не добавил.<br>Добавь продукт, и я посчитаю КБЖУ.</p></div>';
+  } else {
+    container.innerHTML = todayFoods.map((f, i) => `
+      <div class="ex" style="justify-content:space-between;">
+        <div style="flex:1;">
+          <span class="ex-name">${f.name}</span>
+          <span style="font-size:12px;color:var(--muted);margin-left:8px;">${f.weight}г</span>
+          <div style="font-size:12px;color:var(--accent-deep);margin-top:4px;font-weight:600;">Б: ${f.p} г | Ж: ${f.f} г | У: ${f.c} г</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="ex-sets">${f.kcal} ккал</span>
+          <button style="border:none;background:none;color:var(--muted);cursor:pointer;font-size:16px;" onclick="removeFood(${i})">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function removeFood(index) {
+  todayFoods.splice(index, 1);
+  updateHomeMacros();
+  renderFoodList();
+  toast('Продукт удалён');
+}
+
+/* ================= ДРУЗЬЯ ================= */
+let searchType = 'id';
+function switchSearch(type){
+  searchType = type;
+  document.querySelectorAll('#searchSeg button').forEach((b, i) => b.classList.toggle('active', (type==='id' && i===0) || (type==='tg' && i===1)));
+  document.getElementById('friendSearchInput').placeholder = type === 'id' ? 'Введи 6 цифр...' : 'Введи @username...';
+}
+
+function findFriend(){
+  const val = document.getElementById('friendSearchInput').value.trim();
+  if(!val) return toast('Введи данные для поиска');
+  if(friends.find(f => f.id === val || f.tg === val)) return toast('Этот друг уже добавлен');
+  
+  const displayName = searchType === 'tg' ? val : 'Друг ' + val;
+  friends.push({ 
+    id: searchType === 'id' ? val : Math.floor(100000 + Math.random()*900000).toString(), 
+    tg: searchType === 'tg' ? val : '', 
+    name: displayName, 
+    streak: Math.floor(Math.random() * 7) 
+  });
+  saveToServer(); 
+  renderFriends(); 
+  document.getElementById('friendSearchInput').value = ''; 
+  toast('Друг добавлен!');
+}
+
+function renderFriends(){
+  const container = document.getElementById('friendsContainer');
+  if(friends.length === 0){
+    container.innerHTML = '<div class="empty" style="padding:16px 0;"><p>Пока никого нет. Добавь друга по ID или юзернейму.</p></div>';
+  } else {
+    container.innerHTML = friends.map((f, i) => `
+      <div class="rank" style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid rgba(46,42,38,.06);">
+        <div style="width:32px; height:32px; border-radius:10px; background:var(--accent); display:grid; place-items:center; font-weight:800; color:#fff; font-size:14px;">${f.name.charAt(0).toUpperCase()}</div>
+        <div style="flex:1; font-size:15px; font-weight:600;">${f.name}</div>
+        <div style="font-size:14px; font-weight:700; color:var(--accent-deep);">${f.streak} дн.</div>
+        <div style="cursor:pointer; color:var(--muted); padding:4px;" onclick="removeFriend(${i})">✕</div>
+      </div>`).join('');
+  }
+}
+
 function removeFriend(index) { friends.splice(index, 1); saveToServer(); renderFriends(); toast('Друг удален'); }
 
-function openEditProfile(){ document.getElementById('editName').value = user.name; document.getElementById('editAge').value = user.age; document.getElementById('editWeight').value = user.weight; document.getElementById('editHeight').value = user.height; editGenderValue = user.gender; document.querySelectorAll('#editGenderSeg button').forEach(b => b.classList.toggle('active', b.dataset.gender === editGenderValue)); document.getElementById('editProfileModal').classList.add('show'); }
-function setEditGender(gender) { editGenderValue = gender; document.querySelectorAll('#editGenderSeg button').forEach(b => b.classList.toggle('active', b.dataset.gender === gender)); }
-function closeEditProfile(){ document.getElementById('editProfileModal').classList.remove('show'); }
-function saveProfile(){ const n = document.getElementById('editName').value.trim(); const a = +document.getElementById('editAge').value; const w = +document.getElementById('editWeight').value; const h = +document.getElementById('editHeight').value; if(n) user.name = n; if(a) user.age = a; if(w) user.weight = w; if(h) user.height = h; user.gender = editGenderValue; calcNutrition(); saveToServer(); initMainApp(); closeEditProfile(); toast('Профиль обновлён'); }
+/* ================= ПРОФИЛЬ ================= */
+function openEditProfile(){
+  document.getElementById('editName').value = user.name;
+  document.getElementById('editAge').value = user.age;
+  document.getElementById('editWeight').value = user.weight;
+  document.getElementById('editHeight').value = user.height;
+  editGenderValue = user.gender;
+  document.querySelectorAll('#editGenderSeg button').forEach(b => b.classList.toggle('active', b.dataset.gender === editGenderValue));
+  document.getElementById('editProfileModal').classList.add('show');
+}
 
-function switchTab(name){ document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.screen===name)); document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active', s.id===name)); window.scrollTo({top:0, behavior:'smooth'}); }
+function setEditGender(gender) {
+  editGenderValue = gender;
+  document.querySelectorAll('#editGenderSeg button').forEach(b => b.classList.toggle('active', b.dataset.gender === gender));
+}
+
+function closeEditProfile(){ document.getElementById('editProfileModal').classList.remove('show'); }
+
+function saveProfile(){
+  const n = document.getElementById('editName').value.trim();
+  const a = +document.getElementById('editAge').value;
+  const w = +document.getElementById('editWeight').value;
+  const h = +document.getElementById('editHeight').value;
+  if(n) user.name = n;
+  if(a) user.age = a;
+  if(w) user.weight = w;
+  if(h) user.height = h;
+  user.gender = editGenderValue;
+  calcNutrition(); saveToServer(); initMainApp(); closeEditProfile(); toast('Профиль обновлён');
+}
+
+/* ================= НАВИГАЦИЯ ================= */
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.screen===name));
+  document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('active', s.id===name));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
 document.querySelectorAll('.tab').forEach(tab=>{ tab.addEventListener('click', ()=> switchTab(tab.dataset.screen)); });
+
 let toastTimer;
-function toast(msg){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(()=> t.classList.remove('show'), 2200); }
-async function startApp() { await fetchServerData(); const hasLocal = !!localStorage.getItem('fitplan_user'); if(hasLocal || user.name) { document.getElementById('onboarding').style.display = 'none'; document.getElementById('mainApp').style.display = 'block'; document.getElementById('mainApp').style.opacity = 1; document.getElementById('mainApp').classList.add('visible'); initMainApp(); } else { showStep(0); } }
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+/* ================= СТАРТ ================= */
+async function startApp() {
+  await fetchServerData();
+  const hasLocal = !!localStorage.getItem('fitplan_user');
+  
+  if(hasLocal || user.name) {
+    document.getElementById('onboarding').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    document.getElementById('mainApp').style.opacity = 1;
+    document.getElementById('mainApp').classList.add('visible');
+    initMainApp();
+  } else { showStep(0); }
+}
 startApp();
 </script>
 </body>
