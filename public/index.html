@@ -282,10 +282,10 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height:
   padding: 40px 24px; text-align: center; max-width: 480px; margin: 0 auto;
 }
 #expiredScreen.show { display: flex; animation: fadeIn 0.4s var(--ease); }
-.expired-icon { width: 96px; height: 96px; border-radius: 50%; background: var(--danger-light); color: var(--danger); display: grid; place-items: center; margin-bottom: 28px; }
+.expired-icon { width: 96px; height: 96px; border-radius: 50%; background: var(--accent-light); color: var(--accent-deep); display: grid; place-items: center; margin-bottom: 28px; }
 .expired-icon svg { width: 52px; height: 52px; stroke: currentColor; stroke-width: 2.5; fill: none; }
 .expired-title { font-size: 30px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 14px; }
-.expired-text { font-size: 16px; color: var(--text-muted); line-height: 1.5; font-weight: 500; margin-bottom: 36px; max-width: 320px; }
+.expired-text { font-size: 16px; color: var(--text-muted); line-height: 1.5; font-weight: 500; margin-bottom: 36px; max-width: 340px; }
 .expired-actions { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; }
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -297,12 +297,12 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height:
 <!-- ЭКРАН БЛОКИРОВКИ -->
 <div id="expiredScreen">
   <div class="expired-icon">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    <svg viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
   </div>
-  <div class="expired-title">Подписка истекла</div>
-  <div class="expired-text">Чтобы продолжить пользоваться FitPlan, продли подписку в боте. Все твои данные сохранены.</div>
+  <div class="expired-title">Подписка не активна</div>
+  <div class="expired-text">Пробную подписку активируйте в боте → Подписка. Все твои данные сохранены.</div>
   <div class="expired-actions">
-    <button class="btn primary" onclick="openBotForPayment()">Перейти к оплате</button>
+    <button class="btn primary" onclick="openBotForPayment()">Перейти в бот</button>
     <button class="btn secondary" onclick="location.reload()">Проверить снова</button>
   </div>
 </div>
@@ -848,7 +848,6 @@ function showExpiredScreen() {
 
 function checkSubscription() {
   const now = Math.floor(Date.now() / 1000);
-  // 0 или истёкшая = блок
   if (!user.sub_until || user.sub_until < now) {
     showExpiredScreen();
     return false;
@@ -857,7 +856,7 @@ function checkSubscription() {
 }
 
 function openBotForPayment() {
-  const botUrl = "https://t.me/FitPlan_Robot";
+  const botUrl = "https://t.me/FitPlan_bot";
   if (window.Telegram?.WebApp?.openTelegramLink) {
     window.Telegram.WebApp.openTelegramLink(botUrl);
   } else {
@@ -1531,10 +1530,7 @@ function renderAll() {
 window.addEventListener('DOMContentLoaded', async () => {
   initTheme();
   await fetchServerData();
-
-  // Жёсткая проверка подписки
   if (!checkSubscription()) return;
-
   if (user.name && user.kcal) {
     document.getElementById('onboarding').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
