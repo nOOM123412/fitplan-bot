@@ -39,7 +39,7 @@
   --text-main: #ffffff;
   --text-muted: #8e8e93;
   --accent: #30d158;
-  --accent-deep: #248a3d;
+  --accent-deep: #30d158;
   --accent-light: rgba(48, 209, 88, 0.15);
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
@@ -549,7 +549,7 @@ function setTheme(theme) {
 function initTheme() {
   const saved = localStorage.getItem('fitplan_theme');
   if (saved) setTheme(saved);
-  else setTheme('light'); // По умолчанию светлая
+  else setTheme('light');
 }
 
 /* ================= ГЕНЕРАЦИЯ ТРЕНИРОВКИ ================= */
@@ -721,7 +721,7 @@ function updateHomeMacros(){
   saveToServer();
 }
 
-/* ================= НЕДЕЛЬНЫЙ ПЛАН ================= */
+/* ================= ИСПРАВЛЕННЫЙ НЕДЕЛЬНЫЙ ПЛАН ================= */
 function renderWeekGrid() {
   const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
   const container = document.getElementById('weekGrid');
@@ -730,6 +730,7 @@ function renderWeekGrid() {
   let html = '';
   for (let i = 0; i < 7; i++) {
     const day = days[i];
+    // Безопасное извлечение названия
     let name = 'Отдых';
     if (weekPlans && weekPlans[day] && weekPlans[day].name) {
       name = weekPlans[day].name;
