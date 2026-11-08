@@ -347,7 +347,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Ro
 <div class="modal-overlay" id="planModal">
   <div class="modal">
     <h3>Выбрать тренировку</h3>
-    <!-- Кнопка Свой план -->
     <button class="custom-plan-btn" onclick="openCustomPlanModal()">+ Создать свой план</button>
     <div id="planModalContent" style="max-height: 50vh; overflow-y: auto;"></div>
     <button class="btn secondary" style="width:100%; margin-top:16px;" onclick="closePlanModal()">Закрыть</button>
@@ -392,6 +391,8 @@ let friends = [];
 let obStep = 0;
 let editGenderValue = 'male';
 let currentPlanDay = null;
+// Флаг, начата ли тренировка сегодня
+let isWorkoutStarted = false;
 
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString(); 
 const SERVER_URL = window.location.origin;
@@ -595,41 +596,19 @@ function renderPlanModalList(searchQuery = '') {
     const div = document.createElement('div');
     div.className = 'workout-item';
     
-    // Формируем HTML для упражнений
     let exercisesHtml = '';
     if(plan.exercises && plan.exercises.length > 0) {
-      exercisesHtml = '<div class="workout-details">' + 
+      exercisesHtml = '<div class="workout-details" id="details-' + plan.name.replace(/\s/g, '') + '">' + 
         plan.exercises.map(ex => `<div class="workout-exercise">${ex}</div>`).join('') + 
         '<div style="margin-top:12px; font-size:12px; color:var(--accent); font-weight:600;">💪 Отличный выбор! Вперёд к результату.</div>' +
         '</div>';
     }
     
     div.innerHTML = `
-      <div class="workout-info" onclick="toggleWorkoutDetails(this)">
-        <div class="workout-name">${plan.name}</div>
-        <div class="workout-desc">${plan.desc}</div>
-        ${exercisesHtml}
-      </div>
-      <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" onclick="toggleWorkoutDetails(this.parentElement.querySelector('.workout-info'))"><path d="M6 9l6 6 6-6"/></svg>
-    `;
-    
-    // Если это "Отдых" - сразу кликаем, чтобы выбрать.
-    // Если остальное - кликаем на саму плашку, чтобы выбрать. 
-    // Но так как мы хотим раскрывать по стрелочке, мы разделяем клики.
-    // Внутри workout-info клик раскрывает, а чтобы выбрать, надо кликнуть на название.
-    
-    // Упростим: клик по всей плашке - выбор. Клик по стрелочке - раскрытие.
-    // Но у нас стрелочка внутри workout-info. Давай вынесем onclick на саму плашку.
-    
-    // Переделаем верстку для правильных кликов:
-    div.innerHTML = `
       <div class="workout-info" onclick="selectPlan('${currentPlanDay}', '${plan.name}')">
         <div class="workout-name">${plan.name}</div>
         <div class="workout-desc">${plan.desc}</div>
-        <div class="workout-details" id="details-${plan.name.replace(/\s/g, '')}">
-          ${plan.exercises && plan.exercises.length > 0 ? plan.exercises.map(ex => `<div class="workout-exercise">${ex}</div>`).join('') : ''}
-          ${plan.exercises && plan.exercises.length > 0 ? '<div style="margin-top:12px; font-size:12px; color:var(--accent); font-weight:600;">💪 Отличный выбор! Вперёд к результату.</div>' : ''}
-        </div>
+        ${exercisesHtml}
       </div>
       <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" onclick="event.stopPropagation(); toggleDetails('details-${plan.name.replace(/\s/g, '')}', this)"><path d="M6 9l6 6 6-6"/></svg>
     `;
@@ -666,6 +645,7 @@ function selectPlan(day, planName){
   toast('План на ' + day + ' обновлён');
 }
 
+/* ================= ТРЕНИРОВКА СЕГОДНЯ ================= */
 function updateTodayWorkout(){
   const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
   const todayIdx = new Date().getDay();
@@ -676,6 +656,8 @@ function updateTodayWorkout(){
   
   if(plan && plan.name !== 'Отдых'){
     sub.textContent = 'Сегодня — ' + plan.name;
+    
+    // Отрисовка карточки
     content.innerHTML = `
       <div class="ex" style="border-bottom:none; padding-bottom:0;">
         <span class="ex-name">${plan.name}</span>
@@ -685,17 +667,31 @@ function updateTodayWorkout(){
         ${plan.exercises.map(e => `<div style="font-size:13px; color:var(--muted); margin-bottom:4px;">• ${e}</div>`).join('')}
       </div>
     `;
+    
     const btn = document.createElement('button'); 
     btn.className = 'btn'; 
     btn.style.marginTop = '16px'; 
-    btn.textContent = 'Завершить тренировку';
-    btn.onclick = ()=>{ 
-      const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1; 
-      streakDone[dayIdx] = true; 
-      renderStreak(); 
-      saveToServer(); 
-      toast('Тренировка засчитана! 💪'); 
-    };
+    
+    if(!isWorkoutStarted) {
+      btn.textContent = 'Начать тренировку';
+      btn.onclick = () => {
+        isWorkoutStarted = true;
+        toast('Тренировка началась! 💪');
+        updateTodayWorkout(); // Перерисовываем кнопку
+      };
+    } else {
+      btn.textContent = 'Завершить тренировку';
+      btn.classList.add('secondary'); // Меняем цвет
+      btn.onclick = () => { 
+        const dayIdx = todayIdx === 0 ? 6 : todayIdx - 1; 
+        streakDone[dayIdx] = true; 
+        isWorkoutStarted = false;
+        renderStreak(); 
+        saveToServer(); 
+        toast('Тренировка засчитана! Молодец!'); 
+        updateTodayWorkout();
+      };
+    }
     content.appendChild(btn);
   } else {
     sub.textContent = 'Сегодня — отдых'; 
