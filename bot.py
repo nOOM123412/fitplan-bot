@@ -50,14 +50,16 @@ async def init_db():
             fat_target REAL, carb_target REAL, balance REAL DEFAULT 0, sub_until INTEGER, 
             referred_by INTEGER, ref_count INTEGER DEFAULT 0, ref_earned INTEGER DEFAULT 0,
             streak_count INTEGER DEFAULT 0, last_workout_date TEXT, timezone TEXT DEFAULT 'Europe/Moscow', created_at TEXT,
-            foods_json TEXT DEFAULT '[]', plans_json TEXT DEFAULT '{}', today_workouts_json TEXT DEFAULT '[]', custom_workouts_json TEXT DEFAULT '[]', streak_json TEXT DEFAULT '[false,false,false,false,false,false,false]')""")
+            foods_json TEXT DEFAULT '[]', plans_json TEXT DEFAULT '{}', today_workouts_json TEXT DEFAULT '[]', custom_workouts_json TEXT DEFAULT '[]', streak_json TEXT DEFAULT '[false,false,false,false,false,false,false]',
+            trial_used INTEGER DEFAULT 0)""")
         
         columns = [
             ("foods_json", "TEXT DEFAULT '[]'"),
             ("plans_json", "TEXT DEFAULT '{}'"),
             ("today_workouts_json", "TEXT DEFAULT '[]'"),
             ("custom_workouts_json", "TEXT DEFAULT '[]'"),
-            ("streak_json", "TEXT DEFAULT '[false,false,false,false,false,false,false]'")
+            ("streak_json", "TEXT DEFAULT '[false,false,false,false,false,false,false]'"),
+            ("trial_used", "INTEGER DEFAULT 0")
         ]
         for col, col_type in columns:
             try:
@@ -121,7 +123,7 @@ async def get_user_full(uid: str):
             user['sub_until'] = user.get('sub_until') or 0
             return user
 
-# ================= ПЛАНИРОВЩИК (НАПОМИНАНИЯ) =================
+# ================= ПЛАНИРОВЩИК =================
 async def send_reminders():
     now = datetime.now()
     current_time = now.strftime("%H:%M")
@@ -167,9 +169,9 @@ async def api_save_all(request):
             return web.json_response({"error": "Subscription expired"}, status=403)
         
         if not row:
-            # Новый пользователь через API: даём 3 дня триала
-            await db.execute("INSERT INTO users (user_id, name, sub_until, created_at) VALUES (?, ?, ?, ?)",
-                             (int(uid), "User", now + 259200, datetime.utcnow().isoformat()))
+            # Новый пользователь через API: без триала, trial_used=0
+            await db.execute("INSERT INTO users (user_id, name, sub_until, created_at, trial_used) VALUES (?, ?, ?, ?, ?)",
+                             (int(uid), "User", 0, datetime.utcnow().isoformat(), 0))
         
         if 'profile' in data:
             p = data['profile']
@@ -284,12 +286,12 @@ async def cmd_start(message: types.Message):
     uid = message.from_user.id
     async with aiosqlite.connect(DB_FILE) as db:
         db.row_factory = aiosqlite.Row
-        async with db.execute("SELECT user_id, sub_until FROM users WHERE user_id=?", (uid,)) as cur:
+        async with db.execute("SELECT user_id FROM users WHERE user_id=?", (uid,)) as cur:
             row = await cur.fetchone()
         if not row:
-            # Новый пользователь — даём 3 дня триала
-            await db.execute("INSERT INTO users (user_id, name, username, sub_until, created_at) VALUES (?,?,?,?,?)",
-                             (uid, message.from_user.first_name, message.from_user.username, int(time.time())+259200, datetime.utcnow().isoformat()))
+            # Новый пользователь: без автотриала, trial_used=0
+            await db.execute("INSERT INTO users (user_id, name, username, sub_until, created_at, trial_used) VALUES (?,?,?,?,?,?)",
+                             (uid, message.from_user.first_name, message.from_user.username, 0, datetime.utcnow().isoformat(), 0))
             await db.commit()
     await message.answer("Привет! Это <b>FitPlan</b>.\n\nТвой личный тренер и дневник питания.", reply_markup=get_main_menu())
 
@@ -297,11 +299,12 @@ async def cmd_start(message: types.Message):
 async def cb_sub_info(callback: CallbackQuery):
     async with aiosqlite.connect(DB_FILE) as db:
         db.row_factory = aiosqlite.Row
-        async with db.execute("SELECT balance, sub_until FROM users WHERE user_id=?", (callback.from_user.id,)) as cur:
+        async with db.execute("SELECT balance, sub_until, trial_used FROM users WHERE user_id=?", (callback.from_user.id,)) as cur:
             row = await cur.fetchone()
     
     balance = row['balance'] if row else 0
     sub_until = row['sub_until'] if row else 0
+    trial_used = row['trial_used'] if row else 0
     now = int(time.time())
     status = "❌ Не активна"
     if sub_until and sub_until > now:
@@ -315,12 +318,46 @@ async def cb_sub_info(callback: CallbackQuery):
         f"Стоимость подписки на 1 месяц:\n"
         f"<s>999 ₽</s> <b>499 ₽</b> (-50% 🎉)\n\n"
     )
-    kb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💳 Оплатить с баланса", callback_data="pay_sub")],
-        [InlineKeyboardButton(text="👨‍💻 Оператор", url=f"https://t.me/{OPERATOR.replace('@','')}")],
-        [InlineKeyboardButton(text="⬅️ Назад", callback_data="menu_main")]
-    ])
+    
+    buttons = []
+    
+    # Кнопка пробного периода
+    if not trial_used or callback.from_user.id == ADMIN_ID:
+        if callback.from_user.id == ADMIN_ID:
+            buttons.append([InlineKeyboardButton(text="🎁 Активировать пробный период (3 дня)", callback_data="activate_trial")])
+        else:
+            buttons.append([InlineKeyboardButton(text="🎁 Пробный период 3 дня (один раз)", callback_data="activate_trial")])
+    
+    buttons.append([InlineKeyboardButton(text="💳 Оплатить с баланса", callback_data="pay_sub")])
+    buttons.append([InlineKeyboardButton(text="👨‍💻 Оператор", url=f"https://t.me/{OPERATOR.replace('@','')}")])
+    buttons.append([InlineKeyboardButton(text="⬅️ Назад", callback_data="menu_main")])
+    
+    kb = InlineKeyboardMarkup(inline_keyboard=buttons)
     await callback.message.edit_text(text, reply_markup=kb)
+
+@dp.callback_query(F.data == "activate_trial")
+async def cb_activate_trial(callback: CallbackQuery):
+    uid = callback.from_user.id
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT trial_used, sub_until FROM users WHERE user_id=?", (uid,)) as cur:
+            row = await cur.fetchone()
+        
+        if not row:
+            return await callback.answer("❌ Пользователь не найден", show_alert=True)
+        
+        trial_used = row['trial_used']
+        
+        if trial_used and uid != ADMIN_ID:
+            return await callback.answer("❌ Ты уже использовал пробный период", show_alert=True)
+        
+        now = int(time.time())
+        new_until = max(row['sub_until'] or 0, now) + 3 * 24 * 60 * 60
+        await db.execute("UPDATE users SET sub_until = ?, trial_used = 1 WHERE user_id = ?", (new_until, uid))
+        await db.commit()
+    
+    await callback.answer("🎁 Пробный период активирован на 3 дня!", show_alert=True)
+    await cb_sub_info(callback)
 
 @dp.callback_query(F.data == "pay_sub")
 async def cb_pay_sub(callback: CallbackQuery):
@@ -456,7 +493,8 @@ async def process_reset_sub(message: Message, state: FSMContext):
             if not row:
                 await message.answer("❌ Пользователь не найден.")
                 return await state.clear()
-            await db.execute("UPDATE users SET sub_until = 0 WHERE user_id = ?", (target_id,))
+            # Обнуляем и подписку, и флаг триала — чтобы пользователь мог активировать пробный заново
+            await db.execute("UPDATE users SET sub_until = 0, trial_used = 0 WHERE user_id = ?", (target_id,))
             await db.commit()
         try: await bot.send_message(target_id, "⚠️ Твоя подписка была обнулена администратором.")
         except: pass
