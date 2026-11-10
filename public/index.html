@@ -229,7 +229,7 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height:
 .ws-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
 
 .modal-overlay { position: fixed; inset: 0; background: rgba(60, 60, 55, 0.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
-.modal-overlay.show { display: flex; animation: fadeIn 0.3s var(--ease); }
+.modal-overlay.show { display: flex !important; animation: fadeIn 0.3s var(--ease); }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .modal { background: var(--glass-strong); backdrop-filter: blur(40px) saturate(180%); border-radius: 30px 30px 0 0; padding: 24px; width: 100%; max-width: 480px; max-height: 90vh; display: flex; flex-direction: column; animation: slideUpModal 0.45s var(--ease); border-top: 1px solid var(--glass-border); overflow: hidden; }
 @keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -1009,8 +1009,17 @@ function toast(msg) {
   clearTimeout(t._tid); t._tid = setTimeout(() => t.classList.remove('show'), 2200);
 }
 function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
-function openModal(id) { document.getElementById(id).classList.add('show'); }
-function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.add('show');
+}
+function closeModal(id) {
+  const el = document.getElementById(id);
+  if (el) {
+    el.classList.remove('show');
+    el.style.display = '';
+  }
+}
 function haptic(type = 'light') {
   if (window.Telegram?.WebApp?.HapticFeedback) {
     try { window.Telegram.WebApp.HapticFeedback.impactOccurred(type); } catch(e) {}
@@ -1300,10 +1309,18 @@ function getWorkoutMeta(templateId) {
   if (c) return { name: c.name };
   return null;
 }
-function removeTodayWorkout(i) { todayWorkouts.splice(i, 1); saveAll(); renderHome(); }
+async function removeTodayWorkout(i) { 
+  todayWorkouts.splice(i, 1); 
+  renderHome();
+  await saveAll(); 
+}
 function addExtraWorkout() { targetDayKey = null; openWorkoutPicker(); }
 
-function openWorkoutPicker() { renderMuscleTabs(); renderWorkoutOptions(); openModal('modal-plan'); }
+function openWorkoutPicker() { 
+  renderMuscleTabs(); 
+  renderWorkoutOptions(); 
+  openModal('modal-plan'); 
+}
 function renderMuscleTabs() {
   let html = `<button class="muscle-tab custom-tab ${currentMuscleGroup === 'custom' ? 'active' : ''}" onclick="selectMuscle('custom')">+ Своя</button>`;
   html += Object.keys(MUSCLE_LABELS).map(k =>
@@ -1311,7 +1328,12 @@ function renderMuscleTabs() {
   ).join('');
   document.getElementById('muscleTabs').innerHTML = html;
 }
-function selectMuscle(k) { currentMuscleGroup = k; renderMuscleTabs(); renderWorkoutOptions(); haptic(); }
+function selectMuscle(k) { 
+  currentMuscleGroup = k; 
+  renderMuscleTabs(); 
+  renderWorkoutOptions(); 
+  haptic(); 
+}
 function renderWorkoutOptions() {
   let html = '';
   if (currentMuscleGroup === 'custom') {
@@ -1325,10 +1347,26 @@ function renderWorkoutOptions() {
   html = arr.map(t => `<div class="workout-option" onclick="chooseWorkout('${t.id}')"><div class="wo-name">${t.name}</div><div class="wo-desc">${t.desc}</div><div class="wo-meta"><span class="wo-badge">${t.ex.length} упр.</span><span class="wo-badge">${currentDuration} мин</span></div></div>`).join('');
   document.getElementById('workoutOptionsList').innerHTML = html || '<div style="text-align:center;color:var(--text-muted);padding:20px;">Нет тренировок</div>';
 }
-function chooseWorkout(templateId) {
-  if (targetDayKey) { weekPlans[targetDayKey] = templateId; targetDayKey = null; saveAll(); renderAll(); closeModal('modal-plan'); toast('Добавлено в план'); }
-  else { todayWorkouts.push({ templateId, done: false }); saveAll(); renderAll(); closeModal('modal-plan'); toast('Тренировка добавлена'); }
-  haptic('medium');
+
+/* === ИСПРАВЛЕННЫЙ chooseWorkout === */
+async function chooseWorkout(templateId) {
+  if (targetDayKey) {
+    weekPlans[targetDayKey] = templateId;
+    targetDayKey = null;
+    closeModal('modal-plan');
+    renderWeekGrid();
+    renderHome();
+    haptic('medium');
+    toast('Добавлено в план');
+    await saveAll();
+  } else {
+    todayWorkouts.push({ templateId, done: false });
+    closeModal('modal-plan');
+    renderHome();
+    haptic('medium');
+    toast('Тренировка добавлена');
+    await saveAll();
+  }
 }
 
 function renderWeekGrid() {
@@ -1344,14 +1382,16 @@ function openCustomPlanModal() {
   ['customName','customDesc','customEx'].forEach(id => document.getElementById(id).value = '');
   openModal('modal-custom-plan');
 }
-function saveCustomPlan() {
+async function saveCustomPlan() {
   const name = document.getElementById('customName').value.trim();
   const desc = document.getElementById('customDesc').value.trim();
   const ex = document.getElementById('customEx').value.trim();
   if (!name || !ex) { toast('Заполни название и упражнения'); return; }
   const id = 'custom_' + Date.now();
   customWorkouts.push({ id, name, desc, exercises: ex });
-  saveAll(); closeModal('modal-custom-plan'); chooseWorkout(id);
+  closeModal('modal-custom-plan');
+  await saveAll();
+  chooseWorkout(id);
 }
 
 function openFoodModal() {
@@ -1373,10 +1413,10 @@ async function addFood() {
   if (!foodHistory[tk]) foodHistory[tk] = 0;
   foodHistory[tk] += food.kcal;
   closeModal('modal-food');
-  await saveAll();
   renderFood(); renderHome();
   toast('Добавлено');
   haptic('medium');
+  await saveAll();
 }
 function renderFood() {
   const el = document.getElementById('foodItems');
@@ -1396,7 +1436,12 @@ function renderFoodHistoryChart() {
     return `<div class="bar-col"><div class="bar-fill ${h===0?'zero':''}" style="height:${Math.max(h,4)}%"></div><div class="bar-label">${d}</div></div>`;
   }).join('');
 }
-function removeFood(i) { todayFoods.splice(i, 1); saveAll(); renderFood(); renderHome(); toast('Удалено'); }
+async function removeFood(i) { 
+  todayFoods.splice(i, 1); 
+  renderFood(); renderHome(); 
+  toast('Удалено'); 
+  await saveAll();
+}
 
 const FOOD_DB = [
   { name: 'Куриная грудка', kcal: 165, p: 31, f: 3.6, c: 0 },
@@ -1507,9 +1552,9 @@ function renderWaterGlasses() {
     `<div class="water-glass ${i < filled ? 'filled' : ''}" onclick="setWater(${i * 250 + 250})"></div>`
   ).join('');
 }
-function addWater(amount) { waterToday = Math.min(waterToday + amount, 5000); saveAll(); renderWaterSleep(); renderWaterGlasses(); haptic(); }
-function removeWater(amount) { waterToday = Math.max(waterToday - amount, 0); saveAll(); renderWaterSleep(); renderWaterGlasses(); }
-function setWater(val) { waterToday = val; saveAll(); renderWaterSleep(); renderWaterGlasses(); }
+async function addWater(amount) { waterToday = Math.min(waterToday + amount, 5000); renderWaterSleep(); renderWaterGlasses(); haptic(); await saveAll(); }
+async function removeWater(amount) { waterToday = Math.max(waterToday - amount, 0); renderWaterSleep(); renderWaterGlasses(); await saveAll(); }
+async function setWater(val) { waterToday = val; renderWaterSleep(); renderWaterGlasses(); await saveAll(); }
 
 function openSleepModal() {
   document.getElementById('sleepInput').value = sleepHistory[todayKey()] || '';
@@ -1520,9 +1565,9 @@ async function saveSleep() {
   const v = parseFloat(document.getElementById('sleepInput').value);
   if (isNaN(v) || v < 0 || v > 24) { toast('Введи 0-24'); return; }
   sleepHistory[todayKey()] = v;
-  await saveAll();
   closeModal('modal-sleep'); renderWaterSleep(); checkAchievements();
   toast('Сон записан');
+  await saveAll();
 }
 function renderSleepHistoryChart() {
   const el = document.getElementById('sleepHistoryChart');
@@ -1619,9 +1664,9 @@ async function saveProfile() {
   user.weight = +document.getElementById('editWeight').value || user.weight;
   user.height = +document.getElementById('editHeight').value || user.height;
   calcKbzhu();
-  await saveAll();
   closeModal('modal-edit-profile'); renderAll();
   toast('Сохранено');
+  await saveAll();
 }
 
 function renderPhotos() {
@@ -1645,7 +1690,7 @@ function takePhoto() {
   };
   input.click();
 }
-function deletePhoto(i) { if (confirm('Удалить?')) { photos.splice(i, 1); saveAll(); renderPhotos(); } }
+async function deletePhoto(i) { if (confirm('Удалить?')) { photos.splice(i, 1); renderPhotos(); await saveAll(); } }
 
 function renderMealTemplates() {
   const el = document.getElementById('mealTemplatesList');
@@ -1662,7 +1707,7 @@ function openMealTemplateModal() {
   ['templateName','templateKcal','templateP','templateF','templateC'].forEach(id => document.getElementById(id).value = '');
   openModal('modal-meal-template');
 }
-function saveMealTemplate() {
+async function saveMealTemplate() {
   const name = document.getElementById('templateName').value.trim();
   const kcal = +document.getElementById('templateKcal').value || 0;
   const p = +document.getElementById('templateP').value || 0;
@@ -1670,14 +1715,16 @@ function saveMealTemplate() {
   const c = +document.getElementById('templateC').value || 0;
   if (!name) { toast('Введи название'); return; }
   mealTemplates.push({ name, kcal, p, f, c });
-  saveAll(); closeModal('modal-meal-template'); renderMealTemplates(); toast('Шаблон создан');
+  closeModal('modal-meal-template'); renderMealTemplates(); toast('Шаблон создан');
+  await saveAll();
 }
-function applyMealTemplate(i) {
+async function applyMealTemplate(i) {
   const t = mealTemplates[i];
   todayFoods.push({ name: t.name, weight: 100, kcal: t.kcal, protein: t.p, fat: t.f, carbs: t.c });
-  saveAll(); renderFood(); renderHome(); toast('Добавлено'); haptic('medium');
+  renderFood(); renderHome(); toast('Добавлено'); haptic('medium');
+  await saveAll();
 }
-function deleteMealTemplate(i) { mealTemplates.splice(i, 1); saveAll(); renderMealTemplates(); }
+async function deleteMealTemplate(i) { mealTemplates.splice(i, 1); renderMealTemplates(); await saveAll(); }
 
 function renderProgress() {
   setText('statStreak', streakDone.filter(Boolean).length);
@@ -1841,7 +1888,7 @@ function exitWorkout() {
   document.getElementById('wsRestText').style.display = 'none';
   document.getElementById('workoutScreen').classList.remove('active');
 }
-function finishWorkout() {
+async function finishWorkout() {
   clearInterval(wsTimerInterval);
   const scr = document.getElementById('workoutScreen');
   const idx = +scr.dataset.todayIdx;
@@ -1856,9 +1903,10 @@ function finishWorkout() {
   workoutsCompleted++;
   const tk = todayKey();
   activityHistory[tk] = (activityHistory[tk] || 0) + 2;
-  saveAll(); renderAll();
+  renderAll();
   toast('Тренировка завершена');
   haptic('heavy');
+  await saveAll();
 }
 
 function exportJSON() {
