@@ -466,7 +466,7 @@ async def cb_sub_info(callback: CallbackQuery):
         f"💳 <b>Подписка</b>\n\n"
         f"Баланс: <b>{balance} ₽</b>\n"
         f"Статус: <b>{status}</b>\n\n"
-        f"Цена: <s>999 ₽</s> <b>499 ₽</b> / мес\n"
+        f"Цена: <s>999 ₽</s> <b>299 ₽</b> / мес\n"
     )
     buttons = []
     if not trial_used or callback.from_user.id == ADMIN_ID:
