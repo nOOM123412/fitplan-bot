@@ -936,6 +936,15 @@ const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(
 const SERVER_URL = window.location.origin;
 
 /* ================= СЕРВЕР ================= */
+// Дебаунс для сохранения, чтобы не спамить сервер
+let saveTimeout = null;
+function saveAllDebounced() {
+  if (saveTimeout) clearTimeout(saveTimeout);
+  saveTimeout = setTimeout(() => {
+    saveAll();
+  }, 1000); 
+}
+
 async function saveAll() {
   try {
     const data = {
@@ -969,6 +978,10 @@ async function loadAll() {
     if (!res.ok) return;
     const d = await res.json();
     if (d.profile) user = { ...user, ...d.profile };
+    // Восстанавливаем БЖУ, если пришло 0, но есть калории
+    if (user.kcal && (!user.protein || !user.fat || !user.carbs)) {
+        calcKbzhu();
+    }
     if (d.foods) todayFoods = d.foods;
     if (d.plans) weekPlans = d.plans;
     if (d.todayWorkouts) todayWorkouts = d.todayWorkouts;
@@ -1039,7 +1052,7 @@ function unlockAch(id) {
   unlockedAchievements.push(id);
   const a = ACHIEVEMENTS.find(x => x.id === id);
   if (a) toast(`Ачивка: ${a.name}!`);
-  saveAll();
+  saveAllDebounced();
 }
 function checkAchievements() {
   if (workoutsCompleted >= 1) unlockAch('first_workout');
@@ -1312,7 +1325,7 @@ function getWorkoutMeta(templateId) {
 async function removeTodayWorkout(i) { 
   todayWorkouts.splice(i, 1); 
   renderHome();
-  await saveAll(); 
+  saveAllDebounced(); 
 }
 function addExtraWorkout() { targetDayKey = null; openWorkoutPicker(); }
 
@@ -1348,7 +1361,6 @@ function renderWorkoutOptions() {
   document.getElementById('workoutOptionsList').innerHTML = html || '<div style="text-align:center;color:var(--text-muted);padding:20px;">Нет тренировок</div>';
 }
 
-/* === ИСПРАВЛЕННЫЙ chooseWorkout === */
 async function chooseWorkout(templateId) {
   if (targetDayKey) {
     weekPlans[targetDayKey] = templateId;
@@ -1358,14 +1370,14 @@ async function chooseWorkout(templateId) {
     renderHome();
     haptic('medium');
     toast('Добавлено в план');
-    await saveAll();
+    saveAllDebounced();
   } else {
     todayWorkouts.push({ templateId, done: false });
     closeModal('modal-plan');
     renderHome();
     haptic('medium');
     toast('Тренировка добавлена');
-    await saveAll();
+    saveAllDebounced();
   }
 }
 
@@ -1390,7 +1402,7 @@ async function saveCustomPlan() {
   const id = 'custom_' + Date.now();
   customWorkouts.push({ id, name, desc, exercises: ex });
   closeModal('modal-custom-plan');
-  await saveAll();
+  saveAllDebounced();
   chooseWorkout(id);
 }
 
@@ -1416,7 +1428,7 @@ async function addFood() {
   renderFood(); renderHome();
   toast('Добавлено');
   haptic('medium');
-  await saveAll();
+  saveAllDebounced();
 }
 function renderFood() {
   const el = document.getElementById('foodItems');
@@ -1440,7 +1452,7 @@ async function removeFood(i) {
   todayFoods.splice(i, 1); 
   renderFood(); renderHome(); 
   toast('Удалено'); 
-  await saveAll();
+  saveAllDebounced();
 }
 
 const FOOD_DB = [
@@ -1552,9 +1564,9 @@ function renderWaterGlasses() {
     `<div class="water-glass ${i < filled ? 'filled' : ''}" onclick="setWater(${i * 250 + 250})"></div>`
   ).join('');
 }
-async function addWater(amount) { waterToday = Math.min(waterToday + amount, 5000); renderWaterSleep(); renderWaterGlasses(); haptic(); await saveAll(); }
-async function removeWater(amount) { waterToday = Math.max(waterToday - amount, 0); renderWaterSleep(); renderWaterGlasses(); await saveAll(); }
-async function setWater(val) { waterToday = val; renderWaterSleep(); renderWaterGlasses(); await saveAll(); }
+async function addWater(amount) { waterToday = Math.min(waterToday + amount, 5000); renderWaterSleep(); renderWaterGlasses(); haptic(); saveAllDebounced(); }
+async function removeWater(amount) { waterToday = Math.max(waterToday - amount, 0); renderWaterSleep(); renderWaterGlasses(); saveAllDebounced(); }
+async function setWater(val) { waterToday = val; renderWaterSleep(); renderWaterGlasses(); saveAllDebounced(); }
 
 function openSleepModal() {
   document.getElementById('sleepInput').value = sleepHistory[todayKey()] || '';
@@ -1567,7 +1579,7 @@ async function saveSleep() {
   sleepHistory[todayKey()] = v;
   closeModal('modal-sleep'); renderWaterSleep(); checkAchievements();
   toast('Сон записан');
-  await saveAll();
+  saveAllDebounced();
 }
 function renderSleepHistoryChart() {
   const el = document.getElementById('sleepHistoryChart');
@@ -1666,7 +1678,7 @@ async function saveProfile() {
   calcKbzhu();
   closeModal('modal-edit-profile'); renderAll();
   toast('Сохранено');
-  await saveAll();
+  saveAllDebounced();
 }
 
 function renderPhotos() {
@@ -1684,13 +1696,13 @@ function takePhoto() {
     const reader = new FileReader();
     reader.onload = (ev) => {
       photos.push({ url: ev.target.result, date: todayKey() });
-      saveAll(); renderPhotos(); checkAchievements(); toast('Фото добавлено');
+      saveAllDebounced(); renderPhotos(); checkAchievements(); toast('Фото добавлено');
     };
     reader.readAsDataURL(file);
   };
   input.click();
 }
-async function deletePhoto(i) { if (confirm('Удалить?')) { photos.splice(i, 1); renderPhotos(); await saveAll(); } }
+async function deletePhoto(i) { if (confirm('Удалить?')) { photos.splice(i, 1); renderPhotos(); saveAllDebounced(); } }
 
 function renderMealTemplates() {
   const el = document.getElementById('mealTemplatesList');
@@ -1716,15 +1728,15 @@ async function saveMealTemplate() {
   if (!name) { toast('Введи название'); return; }
   mealTemplates.push({ name, kcal, p, f, c });
   closeModal('modal-meal-template'); renderMealTemplates(); toast('Шаблон создан');
-  await saveAll();
+  saveAllDebounced();
 }
 async function applyMealTemplate(i) {
   const t = mealTemplates[i];
   todayFoods.push({ name: t.name, weight: 100, kcal: t.kcal, protein: t.p, fat: t.f, carbs: t.c });
   renderFood(); renderHome(); toast('Добавлено'); haptic('medium');
-  await saveAll();
+  saveAllDebounced();
 }
-async function deleteMealTemplate(i) { mealTemplates.splice(i, 1); renderMealTemplates(); await saveAll(); }
+async function deleteMealTemplate(i) { mealTemplates.splice(i, 1); renderMealTemplates(); saveAllDebounced(); }
 
 function renderProgress() {
   setText('statStreak', streakDone.filter(Boolean).length);
@@ -1906,7 +1918,7 @@ async function finishWorkout() {
   renderAll();
   toast('Тренировка завершена');
   haptic('heavy');
-  await saveAll();
+  saveAllDebounced();
 }
 
 function exportJSON() {
