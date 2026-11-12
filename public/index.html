@@ -216,20 +216,9 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height:
 .heatmap-cell.lvl-3 { background: var(--accent); }
 .heatmap-cell.lvl-4 { background: var(--accent-deep); }
 
-.streak-days { display: flex; gap: 6px; margin-top: 14px; }
-.streak-day { flex: 1; aspect-ratio: 1; border-radius: 10px; background: var(--glass-strong); border: 1px solid var(--glass-border); display: grid; place-items: center; font-size: 12px; font-weight: 800; color: var(--text-muted); transition: all 0.3s var(--ease); }
-.streak-day.done { background: var(--accent-gradient); border-color: transparent; color: #fff; box-shadow: 0 4px 12px rgba(143,174,148,0.35); transform: translateY(-2px); }
-
-.leaderboard-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--glass-border); }
-.leaderboard-row:last-child { border-bottom: none; }
-.leaderboard-rank { font-size: 18px; font-weight: 800; width: 30px; text-align: center; color: var(--text-muted); }
-.leaderboard-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-gradient); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
-.leaderboard-name { flex: 1; font-weight: 700; font-size: 15px; }
-.leaderboard-score { display: flex; align-items: center; gap: 4px; font-weight: 800; color: var(--accent-deep); font-size: 15px; }
-.poke-btn { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 8px; padding: 4px 8px; font-size: 14px; cursor: pointer; }
-
+/* ИМТ И ВЕС */
 .bmi-hero { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
-.bmi-hero-val { font-size: 42px; font-weight: 800; letter-spacing: -1.5px; line-height: 1; }
+.bmi-hero-val { font-size: 42px; font-weight: 800; letter-spacing: -1.5px; line-height: 1; color: var(--text-main); }
 .bmi-hero-cat { font-size: 13px; font-weight: 700; margin-top: 6px; display: inline-block; padding: 5px 12px; border-radius: 10px; }
 .bmi-scale { position: relative; height: 22px; border-radius: 12px; margin: 8px 0 14px; background: linear-gradient(90deg, var(--info) 0%, var(--info) 18%, var(--accent-soft) 18%, var(--accent-soft) 52%, var(--warn) 52%, var(--warn) 78%, var(--danger) 78%, var(--danger) 100%); }
 .bmi-scale-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); font-weight: 700; margin-top: 4px; }
@@ -238,6 +227,10 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height:
 .bmi-row:last-child { border-bottom: none; }
 .bmi-row .k { font-size: 14px; color: var(--text-muted); font-weight: 700; }
 .bmi-row .v { font-size: 15px; font-weight: 800; text-align: right; }
+
+.weight-chart { width: 100%; height: 140px; margin-top: 12px; position: relative; }
+.weight-chart svg { width: 100%; height: 100%; overflow: visible; }
+.weight-chart-empty { text-align: center; color: var(--text-muted); font-size: 14px; padding: 20px 0; font-weight: 600; }
 
 .tabbar { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; padding: 8px 12px calc(8px + var(--safe-bottom)); background: var(--glass-strong); backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px) saturate(180%); border-top: 1px solid var(--glass-border); display: flex; justify-content: space-between; z-index: 100; border-radius: 28px 28px 0 0; box-shadow: 0 -8px 30px rgba(120,118,110,0.06); }
 [data-theme="bento"] .tabbar { border-top: 4px solid #111; border-radius: 0; }
@@ -578,7 +571,7 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 9l-5 5-2-2-4 4"/></svg>Динамика веса</div><button class="btn-icon" onclick="openWeightModal()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></h2>
-      <div id="weightChartContainer"><div style="text-align:center;color:var(--text-muted);font-size:14px;padding:20px 0;font-weight:600;">Нет данных. Добавь первый замер ↓</div></div>
+      <div id="weightChartContainer"><div class="weight-chart-empty">Нет данных. Добавь первый замер ↓</div></div>
       <button class="btn primary" style="margin-top: 14px;" onclick="openWeightModal()">+ Записать вес</button>
     </div>
 
