@@ -651,6 +651,14 @@ async function saveAll() {
 async function loadAll() {
   try {
     const res = await fetch(`${SERVER_URL}/api/user?id=${USER_ID}`);
+    
+    // ДОБАВЛЕНО: Если подписка истекла, показываем экран оплаты и выходим
+    if (res.status === 403) {
+      document.getElementById('mainApp').style.display = 'none';
+      document.getElementById('expiredScreen').classList.add('show');
+      return; 
+    }
+
     if (!res.ok) return;
     const d = await res.json();
     if (d.profile) user = { ...user, ...d.profile };
@@ -1059,6 +1067,10 @@ function toggleReminder(type, val) { user.reminders[type] = val; renderReminders
 document.addEventListener('DOMContentLoaded', async () => {
   setTheme(localStorage.getItem('fitplan_theme') || 'light');
   await loadAll();
+  
+  // Если подписка истекла, экран подписки уже показан внутри loadAll()
+  if (document.getElementById('expiredScreen').classList.contains('show')) return;
+
   if (user.name && user.kcal) { 
     document.getElementById('onboarding').style.display = 'none'; 
     document.getElementById('mainApp').style.display = 'block'; 
