@@ -184,6 +184,13 @@ svg { display: block; }
 .ws-weight-control { display: inline-flex; align-items: center; gap: 14px; background: var(--glass-strong); padding: 8px 16px; border-radius: 18px; margin: 0 auto 20px auto; border: 1px solid var(--glass-border); transition: opacity 0.3s; }
 .ws-weight-btn { width: 34px; height: 34px; border-radius: 10px; border: none; background: var(--bg); color: var(--text-main); font-size: 20px; font-weight: 700; cursor: pointer; }
 .ws-history { font-size: 13px; color: var(--info); font-weight: 700; margin-bottom: 10px; min-height: 18px; }
+
+/* QR СКАНЕР */
+.fullscreen-overlay { position: fixed; inset: 0; z-index: 4000; background: #000; display: none; flex-direction: column; }
+.fullscreen-overlay.show { display: flex; }
+#qrReader { flex: 1; width: 100%; }
+.qr-close { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.2); color: #fff; border: none; z-index: 10; cursor: pointer; display: grid; place-items: center; }
+.qr-close svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.4; }
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -577,6 +584,12 @@ svg { display: block; }
   </div>
 </div>
 
+<div class="fullscreen-overlay" id="qrModal">
+  <button class="qr-close" onclick="closeQRScanner()"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  <div id="qrReader" style="width: 100%; height: 100%;"></div>
+  <div style="padding: 20px; text-align: center; color: #fff; font-weight: 700;">Наведи камеру на штрих-код</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -617,7 +630,7 @@ let sleepHistory = {};
 let foodHistory = {};
 let activityHistory = {};
 let recentFoods = [];
-let friends = []; // Теперь друзья хранятся здесь
+let friends = []; 
 let dailyQuests = {};
 let foodLog = {}; 
 let selectedMeal = 'breakfast';
@@ -683,7 +696,7 @@ async function loadAll() {
     if (d.waterToday) waterToday = d.waterToday;
     if (d.sleepHistory) sleepHistory = d.sleepHistory;
     if (d.weightHistory) weightHistory = d.weightHistory;
-    if (d.friends) friends = d.friends; // ВАЖНО: Теперь друзья сохраняются в переменную!
+    if (d.friends) friends = d.friends; 
     if (d.recentFoods) recentFoods = d.recentFoods;
     if (d.dailyQuests) dailyQuests = d.dailyQuests;
     if (d.foodLog) foodLog = d.foodLog;
@@ -1049,6 +1062,87 @@ async function loadLeaderboard() {
 async function pokeFriend(id, type) {
   await fetch(`${SERVER_URL}/api/friends/poke`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: USER_ID, target_id: id, type }) });
   toast('Подкол отправлен!');
+}
+
+// ---- QR СКАНЕР ----
+let qrScannerObj = null;
+function openQRScanner() {
+  document.getElementById('qrModal').classList.add('show');
+  setTimeout(() => {
+    if (typeof Html5Qrcode === 'undefined') { toast('Ошибка загрузки сканера'); closeQRScanner(); return; }
+    try {
+      if (qrScannerObj) qrScannerObj.clear();
+      qrScannerObj = new Html5Qrcode("qrReader");
+      qrScannerObj.start(
+        { facingMode: "environment" }, 
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => { closeQRScanner(); searchByBarcode(decodedText); },
+        () => {}
+      ).catch(err => { toast('Нет доступа к камере'); closeQRScanner(); });
+    } catch(e) { toast('Ошибка запуска'); closeQRScanner(); }
+  }, 300);
+}
+function closeQRScanner() {
+  document.getElementById('qrModal').classList.remove('show');
+  if (qrScannerObj) { try { qrScannerObj.stop().then(() => { qrScannerObj.clear(); qrScannerObj = null; }); } catch(e) { qrScannerObj = null; } }
+}
+async function searchByBarcode(code) {
+  toast('Ищу: ' + code);
+  try {
+    const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${code}.json`);
+    const data = await res.json();
+    if (data.status === 1) {
+      const p = data.product; const n = p.product_name || 'Продукт'; const nut = p.nutriments || {};
+      const kcal = Math.round(nut['energy-kcal_100g'] || 0);
+      const pp = Math.round(nut['proteins_100g'] || 0);
+      const ff = Math.round(nut['fat_100g'] || 0);
+      const cc = Math.round(nut['carbohydrates_100g'] || 0);
+      if (kcal > 0) {
+        document.getElementById('foodName').value = n;
+        document.getElementById('foodKcal').value = kcal;
+        document.getElementById('foodP').value = pp; document.getElementById('foodF').value = ff; document.getElementById('foodC').value = cc;
+        document.getElementById('foodWeight').value = 100;
+        openModal('modal-food');
+      } else toast('Не хватает данных');
+    } else toast('Не найден');
+  } catch(e) { toast('Ошибка сети'); }
+}
+
+async function openFoodSearch() {
+  document.getElementById('foodSearchInput').value = '';
+  document.getElementById('foodSearchResults').innerHTML = '';
+  openModal('modal-food-search');
+  setTimeout(() => document.getElementById('foodSearchInput').focus(), 100);
+}
+async function searchFoodDB() {
+  const q = document.getElementById('foodSearchInput').value.trim().toLowerCase();
+  const results = document.getElementById('foodSearchResults');
+  if (!q) { results.innerHTML = ''; return; }
+  results.innerHTML = '<div class="skeleton" style="height: 60px; margin-bottom: 8px;"></div>';
+  try {
+    const res = await fetch(`https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=5`);
+    const data = await res.json();
+    let html = '';
+    if (data.products && data.products.length > 0) {
+      data.products.slice(0, 5).forEach(p => {
+        const n = p.product_name || 'Без названия'; const nut = p.nutriments || {};
+        const kcal = Math.round(nut['energy-kcal_100g'] || 0);
+        const pp = Math.round(nut['proteins_100g'] || 0);
+        const ff = Math.round(nut['fat_100g'] || 0);
+        const cc = Math.round(nut['carbohydrates_100g'] || 0);
+        if (kcal > 0) html += `<div class="workout-option" onclick="chooseFoodFromDB('${n.replace(/'/g, "\\'")}', ${kcal}, ${pp}, ${ff}, ${cc})" style="padding: 12px; background: var(--glass); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--glass-border);"><div style="font-weight:800;">${n}</div><div style="font-size:12px;color:var(--text-muted);">${kcal} ккал · Б${pp} Ж${ff} У${cc}</div></div>`;
+      });
+    }
+    results.innerHTML = html || '<div style="text-align:center;color:var(--text-muted);padding:20px;">Ничего не найдено</div>';
+  } catch(e) { results.innerHTML = '<div style="text-align:center;color:var(--danger);padding:20px;">Ошибка поиска</div>'; }
+}
+function chooseFoodFromDB(name, kcal, p, f, c) {
+  closeModal('modal-food-search');
+  document.getElementById('foodName').value = name;
+  document.getElementById('foodKcal').value = kcal;
+  document.getElementById('foodP').value = p; document.getElementById('foodF').value = f; document.getElementById('foodC').value = c;
+  document.getElementById('foodWeight').value = 100;
+  openModal('modal-food');
 }
 
 // ---- СЛУЖЕБНОЕ ----
