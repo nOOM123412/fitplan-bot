@@ -1361,9 +1361,50 @@ function saveSleep() { sleepHistory[todayKey()] = parseFloat(document.getElement
 
 function toggleReminder(type, val) { user.reminders[type] = val; saveAllDebounced(); }
 
+// === ВОЗВРАТ К РЕГИСТРАЦИИ И РЕДАКТИРОВАНИЕ ПРОФИЛЯ ===
+function restartOnboarding() {
+  if (confirm('Вернуться к регистрации? Текущие данные профиля останутся в базе, но вы сможете ввести новые.')) {
+    // Сбрасываем только шаг и показываем экран регистрации поверх основного приложения
+    obStep = 0;
+    document.querySelectorAll('.ob-step').forEach((s, i) => s.style.display = i === 0 ? 'block' : 'none');
+    document.getElementById('btnNext').textContent = 'Далее';
+    
+    // Предзаполняем поля текущими данными (чтобы не вводить заново)
+    document.getElementById('inpName').value = user.name || '';
+    document.getElementById('inpAge').value = user.age || '';
+    document.getElementById('inpWeight').value = user.weight || '';
+    document.getElementById('inpHeight').value = user.height || '';
+    
+    document.getElementById('onboarding').style.display = 'flex';
+  }
+}
+
+function openEditProfile() {
+  document.getElementById('editName').value = user.name || '';
+  document.getElementById('editAge').value = user.age || '';
+  document.getElementById('editWeight').value = user.weight || '';
+  document.getElementById('editHeight').value = user.height || '';
+  openModal('modal-edit-profile');
+}
+
+async function saveProfile() {
+  user.name = document.getElementById('editName').value.trim() || user.name;
+  user.age = +document.getElementById('editAge').value || user.age;
+  user.weight = +document.getElementById('editWeight').value || user.weight;
+  user.height = +document.getElementById('editHeight').value || user.height;
+  calcKbzhu();
+  closeModal('modal-edit-profile'); renderHome(); renderProfile();
+  toast('Сохранено'); saveAllDebounced();
+}
+
+function resetAll() {
+  if (!confirm('Удалить все данные и вернуться к полной регистрации?')) return;
+  localStorage.removeItem('fitplan_theme');
+  location.reload();
+}
+
 // Инициализация
 window.addEventListener('DOMContentLoaded', async () => {
-  // По умолчанию СВЕТЛАЯ тема
   const savedTheme = localStorage.getItem('fitplan_theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
   
@@ -1408,11 +1449,11 @@ async function obNext() {
 
 async function finishOnboarding() {
   if(!user.uniqueId) user.uniqueId = Math.floor(100000 + Math.random() * 900000).toString();
-  await saveAll(); document.getElementById('onboarding').style.display = 'none'; document.getElementById('mainApp').style.display = 'block';
+  await saveAll(); 
+  document.getElementById('onboarding').style.display = 'none'; 
+  document.getElementById('mainApp').style.display = 'block';
   renderHome(); switchTab('home');
 }
-
-function restartOnboarding() { if(confirm('Сбросить?')) { localStorage.clear(); location.reload(); } }
 </script>
 </body>
 </html>
