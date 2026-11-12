@@ -127,7 +127,6 @@ svg { display: block; }
 .tab { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: var(--text-muted); font-size: 9px; font-weight: 700; cursor: pointer; padding: 8px 6px; border-radius: 14px; }
 .tab svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2.3; fill: none; }
 .tab.active { color: var(--accent-deep); background: var(--accent-light); }
-/* Модалки */
 .modal-overlay { position: fixed; inset: 0; background: rgba(60, 60, 55, 0.35); backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
 .modal-overlay.show { display: flex !important; }
 .modal { background: var(--glass-strong); border-radius: 30px 30px 0 0; padding: 24px; width: 100%; max-width: 480px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; border-top: 1px solid var(--glass-border); }
@@ -145,32 +144,20 @@ svg { display: block; }
 .screen.active { display: block; }
 .toast { position: fixed; bottom: calc(120px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text-main); color: var(--bg); border-radius: 30px; padding: 13px 26px; font-size: 15px; font-weight: 700; opacity: 0; pointer-events: none; transition: all 0.4s var(--ease); z-index: 3000; text-align: center; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ЭКРАН ТРЕНИРОВКИ */
 #workoutScreen { position: fixed; inset: 0; z-index: 1000; background: var(--bg); display: none; flex-direction: column; padding: var(--safe-top) 20px calc(20px + var(--safe-bottom)); max-width: 480px; margin: 0 auto; }
 #workoutScreen.active { display: flex; }
 .ws-card { background: var(--glass); border-radius: 30px; padding: 28px 22px; box-shadow: var(--shadow); text-align: center; border: 1px solid var(--glass-border); flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
 .ws-ex-name { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
 .ws-ex-meta { font-size: 15px; color: var(--text-muted); margin-bottom: 20px; font-weight: 600; }
 .ws-set-tracker { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-.ws-set-dot { width: 42px; height: 42px; border-radius: 13px; background: var(--glass-strong); display: grid; place-items: center; font-weight: 800; color: var(--text-muted); border: 2px solid var(--glass-border); }
-.ws-set-dot.done { background: var(--accent-gradient); color: #fff; }
-.ws-set-dot.current { border-color: var(--accent); color: var(--accent-deep); }
-.ws-weight-control { display: inline-flex; align-items: center; gap: 14px; background: var(--glass-strong); padding: 8px 16px; border-radius: 18px; margin: 0 auto 20px auto; border: 1px solid var(--glass-border); }
+.ws-set-dot { width: 42px; height: 42px; border-radius: 13px; background: var(--glass-strong); display: grid; place-items: center; font-weight: 800; color: var(--text-muted); border: 2px solid var(--glass-border); transition: all 0.2s; }
+.ws-set-dot.done { background: var(--accent-gradient); color: #fff; border-color: transparent; }
+.ws-set-dot.current { border-color: var(--accent); color: var(--accent-deep); transform: scale(1.1); box-shadow: 0 4px 10px rgba(143,174,148,0.2); }
+.ws-weight-control { display: inline-flex; align-items: center; gap: 14px; background: var(--glass-strong); padding: 8px 16px; border-radius: 18px; margin: 0 auto 20px auto; border: 1px solid var(--glass-border); transition: opacity 0.3s; }
 .ws-weight-btn { width: 34px; height: 34px; border-radius: 10px; border: none; background: var(--bg); color: var(--text-main); font-size: 20px; font-weight: 700; cursor: pointer; }
-.ws-history { font-size: 13px; color: var(--info); font-weight: 700; margin-bottom: 10px; }
-/* Специфичные стили */
-.food-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
-.food-tab { padding: 6px 12px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-border); font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; }
-.food-tab.active { background: var(--accent-gradient); color: #fff; border-color: transparent; }
-.recent-foods { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 4px; }
-.recent-food-item { flex: 0 0 auto; background: var(--glass-strong); border: 1px solid var(--glass-border); padding: 8px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
-.leaderboard-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--glass-border); }
-.leaderboard-row:last-child { border-bottom: none; }
-.leaderboard-rank { font-size: 18px; font-weight: 800; width: 30px; text-align: center; color: var(--text-muted); }
-.leaderboard-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-gradient); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 14px; }
-.leaderboard-name { flex: 1; font-weight: 700; font-size: 15px; }
-.leaderboard-score { display: flex; align-items: center; gap: 4px; font-weight: 800; color: var(--accent-deep); font-size: 15px; }
-.leaderboard-score svg { width: 16px; height: 16px; }
-.poke-btn { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 8px; padding: 4px 8px; font-size: 14px; cursor: pointer; }
+.ws-history { font-size: 13px; color: var(--info); font-weight: 700; margin-bottom: 10px; min-height: 18px; }
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -188,16 +175,20 @@ svg { display: block; }
       <div class="ws-ex-name" id="wsExName">Упражнение</div>
       <div class="ws-ex-meta" id="wsExMeta">3 подхода × 10</div>
       <div class="ws-history" id="wsHistory"></div>
+      
       <div class="ws-set-tracker" id="wsSetTracker"></div>
-      <div class="ws-weight-control">
+      
+      <div class="ws-weight-control" id="wsWeightControl">
         <button class="ws-weight-btn" onclick="changeWorkoutWeight(-1)">−</button>
         <div style="font-size: 20px; font-weight: 800; min-width: 68px; text-align: center;" id="wsWeightVal">0 кг</div>
         <button class="ws-weight-btn" onclick="changeWorkoutWeight(1)">+</button>
       </div>
-      <div id="wsRestText" style="font-size: 15px; color: var(--text-muted); margin-bottom: 16px; display: none;">Отдых: <span id="wsRestTimer" style="font-weight: 800; color: var(--accent-deep);">60</span> сек</div>
     </div>
+    
     <div style="display: flex; flex-direction: column; gap: 10px;">
+      <!-- Кнопка меняется в зависимости от состояния -->
       <button class="btn primary" id="wsActionBtn" onclick="handleWorkoutAction()">Начать подход</button>
+      
       <button class="btn secondary" id="wsSkipBtn" onclick="skipExercise()" style="padding: 14px; font-size: 15px;">Пропустить упражнение</button>
     </div>
   </div>
@@ -597,18 +588,17 @@ let activityHistory = {};
 let recentFoods = [];
 let friends = [];
 let dailyQuests = {};
-let foodLog = {}; // Для копирования дней
+let foodLog = {}; 
 let selectedMeal = 'breakfast';
 let qrScanner = null;
+
 let wsExercises = [];
 let wsCurrentExIdx = 0;
 let wsCurrentSetIdx = 0;
-let wsTimerInterval = null;
-let wsResting = false;
+let wsIsSetActive = false; // НОВОЕ: флаг, идет ли подход прямо сейчас
 let saveTimeout = null;
 
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString();
-const USERNAME = window.Telegram?.WebApp?.initDataUnsafe?.user?.username || '';
 const SERVER_URL = window.location.origin;
 
 // ================= УТИЛИТЫ =================
@@ -703,7 +693,6 @@ function renderHome() {
   setText('mF', Math.round(f)); setText('mFT', user.fat || 0);
   setText('mC', Math.round(c)); setText('mCT', user.carbs || 0);
 
-  // Подсказки БЖУ
   const advice = document.getElementById('adviceBox');
   if (target - eaten > 200 && new Date().getHours() > 18) { advice.style.display = 'block'; advice.textContent = `Ты сильно недобрал калорий. Добавь перекус.`; }
   else if (p < user.protein * 0.7 && new Date().getHours() > 16) { advice.style.display = 'block'; advice.textContent = `Не хватает белка (${Math.round(user.protein - p)}г). Съешь творог или курицу.`; }
@@ -883,11 +872,7 @@ function quickAddRecent(name, kcal, p, f, c) {
 }
 
 async function removeFood(i) { todayFoods.splice(i, 1); renderFood(); renderHome(); saveAllDebounced(); }
-
-async function copyYesterday() {
-  // В реальности тут нужно брать данные из foodLog за вчера. Упрощенно - просто заглушка.
-  toast('Функция в разработке (копирование дня)');
-}
+async function copyYesterday() { toast('Функция в разработке'); }
 
 // ---- ТРЕНИРОВКИ ----
 function openWorkoutByIndex(idx) {
@@ -896,19 +881,22 @@ function openWorkoutByIndex(idx) {
 }
 
 async function startWorkoutSession(templateId) {
-  wsExercises = generateWorkout(templateId); wsCurrentExIdx = 0; wsCurrentSetIdx = 0; wsResting = false;
+  wsExercises = generateWorkout(templateId); wsCurrentExIdx = 0; wsCurrentSetIdx = 0; 
+  wsIsSetActive = false; // Сбрасываем состояние
   document.getElementById('wsTitle').textContent = (getWorkoutMeta(templateId)?.name || 'Тренировка');
   document.getElementById('workoutScreen').classList.add('active');
   await renderWorkoutScreen();
 }
 
+// === НОВАЯ ЛОГИКА ОТОБРАЖЕНИЯ ТРЕНИРОВКИ ===
 async function renderWorkoutScreen() {
   const ex = wsExercises[wsCurrentExIdx];
   if (!ex) { finishWorkout(); return; }
+  
   setText('wsExName', ex.name); setText('wsExMeta', `${ex.sets} подходов × ${ex.reps}`);
   setText('wsWeightVal', (ex.currentWeight || 0) + ' кг');
   
-  // История
+  // История весов
   try {
     const res = await fetch(`${SERVER_URL}/api/exercise/history?id=${USER_ID}&name=${encodeURIComponent(ex.name)}`);
     const d = await res.json();
@@ -919,44 +907,66 @@ async function renderWorkoutScreen() {
   const tracker = document.getElementById('wsSetTracker'); tracker.innerHTML = '';
   for (let i = 0; i < ex.sets; i++) {
     const d = document.createElement('div'); d.className = 'ws-set-dot';
-    if (i < wsCurrentSetIdx) d.classList.add('done'); else if (i === wsCurrentSetIdx) d.classList.add('current');
+    if (i < wsCurrentSetIdx) d.classList.add('done'); 
+    else if (i === wsCurrentSetIdx && !wsIsSetActive) d.classList.add('current');
     d.textContent = i + 1; tracker.appendChild(d);
   }
-  document.getElementById('wsActionBtn').textContent = wsResting ? 'Отдых…' : 'Завершить подход';
+  
+  // Блокируем изменение веса, если подход уже идет
+  document.getElementById('wsWeightControl').style.opacity = wsIsSetActive ? '0.5' : '1';
+  document.getElementById('wsWeightControl').style.pointerEvents = wsIsSetActive ? 'none' : 'auto';
+
+  // Меняем кнопку
+  const btn = document.getElementById('wsActionBtn');
+  if (wsIsSetActive) {
+    btn.textContent = 'Завершить подход';
+    btn.style.background = 'var(--accent-deep)'; 
+  } else {
+    btn.textContent = 'Начать подход';
+    btn.style.background = 'var(--accent-gradient)';
+  }
 }
 
+// === НОВАЯ ОБРАБОТКА КНОПКИ ===
 function handleWorkoutAction() {
-  if (wsResting) return;
-  const ex = wsExercises[wsCurrentExIdx]; wsCurrentSetIdx++;
-  if (wsCurrentSetIdx >= ex.sets) {
-    // Логируем подход
+  haptic();
+  if (!wsIsSetActive) {
+    // НАЧАЛО ПОДХОДА
+    wsIsSetActive = true;
+    renderWorkoutScreen();
+  } else {
+    // КОНЕЦ ПОДХОДА
+    wsIsSetActive = false;
+    const ex = wsExercises[wsCurrentExIdx]; 
+    
+    // Логируем подход на сервер
     fetch(`${SERVER_URL}/api/exercise/log`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: USER_ID, name: ex.name, weight: ex.currentWeight, reps: ex.reps }) });
-    wsCurrentSetIdx = 0; wsCurrentExIdx++;
-    if (wsCurrentExIdx >= wsExercises.length) { finishWorkout(); return; }
-    renderWorkoutScreen(); return;
-  }
-  wsResting = true; let sec = 60;
-  document.getElementById('wsRestText').style.display = 'block';
-  clearInterval(wsTimerInterval);
-  wsTimerInterval = setInterval(() => {
-    sec--; setText('wsRestTimer', sec);
-    if (sec <= 0) { 
-      clearInterval(wsTimerInterval); wsResting = false; document.getElementById('wsRestText').style.display = 'none'; 
-      if (window.Telegram?.WebApp?.HapticFeedback) window.Telegram.WebApp.HapticFeedback.notificationOccurred('success');
-      renderWorkoutScreen();
+    
+    wsCurrentSetIdx++;
+    
+    if (wsCurrentSetIdx >= ex.sets) {
+      // Все подходы упражнения сделаны -> переходим к следующему
+      wsCurrentSetIdx = 0; wsCurrentExIdx++;
+      if (wsCurrentExIdx >= wsExercises.length) { finishWorkout(); return; }
+      toast('Упражнение выполнено');
     }
-  }, 1000);
+    renderWorkoutScreen();
+  }
 }
 
 async function finishWorkout() {
-  clearInterval(wsTimerInterval); document.getElementById('workoutScreen').classList.remove('active');
+  document.getElementById('workoutScreen').classList.remove('active');
   streakDone[(new Date().getDay() + 6) % 7] = true; addXP(50);
   renderHome(); checkQuests(); saveAllDebounced(); toast('Тренировка завершена! +50 XP');
 }
 
-function skipExercise() { wsCurrentSetIdx = 0; wsCurrentExIdx++; if (wsCurrentExIdx >= wsExercises.length) finishWorkout(); else renderWorkoutScreen(); }
+function skipExercise() { 
+  wsIsSetActive = false; wsCurrentSetIdx = 0; wsCurrentExIdx++; 
+  if (wsCurrentExIdx >= wsExercises.length) finishWorkout(); 
+  else renderWorkoutScreen(); 
+}
 function changeWorkoutWeight(dir) { const ex = wsExercises[wsCurrentExIdx]; ex.currentWeight = Math.max(0, (ex.currentWeight || 0) + dir * (ex.step || 2.5)); setText('wsWeightVal', ex.currentWeight + ' кг'); }
-function exitWorkout() { clearInterval(wsTimerInterval); document.getElementById('workoutScreen').classList.remove('active'); }
+function exitWorkout() { wsIsSetActive = false; document.getElementById('workoutScreen').classList.remove('active'); }
 
 function generateWorkout(tid) {
   let plan = null;
