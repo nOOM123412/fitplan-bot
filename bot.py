@@ -74,7 +74,8 @@ async def init_db():
             recent_foods_json TEXT DEFAULT '[]',
             daily_quests_json TEXT DEFAULT '{}',
             reminders_json TEXT DEFAULT '{"water": true, "workout": true}',
-            frame TEXT DEFAULT 'none'
+            frame TEXT DEFAULT 'none',
+            food_log_json TEXT DEFAULT '{}'
         )""")
 
         new_cols = [
@@ -83,7 +84,7 @@ async def init_db():
             ("daily_quests_json", "TEXT DEFAULT '{}'"), 
             ("reminders_json", "TEXT DEFAULT '{\"water\": true, \"workout\": true}'"),
             ("frame", "TEXT DEFAULT 'none'"),
-            ("food_log_json", "TEXT DEFAULT '{}'") # Для копирования "вчера"
+            ("food_log_json", "TEXT DEFAULT '{}'")
         ]
         for col, col_type in new_cols:
             try: await db.execute(f"ALTER TABLE users ADD COLUMN {col} {col_type}")
@@ -93,10 +94,7 @@ async def init_db():
         await db.execute("""CREATE TABLE IF NOT EXISTS food_log (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, date TEXT, ts TEXT, name TEXT, grams REAL, kcal REAL, protein REAL, fat REAL, carb REAL)""")
         await db.execute("""CREATE TABLE IF NOT EXISTS workouts_log (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, date TEXT, plan_id TEXT, plan_name TEXT, duration_min INTEGER, calories_burned REAL, exercises_json TEXT)""")
         await db.execute("""CREATE TABLE IF NOT EXISTS weight_log (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, date TEXT, weight REAL, ts TEXT)""")
-        # Таблица истории упражнений
-        await db.execute("""CREATE TABLE IF NOT EXISTS exercise_history (
-            id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, ex_name TEXT, weight REAL, reps INTEGER, date TEXT
-        )""")
+        await db.execute("""CREATE TABLE IF NOT EXISTS exercise_history (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, ex_name TEXT, weight REAL, reps INTEGER, date TEXT)""")
         await db.commit()
 
         defaults = {"reminder_workout_time": "18:00", "reminder_streak_time": "20:00", "reminder_sub_time": "12:00"}
@@ -153,6 +151,36 @@ async def get_user_full(uid: str):
             return u
 
 
+# ================= НАПОМИНАНИЯ =================
+async def send_reminders():
+    now = datetime.now()
+    cur_time = now.strftime("%H:%M")
+    today = now.strftime("%Y-%m-%d")
+    t_workout = await get_setting("reminder_workout_time", "18:00")
+    t_streak = await get_setting("reminder_streak_time", "20:00")
+    t_sub = await get_setting("reminder_sub_time", "12:00")
+
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT user_id, streak_count, last_workout_date, sub_until, reminders_json FROM users") as cur:
+            users = await cur.fetchall()
+            for u in users:
+                uid = u["user_id"]
+                reminders = _parse(u["reminders_json"], {"water": True, "workout": True})
+                
+                if cur_time == t_workout and u["last_workout_date"] != today and reminders.get("workout", True):
+                    try: await bot.send_message(uid, "💪 Пора на тренировку! Открой FitPlan.", reply_markup=get_main_menu())
+                    except Exception: pass
+                
+                if cur_time == t_streak and u["streak_count"] > 0 and u["last_workout_date"] != today:
+                    try: await bot.send_message(uid, f"🔥 Твой стрик {u['streak_count']} под угрозой!")
+                    except Exception: pass
+                
+                if cur_time == t_sub and u["sub_until"] and 0 < u["sub_until"] - int(time.time()) < 86400:
+                    try: await bot.send_message(uid, "⏳ Подписка заканчивается завтра.")
+                    except Exception: pass
+
+
 # ================= API (AIOHTTP) =================
 async def handle_index(request):
     response = web.FileResponse("./public/index.html")
@@ -177,8 +205,10 @@ async def api_save_all(request):
         db.row_factory = aiosqlite.Row
         async with db.execute("SELECT sub_until FROM users WHERE user_id = ?", (int(uid),)) as cur:
             row = await cur.fetchone()
+        
         if row and (not row["sub_until"] or row["sub_until"] < now):
             return web.json_response({"error": "Subscription expired"}, status=403)
+        
         if not row:
             await db.execute("INSERT INTO users (user_id, name, sub_until, created_at, trial_used) VALUES (?, ?, ?, ?, ?)",
                 (int(uid), "User", 0, datetime.utcnow().isoformat(), 0))
@@ -218,13 +248,11 @@ async def api_add_friend(request):
     
     async with aiosqlite.connect(DB_FILE) as db:
         db.row_factory = aiosqlite.Row
-        # Ищем пользователя по юзернейму
         async with db.execute("SELECT user_id, name, streak_count FROM users WHERE username = ?", (target_username,)) as cur:
             target = await cur.fetchone()
         if not target:
             return web.json_response({"error": "Пользователь не найден. Попроси его зайти в бота."}, status=404)
         
-        # Получаем список друзей
         async with db.execute("SELECT friends_json FROM users WHERE user_id=?", (my_id,)) as cur:
             my_row = await cur.fetchone()
             friends = _parse(my_row["friends_json"], [])
@@ -263,7 +291,7 @@ async def api_send_poke(request):
     data = await request.json()
     my_id = int(data.get("id"))
     target_id = int(data.get("target_id"))
-    poke_type = data.get("type", "fire") # fire / turtle
+    poke_type = data.get("type", "fire")
     
     async with aiosqlite.connect(DB_FILE) as db:
         db.row_factory = aiosqlite.Row
@@ -310,7 +338,6 @@ async def api_weight_add(request):
     return web.json_response({"status": "ok"})
 
 async def api_export_csv(request):
-    # ... (оставил как было)
     uid = int(request.query.get("id")); type_ = request.query.get("type", "food")
     table = "food_log" if type_ == "food" else "workouts_log"
     async with aiosqlite.connect(DB_FILE) as db:
@@ -325,7 +352,6 @@ async def api_export_csv(request):
     return web.Response(text=output.getvalue(), content_type="text/csv", headers={"Content-Disposition": f'attachment; filename="{type_}.csv"'})
 
 async def api_export_pdf(request):
-    # ... (оставил как было)
     uid = int(request.query.get("id"))
     buffer = io.BytesIO(); p = canvas.Canvas(buffer, pagesize=A4)
     p.drawString(100, 800, f"FitPlan Report — user {uid}")
@@ -371,16 +397,263 @@ async def cmd_start(message: types.Message):
                 (uid, message.from_user.first_name, message.from_user.username, 0, datetime.utcnow().isoformat(), 0))
             await db.commit()
         else:
-            # Обновляем юзернейм, если он изменился
             await db.execute("UPDATE users SET username=? WHERE user_id=?", (message.from_user.username, uid))
             await db.commit()
     await message.answer("Привет! Это <b>FitPlan</b>.\n\nТвой личный тренер и дневник питания.", reply_markup=get_main_menu())
 
-# ... (Остальной код бота, админки и подписок оставляем без изменений, как в предыдущем ответе)
+@dp.callback_query(F.data == "menu_sub")
+async def cb_sub_info(callback: CallbackQuery):
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT balance, sub_until, trial_used FROM users WHERE user_id=?", (callback.from_user.id,)) as cur:
+            row = await cur.fetchone()
+    balance = row["balance"] if row else 0
+    sub_until = row["sub_until"] if row else 0
+    trial_used = row["trial_used"] if row else 0
+    now = int(time.time())
+    status = "❌ Не активна"
+    if sub_until and sub_until > now:
+        status = f"✅ Активна ({math.ceil((sub_until - now) / 86400)} дн.)"
+    text = (f"💳 <b>Подписка</b>\n\nБаланс: <b>{balance} ₽</b>\nСтатус: <b>{status}</b>\n\nЦена: <s>999 ₽</s> <b>299 ₽</b> / мес\n")
+    buttons = []
+    if not trial_used or callback.from_user.id == ADMIN_ID:
+        buttons.append([InlineKeyboardButton(text="🎁 Пробный период (3 дня)", callback_data="activate_trial")])
+    buttons += [
+        [InlineKeyboardButton(text="💳 Оплатить с баланса", callback_data="pay_sub")],
+        [InlineKeyboardButton(text="👨‍💻 Оператор", url=f"https://t.me/{OPERATOR.replace('@','')}")],
+        [InlineKeyboardButton(text="⬅️ Назад", callback_data="menu_main")],
+    ]
+    await callback.message.edit_text(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
 
+@dp.callback_query(F.data == "activate_trial")
+async def cb_activate_trial(callback: CallbackQuery):
+    uid = callback.from_user.id
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT trial_used, sub_until FROM users WHERE user_id=?", (uid,)) as cur:
+            row = await cur.fetchone()
+        if not row: return await callback.answer("❌ Не найден", show_alert=True)
+        if row["trial_used"] and uid != ADMIN_ID: return await callback.answer("❌ Уже использовал", show_alert=True)
+        now = int(time.time())
+        new_until = max(row["sub_until"] or 0, now) + 3 * 86400
+        await db.execute("UPDATE users SET sub_until=?, trial_used=1 WHERE user_id=?", (new_until, uid))
+        await db.commit()
+    await callback.answer("🎁 Пробный период на 3 дня активирован!", show_alert=True)
+    await cb_sub_info(callback)
+
+@dp.callback_query(F.data == "pay_sub")
+async def cb_pay_sub(callback: CallbackQuery):
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT balance, sub_until FROM users WHERE user_id=?", (callback.from_user.id,)) as cur:
+            row = await cur.fetchone()
+        if not row: return await callback.answer("Ошибка", show_alert=True)
+        if row["balance"] < 499: return await callback.answer("Недостаточно средств", show_alert=True)
+        new_until = max(row["sub_until"] or 0, int(time.time())) + 30 * 86400
+        await db.execute("UPDATE users SET balance=balance-499, sub_until=? WHERE user_id=?", (new_until, callback.from_user.id))
+        await db.commit()
+    await callback.answer("✅ Подписка оплачена", show_alert=True)
+    await cb_sub_info(callback)
+
+@dp.callback_query(F.data == "menu_ref")
+async def cb_ref_info(callback: CallbackQuery):
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT ref_count, ref_earned FROM users WHERE user_id=?", (callback.from_user.id,)) as cur:
+            row = await cur.fetchone()
+    ref_count = row["ref_count"] if row else 0
+    ref_earned = row["ref_earned"] if row else 0
+    bot_username = (await bot.get_me()).username
+    link = f"https://t.me/{bot_username}?start=ref_{callback.from_user.id}"
+    text = (f"👥 <b>Реферальная система</b>\n\nПриглашай друзей и получай 10% с их пополнений.\n\nТвоя ссылка:\n<code>{link}</code>\n\nДрузей: <b>{ref_count}</b>\nЗаработано: <b>{ref_earned} ₽</b>")
+    await callback.message.edit_text(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="⬅️ Назад", callback_data="menu_main")]]))
+
+@dp.callback_query(F.data == "menu_main")
+async def cb_main_menu(callback: CallbackQuery):
+    await callback.message.edit_text("Привет! Это <b>FitPlan</b>.", reply_markup=get_main_menu())
+
+# ================= АДМИНКА =================
+class AdminState(StatesGroup):
+    balance_user = State()
+    balance_amount = State()
+    broadcast = State()
+    reset_sub_user = State()
+    reminder_time = State()
+
+def admin_menu():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💰 Начислить баланс", callback_data="admin_balance")],
+        [InlineKeyboardButton(text="⛔ Обнулить подписку", callback_data="admin_reset_sub")],
+        [InlineKeyboardButton(text="⏰ Настройки уведомлений", callback_data="admin_reminders")],
+        [InlineKeyboardButton(text="📋 Пользователи", callback_data="admin_users")],
+        [InlineKeyboardButton(text="📢 Рассылка", callback_data="admin_broadcast")],
+    ])
+
+@dp.message(Command("admin"))
+async def cmd_admin(message: Message):
+    if message.from_user.id != ADMIN_ID: return await message.answer("⛔ Нет доступа.")
+    await message.answer("👑 <b>Админ-панель</b>", reply_markup=admin_menu())
+
+@dp.callback_query(F.data == "admin_balance")
+async def cb_admin_balance(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id != ADMIN_ID: return
+    await callback.message.edit_text("Введи <b>ID пользователя</b>:")
+    await state.set_state(AdminState.balance_user)
+
+@dp.message(AdminState.balance_user)
+async def process_balance_user(message: Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID: return
+    target_id = message.text.strip()
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT name FROM users WHERE user_id=?", (int(target_id),)) as cur:
+            row = await cur.fetchone()
+    if not row:
+        await message.answer("❌ Не найден")
+        return await state.clear()
+    await state.update_data(target_id=target_id)
+    await message.answer(f"Введи <b>сумму</b> для <code>{row['name']}</code>:")
+    await state.set_state(AdminState.balance_amount)
+
+@dp.message(AdminState.balance_amount)
+async def process_balance_amount(message: Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID: return
+    try:
+        amount = int(message.text.strip())
+        data = await state.get_data()
+        target_id = int(data["target_id"])
+        async with aiosqlite.connect(DB_FILE) as db:
+            db.row_factory = aiosqlite.Row
+            async with db.execute("SELECT referred_by FROM users WHERE user_id=?", (target_id,)) as cur:
+                row = await cur.fetchone()
+            ref = row["referred_by"] if row else None
+            await db.execute("UPDATE users SET balance=balance+? WHERE user_id=?", (amount, target_id))
+            if ref:
+                bonus = int(amount * 0.1)
+                await db.execute("UPDATE users SET balance=balance+?, ref_earned=ref_earned+?, ref_count=ref_count+1 WHERE user_id=?", (bonus, bonus, ref))
+                try: await bot.send_message(ref, f"🎉 Друг пополнил баланс! Тебе +{bonus} ₽")
+                except Exception: pass
+            await db.commit()
+        try: await bot.send_message(target_id, f"🎉 Баланс пополнен на {amount} ₽")
+        except Exception: pass
+        await message.answer(f"✅ Начислено {amount} ₽")
+        await cmd_admin(message)
+    except ValueError:
+        await message.answer("❌ Введи число")
+    finally:
+        await state.clear()
+
+@dp.callback_query(F.data == "admin_reset_sub")
+async def cb_reset_sub(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id != ADMIN_ID: return
+    await callback.message.edit_text("Введи <b>ID</b> пользователя:")
+    await state.set_state(AdminState.reset_sub_user)
+
+@dp.message(AdminState.reset_sub_user)
+async def process_reset_sub(message: Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID: return
+    try:
+        target_id = int(message.text.strip())
+        async with aiosqlite.connect(DB_FILE) as db:
+            await db.execute("UPDATE users SET sub_until=0, trial_used=0 WHERE user_id=?", (target_id,))
+            await db.commit()
+        try: await bot.send_message(target_id, "⚠️ Подписка обнулена администратором")
+        except Exception: pass
+        await message.answer(f"✅ Подписка <code>{target_id}</code> обнулена")
+        await cmd_admin(message)
+    except ValueError:
+        await message.answer("❌ Введи число")
+    finally:
+        await state.clear()
+
+@dp.callback_query(F.data == "admin_reminders")
+async def cb_admin_reminders(callback: CallbackQuery):
+    if callback.from_user.id != ADMIN_ID: return
+    t_w = await get_setting("reminder_workout_time", "18:00")
+    t_s = await get_setting("reminder_streak_time", "20:00")
+    t_p = await get_setting("reminder_sub_time", "12:00")
+    text = (f"⏰ <b>Уведомления (МСК)</b>\n\n💪 Тренировка: <b>{t_w}</b>\n🔥 Стрик: <b>{t_s}</b>\n💳 Подписка: <b>{t_p}</b>\n\nВыбери, что изменить:")
+    kb = InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text=f"💪 Тренировка ({t_w})", callback_data="edit_rem|reminder_workout_time")],
+        [InlineKeyboardButton(text=f"🔥 Стрик ({t_s})", callback_data="edit_rem|reminder_streak_time")],
+        [InlineKeyboardButton(text=f"💳 Подписка ({t_p})", callback_data="edit_rem|reminder_sub_time")],
+        [InlineKeyboardButton(text="⬅️ Назад", callback_data="admin_back")],
+    ])
+    await callback.message.edit_text(text, reply_markup=kb)
+
+@dp.callback_query(F.data.startswith("edit_rem|"))
+async def cb_edit_rem(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id != ADMIN_ID: return
+    key = callback.data.split("|")[1]
+    await state.update_data(reminder_key=key)
+    labels = {"reminder_workout_time": "тренировка", "reminder_streak_time": "стрик", "reminder_sub_time": "подписка"}
+    await callback.message.edit_text(f"Введи время для «{labels[key]}» в формате <code>ЧЧ:ММ</code>:", reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="⬅️ Отмена", callback_data="admin_reminders")]]))
+    await state.set_state(AdminState.reminder_time)
+
+@dp.message(AdminState.reminder_time)
+async def process_reminder_time(message: Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID: return
+    txt = message.text.strip()
+    if len(txt) != 5 or txt[2] != ":": return await message.answer("❌ Формат: <code>ЧЧ:ММ</code>")
+    try:
+        hh, mm = map(int, txt.split(":"))
+        if not (0 <= hh < 24 and 0 <= mm < 60): raise ValueError
+    except ValueError: return await message.answer("❌ Неверное время")
+    data = await state.get_data()
+    await set_setting(data["reminder_key"], txt)
+    await state.clear()
+    await message.answer(f"✅ Сохранено: <b>{txt}</b> (МСК)")
+    await cmd_admin(message)
+
+@dp.callback_query(F.data == "admin_users")
+async def cb_admin_users(callback: CallbackQuery):
+    if callback.from_user.id != ADMIN_ID: return
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT * FROM users LIMIT 30") as cur:
+            users = await cur.fetchall()
+    text = "📋 <b>Пользователи</b>\n\n"
+    for u in users:
+        sub = "✅" if (u["sub_until"] and u["sub_until"] > time.time()) else "❌"
+        text += f"👤 <b>{u['name']}</b> (ID <code>{u['user_id']}</code>) — {u['balance']} ₽ · {sub}\n"
+    await callback.message.edit_text(text, reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="⬅️ Назад", callback_data="admin_back")]]))
+
+@dp.callback_query(F.data == "admin_broadcast")
+async def cb_admin_broadcast(callback: CallbackQuery, state: FSMContext):
+    if callback.from_user.id != ADMIN_ID: return
+    await callback.message.edit_text("Введи <b>текст рассылки</b>:")
+    await state.set_state(AdminState.broadcast)
+
+@dp.message(AdminState.broadcast)
+async def process_broadcast(message: Message, state: FSMContext):
+    if message.from_user.id != ADMIN_ID: return
+    text = message.text
+    async with aiosqlite.connect(DB_FILE) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT user_id FROM users") as cur:
+            users = await cur.fetchall()
+    sent = failed = 0
+    msg = await message.answer("🔄 Рассылка...")
+    for u in users:
+        try:
+            await bot.send_message(u["user_id"], text)
+            sent += 1
+            await asyncio.sleep(0.05)
+        except Exception: failed += 1
+    await msg.edit_text(f"✅ Готово. Отправлено: {sent}, ошибок: {failed}")
+    await state.clear()
+    await cmd_admin(message)
+
+@dp.callback_query(F.data == "admin_back")
+async def cb_admin_back(callback: CallbackQuery):
+    if callback.from_user.id != ADMIN_ID: return
+    await callback.message.edit_text("👑 <b>Админ-панель</b>", reply_markup=admin_menu())
+
+# ================= ЗАПУСК =================
 async def main():
     await init_db()
     await start_web_server()
+    scheduler.add_job(send_reminders, "cron", minute="*")
     scheduler.start()
     print("🚀 Бот и сервер запущены")
     await dp.start_polling(bot)
