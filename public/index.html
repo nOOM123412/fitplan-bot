@@ -145,6 +145,23 @@ svg { display: block; }
 .toast { position: fixed; bottom: calc(120px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text-main); color: var(--bg); border-radius: 30px; padding: 13px 26px; font-size: 15px; font-weight: 700; opacity: 0; pointer-events: none; transition: all 0.4s var(--ease); z-index: 3000; text-align: center; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* НОВЫЕ СТИЛИ ДЛЯ ПИТАНИЯ */
+.food-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
+.food-tab { padding: 6px 12px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-border); font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; }
+.food-tab.active { background: var(--accent-gradient); color: #fff; border-color: transparent; }
+.recent-foods { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 4px; }
+.recent-food-item { flex: 0 0 auto; background: var(--glass-strong); border: 1px solid var(--glass-border); padding: 8px 12px; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+
+/* НОВЫЕ СТИЛИ ДЛЯ ДРУЗЕЙ */
+.leaderboard-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--glass-border); }
+.leaderboard-row:last-child { border-bottom: none; }
+.leaderboard-rank { font-size: 18px; font-weight: 800; width: 30px; text-align: center; color: var(--text-muted); }
+.leaderboard-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-gradient); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 14px; }
+.leaderboard-name { flex: 1; font-weight: 700; font-size: 15px; }
+.leaderboard-score { display: flex; align-items: center; gap: 4px; font-weight: 800; color: var(--accent-deep); font-size: 15px; }
+.leaderboard-score svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+.poke-btn { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 8px; padding: 4px 8px; font-size: 14px; cursor: pointer; }
+
 /* ЭКРАН ПОДПИСКИ */
 #expiredScreen { position: fixed; inset: 0; z-index: 5000; background: var(--bg); background-image: var(--bg-gradient); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; text-align: center; max-width: 480px; margin: 0 auto; }
 #expiredScreen.show { display: flex; }
@@ -368,10 +385,6 @@ svg { display: block; }
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Лидерборд недели</div></h2>
       <div id="leaderboard"></div>
-    </div>
-    <div class="card">
-      <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Челленджи</div></h2>
-      <div id="challengesList"></div>
     </div>
   </section>
 
@@ -604,7 +617,7 @@ let sleepHistory = {};
 let foodHistory = {};
 let activityHistory = {};
 let recentFoods = [];
-let friends = [];
+let friends = []; // Теперь друзья хранятся здесь
 let dailyQuests = {};
 let foodLog = {}; 
 let selectedMeal = 'breakfast';
@@ -652,7 +665,6 @@ async function loadAll() {
   try {
     const res = await fetch(`${SERVER_URL}/api/user?id=${USER_ID}`);
     
-    // ДОБАВЛЕНО: Если подписка истекла, показываем экран оплаты и выходим
     if (res.status === 403) {
       document.getElementById('mainApp').style.display = 'none';
       document.getElementById('expiredScreen').classList.add('show');
@@ -671,7 +683,7 @@ async function loadAll() {
     if (d.waterToday) waterToday = d.waterToday;
     if (d.sleepHistory) sleepHistory = d.sleepHistory;
     if (d.weightHistory) weightHistory = d.weightHistory;
-    if (d.friends) friends = d.friends;
+    if (d.friends) friends = d.friends; // ВАЖНО: Теперь друзья сохраняются в переменную!
     if (d.recentFoods) recentFoods = d.recentFoods;
     if (d.dailyQuests) dailyQuests = d.dailyQuests;
     if (d.foodLog) foodLog = d.foodLog;
@@ -1068,7 +1080,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setTheme(localStorage.getItem('fitplan_theme') || 'light');
   await loadAll();
   
-  // Если подписка истекла, экран подписки уже показан внутри loadAll()
   if (document.getElementById('expiredScreen').classList.contains('show')) return;
 
   if (user.name && user.kcal) { 
