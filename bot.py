@@ -46,6 +46,11 @@ OLD_JSON_PATH = os.path.join(DATA_DIR, "users.json")
 
 
 async def init_db():
+    # Включаем WAL-режим для предотвращения блокировок при частой записи
+    async with aiosqlite.connect(DB_FILE) as db:
+        await db.execute("PRAGMA journal_mode=WAL;")
+        await db.commit()
+
     async with aiosqlite.connect(DB_FILE) as db:
         await db.execute("""CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY, username TEXT, name TEXT, age INTEGER, sex TEXT,
@@ -179,6 +184,10 @@ async def get_user_full(uid: str):
                 "sex": u.get("sex") or "male", "weight": u.get("weight", 65),
                 "height": u.get("height", 175), "activity": u.get("activity", 1.375),
                 "goal": u.get("goal", "gain"), "kcal": u.get("kcal_target", 0),
+                # ВАЖНО: Отдаем БЖУ
+                "protein": u.get("protein_target", 0),
+                "fat": u.get("fat_target", 0),
+                "carbs": u.get("carb_target", 0),
             }
             u["foods"] = _parse(u.get("foods_json"), [])
             u["plans"] = _parse(u.get("plans_json"), {})
@@ -274,11 +283,15 @@ async def api_save_all(request):
 
         if "profile" in data:
             p = data["profile"]
+            # ВАЖНО: Сохраняем БЖУ
             await db.execute(
-                """UPDATE users SET name=?, age=?, sex=?, weight=?, height=?, activity=?, goal=?, kcal_target=?
+                """UPDATE users SET name=?, age=?, sex=?, weight=?, height=?, activity=?, goal=?, 
+                   kcal_target=?, protein_target=?, fat_target=?, carb_target=?
                    WHERE user_id=?""",
                 (p.get("name"), p.get("age"), p.get("sex") or p.get("gender"), p.get("weight"),
-                 p.get("height"), p.get("activity"), p.get("goal"), p.get("kcal"), int(uid)),
+                 p.get("height"), p.get("activity"), p.get("goal"), p.get("kcal"),
+                 p.get("protein", 0), p.get("fat", 0), p.get("carbs", 0),
+                 int(uid)),
             )
 
         field_map = {
