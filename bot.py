@@ -191,9 +191,22 @@ async def handle_static(request):
     filepath = os.path.join("./public", request.match_info["filename"])
     return web.FileResponse(filepath) if os.path.exists(filepath) else web.Response(status=404)
 
+# ИСПРАВЛЕНИЕ: Добавлена проверка подписки!
 async def api_get_user(request):
-    user = await get_user_full(request.query.get("id"))
-    return web.json_response(user) if user else web.json_response({"error": "Not found"}, status=404)
+    uid = request.query.get("id")
+    if not uid:
+        return web.json_response({"error": "No ID"}, status=400)
+    
+    user = await get_user_full(uid)
+    if not user: 
+        return web.json_response({"error": "Not found"}, status=404)
+    
+    now = int(time.time())
+    # Если подписки нет или она истекла - отдаем 403
+    if not user.get("sub_until") or user["sub_until"] < now:
+        return web.json_response({"error": "Subscription expired"}, status=403)
+        
+    return web.json_response(user)
 
 async def api_save_all(request):
     data = await request.json()
