@@ -145,6 +145,15 @@ svg { display: block; }
 .toast { position: fixed; bottom: calc(120px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text-main); color: var(--bg); border-radius: 30px; padding: 13px 26px; font-size: 15px; font-weight: 700; opacity: 0; pointer-events: none; transition: all 0.4s var(--ease); z-index: 3000; text-align: center; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ЭКРАН ПОДПИСКИ */
+#expiredScreen { position: fixed; inset: 0; z-index: 5000; background: var(--bg); background-image: var(--bg-gradient); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; text-align: center; max-width: 480px; margin: 0 auto; }
+#expiredScreen.show { display: flex; }
+.expired-icon { width: 96px; height: 96px; border-radius: 50%; background: var(--accent-light); color: var(--accent-deep); display: grid; place-items: center; margin-bottom: 24px; }
+.expired-icon svg { width: 52px; height: 52px; stroke: currentColor; stroke-width: 2.5; fill: none; }
+.expired-title { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 12px; }
+.expired-text { font-size: 15px; color: var(--text-muted); line-height: 1.5; font-weight: 500; margin-bottom: 32px; max-width: 340px; }
+.expired-actions { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; }
+
 /* ЭКРАН ТРЕНИРОВКИ */
 #workoutScreen { position: fixed; inset: 0; z-index: 1000; background: var(--bg); display: none; flex-direction: column; padding: var(--safe-top) 20px calc(20px + var(--safe-bottom)); max-width: 480px; margin: 0 auto; }
 #workoutScreen.active { display: flex; }
@@ -164,6 +173,17 @@ svg { display: block; }
 <body>
 
 <div class="bg-blobs"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
+
+<!-- ЭКРАН ПОДПИСКИ -->
+<div id="expiredScreen">
+  <div class="expired-icon"><svg viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/></svg></div>
+  <div class="expired-title">Подписка не активна</div>
+  <div class="expired-text">Пробную подписку активируйте в боте → Подписка. Все данные сохранены.</div>
+  <div class="expired-actions">
+    <button class="btn primary" onclick="openBotForPayment()">Перейти в бот</button>
+    <button class="btn secondary" onclick="location.reload()">Проверить снова</button>
+  </div>
+</div>
 
 <div id="workoutScreen">
   <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
@@ -186,9 +206,7 @@ svg { display: block; }
     </div>
     
     <div style="display: flex; flex-direction: column; gap: 10px;">
-      <!-- Кнопка меняется в зависимости от состояния -->
       <button class="btn primary" id="wsActionBtn" onclick="handleWorkoutAction()">Начать подход</button>
-      
       <button class="btn secondary" id="wsSkipBtn" onclick="skipExercise()" style="padding: 14px; font-size: 15px;">Пропустить упражнение</button>
     </div>
   </div>
@@ -595,7 +613,7 @@ let qrScanner = null;
 let wsExercises = [];
 let wsCurrentExIdx = 0;
 let wsCurrentSetIdx = 0;
-let wsIsSetActive = false; // НОВОЕ: флаг, идет ли подход прямо сейчас
+let wsIsSetActive = false; 
 let saveTimeout = null;
 
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString();
@@ -623,7 +641,10 @@ async function saveAll() {
       friends, recentFoods, dailyQuests, foodLog
     };
     const res = await fetch(`${SERVER_URL}/api/save`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-    if (res.status === 403) { document.getElementById('mainApp').style.display = 'none'; alert('Подписка истекла'); }
+    if (res.status === 403) { 
+      document.getElementById('mainApp').style.display = 'none'; 
+      document.getElementById('expiredScreen').classList.add('show');
+    }
   } catch (e) { console.error(e); }
 }
 
@@ -647,6 +668,15 @@ async function loadAll() {
     if (d.dailyQuests) dailyQuests = d.dailyQuests;
     if (d.foodLog) foodLog = d.foodLog;
   } catch (e) { console.error(e); }
+}
+
+function openBotForPayment() {
+  const botUrl = "https://t.me/FitPlan_Robot";
+  if (window.Telegram?.WebApp?.openTelegramLink) {
+    window.Telegram.WebApp.openTelegramLink(botUrl);
+  } else {
+    window.open(botUrl, '_blank');
+  }
 }
 
 // ================= ЛОГИКА =================
@@ -882,13 +912,12 @@ function openWorkoutByIndex(idx) {
 
 async function startWorkoutSession(templateId) {
   wsExercises = generateWorkout(templateId); wsCurrentExIdx = 0; wsCurrentSetIdx = 0; 
-  wsIsSetActive = false; // Сбрасываем состояние
+  wsIsSetActive = false; 
   document.getElementById('wsTitle').textContent = (getWorkoutMeta(templateId)?.name || 'Тренировка');
   document.getElementById('workoutScreen').classList.add('active');
   await renderWorkoutScreen();
 }
 
-// === НОВАЯ ЛОГИКА ОТОБРАЖЕНИЯ ТРЕНИРОВКИ ===
 async function renderWorkoutScreen() {
   const ex = wsExercises[wsCurrentExIdx];
   if (!ex) { finishWorkout(); return; }
@@ -896,7 +925,6 @@ async function renderWorkoutScreen() {
   setText('wsExName', ex.name); setText('wsExMeta', `${ex.sets} подходов × ${ex.reps}`);
   setText('wsWeightVal', (ex.currentWeight || 0) + ' кг');
   
-  // История весов
   try {
     const res = await fetch(`${SERVER_URL}/api/exercise/history?id=${USER_ID}&name=${encodeURIComponent(ex.name)}`);
     const d = await res.json();
@@ -912,11 +940,9 @@ async function renderWorkoutScreen() {
     d.textContent = i + 1; tracker.appendChild(d);
   }
   
-  // Блокируем изменение веса, если подход уже идет
   document.getElementById('wsWeightControl').style.opacity = wsIsSetActive ? '0.5' : '1';
   document.getElementById('wsWeightControl').style.pointerEvents = wsIsSetActive ? 'none' : 'auto';
 
-  // Меняем кнопку
   const btn = document.getElementById('wsActionBtn');
   if (wsIsSetActive) {
     btn.textContent = 'Завершить подход';
@@ -927,25 +953,20 @@ async function renderWorkoutScreen() {
   }
 }
 
-// === НОВАЯ ОБРАБОТКА КНОПКИ ===
 function handleWorkoutAction() {
   haptic();
   if (!wsIsSetActive) {
-    // НАЧАЛО ПОДХОДА
     wsIsSetActive = true;
     renderWorkoutScreen();
   } else {
-    // КОНЕЦ ПОДХОДА
     wsIsSetActive = false;
     const ex = wsExercises[wsCurrentExIdx]; 
     
-    // Логируем подход на сервер
     fetch(`${SERVER_URL}/api/exercise/log`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: USER_ID, name: ex.name, weight: ex.currentWeight, reps: ex.reps }) });
     
     wsCurrentSetIdx++;
     
     if (wsCurrentSetIdx >= ex.sets) {
-      // Все подходы упражнения сделаны -> переходим к следующему
       wsCurrentSetIdx = 0; wsCurrentExIdx++;
       if (wsCurrentExIdx >= wsExercises.length) { finishWorkout(); return; }
       toast('Упражнение выполнено');
