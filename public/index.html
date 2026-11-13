@@ -349,7 +349,7 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
   background: var(--accent-gradient); 
   color: #fff; 
   border-color: transparent; 
-}.muscle-tab.active { background: var(--accent-gradient); color: #fff; border-color: transparent; }
+}
 
 /* Быстрое добавление еды */
 .recent-food-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--glass); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--glass-border); cursor: pointer; transition: background 0.2s; }
@@ -363,6 +363,36 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 .leaderboard-name { flex: 1; font-weight: 700; font-size: 15px; }
 .leaderboard-score { display: flex; align-items: center; gap: 4px; font-weight: 800; color: var(--accent-deep); font-size: 15px; }
 .poke-btn { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 8px; padding: 4px 8px; font-size: 14px; cursor: pointer; }
+
+/* НОВЫЕ КНОПКИ В МОДАЛКЕ ТРЕНИРОВОК */
+.workout-option-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--glass);
+  border-radius: 18px;
+  margin-bottom: 10px;
+  border: 1px solid var(--glass-border);
+  padding: 0 8px 0 0;
+}
+.workout-option-content {
+  flex: 1;
+  padding: 16px;
+  cursor: pointer;
+}
+.workout-delete-btn {
+  flex: 0 0 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--danger-light);
+  border: 1px solid rgba(217,154,146,0.3);
+  color: var(--danger);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 700;
+}
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -663,7 +693,6 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 <div class="modal-overlay" id="modal-plan">
   <div class="modal">
     <div class="modal-header"><h3>Выбрать тренировку</h3><button class="btn-icon" onclick="closeModal('modal-plan')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-    <!-- ИСПРАВЛЕНО: Обертка для скролла без полоски -->
     <div class="muscle-tabs-container" id="muscleTabs"></div>
     <div class="modal-scroll" id="workoutOptionsList"></div>
   </div>
@@ -706,7 +735,6 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
   </div>
 </div>
 
-<!-- МОДАЛКА БЫСТРОГО ДОБАВЛЕНИЯ -->
 <div class="modal-overlay" id="modal-recent">
   <div class="modal">
     <div class="modal-header"><h3>Последние продукты</h3><button class="btn-icon" onclick="closeModal('modal-recent')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
@@ -1172,7 +1200,6 @@ function renderProfile() {
     setText('bmiIdeal', ideal.toFixed(1) + ' кг');
     setText('bmiCurrent', user.weight + ' кг');
   }
-  // Устанавливаем значения тумблеров
   document.getElementById('remWaterToggle').checked = user.reminders.water;
   document.getElementById('remWorkToggle').checked = user.reminders.workout;
   
@@ -1225,21 +1252,49 @@ function renderWeightChart() {
 async function removeTodayWorkout(i) { todayWorkouts.splice(i, 1); renderHome(); saveAllDebounced(); }
 function addExtraWorkout() { targetDayKey = null; openWorkoutPicker(); }
 function openWorkoutPicker() {
-  document.getElementById('muscleTabs').innerHTML = Object.keys(MUSCLE_LABELS).map(k => `<div class="muscle-tab" onclick="selectMuscle('${k}')">${MUSCLE_LABELS[k]}</div>`).join('');
+  // Добавили кнопку "+ Своя" в начало
+  let tabsHtml = `<button class="muscle-tab" onclick="openCustomPlanModal()" style="border: 1px dashed var(--accent);">+ Своя</button>`;
+  tabsHtml += Object.keys(MUSCLE_LABELS).map(k => `<div class="muscle-tab" onclick="selectMuscle('${k}')" data-key="${k}">${MUSCLE_LABELS[k]}</div>`).join('');
+  document.getElementById('muscleTabs').innerHTML = tabsHtml;
   selectMuscle('chest');
   openModal('modal-plan');
 }
 function selectMuscle(k) {
   currentMuscleGroup = k;
-  document.querySelectorAll('#muscleTabs .muscle-tab').forEach(t => t.classList.toggle('active', t.textContent === MUSCLE_LABELS[k]));
+  document.querySelectorAll('#muscleTabs .muscle-tab').forEach(t => t.classList.toggle('active', t.dataset.key === k));
   const arr = WORKOUT_CATALOG[k] || [];
-  document.getElementById('workoutOptionsList').innerHTML = arr.map(t => `<div class="workout-option" onclick="chooseWorkout('${t.id}')" style="padding: 16px; background: var(--glass); border-radius: 18px; margin-bottom: 10px; border: 1px solid var(--glass-border);"><div style="font-size: 15px; font-weight: 800; margin-bottom: 4px;">${t.name}</div><div style="font-size: 13px; color: var(--text-muted);">${t.desc}</div></div>`).join('');
+  document.getElementById('workoutOptionsList').innerHTML = arr.map(t => `
+    <div class="workout-option-row">
+      <div class="workout-option-content" onclick="chooseWorkout('${t.id}')">
+        <div style="font-size: 15px; font-weight: 800; margin-bottom: 4px;">${t.name}</div>
+        <div style="font-size: 13px; color: var(--text-muted);">${t.desc}</div>
+      </div>
+      <button class="workout-delete-btn" onclick="deleteCustomWorkout('${t.id}')">×</button>
+    </div>
+  `).join('');
 }
 
 async function chooseWorkout(templateId) {
   if (targetDayKey) { weekPlans[targetDayKey] = templateId; targetDayKey = null; closeModal('modal-plan'); renderWeekGrid(); renderHome(); }
   else { todayWorkouts.push({ templateId, done: false }); closeModal('modal-plan'); renderHome(); }
   toast('Добавлено'); saveAllDebounced();
+}
+
+async function deleteCustomWorkout(templateId) {
+  if (!templateId.startsWith('custom_')) { toast('Системную тренировку удалить нельзя'); return; }
+  if (!confirm('Удалить эту тренировку из своих?')) return;
+  
+  customWorkouts = customWorkouts.filter(c => c.id !== templateId);
+  
+  // Если тренировка была в плане на сегодня, убираем
+  todayWorkouts = todayWorkouts.filter(w => w.templateId !== templateId);
+  for (const d of DAYS) { if (weekPlans[d] === templateId) weekPlans[d] = null; }
+  
+  renderHome();
+  renderWeekGrid();
+  saveAllDebounced();
+  selectMuscle('chest');
+  toast('Удалено');
 }
 
 function updateDurationLabel(v) { currentDuration = +v; document.getElementById('durationLabel').textContent = v + ' мин'; }
@@ -1267,7 +1322,6 @@ async function addFood() {
   closeModal('modal-food'); renderFood(); renderHome(); checkQuests(); saveAllDebounced(); toast('Добавлено');
 }
 
-// Модалка быстрого добавления
 function openRecentFoodsModal() {
   const list = document.getElementById('recentFoodsList');
   if (!recentFoods.length) {
@@ -1401,7 +1455,6 @@ async function addFriend() {
     if (res.ok) { 
       toast('Друг добавлен!'); 
       document.getElementById('friendUsername').value = ''; 
-      // Принудительно перезапрашиваем профиль, чтобы получить обновленный массив друзей с сервера
       await loadAll(); 
       loadLeaderboard(); 
       saveAllDebounced(); 
@@ -1522,7 +1575,6 @@ function switchTab(t) {
   if (t === 'profile') renderProfile();
 }
 
-// ИСПРАВЛЕННЫЙ РЕНДЕР ПРОГРЕССА
 function renderProgress() {
   setText('statStreak', streakDone.filter(Boolean).length);
   setText('statWorkouts', workoutsCompleted);
@@ -1601,7 +1653,6 @@ function resetAll() {
   location.reload();
 }
 
-// Инициализация
 window.addEventListener('DOMContentLoaded', async () => {
   const savedTheme = localStorage.getItem('fitplan_theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
