@@ -184,7 +184,7 @@ svg { display: block; }
 input[type=range] { flex: 1; accent-color: var(--accent); height: 8px; border-radius: 4px; background: var(--glass-border); appearance: none; }
 input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height: 26px; border-radius: 50%; background: var(--bg); border: 3px solid var(--accent); box-shadow: var(--shadow-sm); cursor: pointer; }
 
-/* ИСПРАВЛЕНО: Стрик - grid 7 колонок */
+/* СТРИК */
 .streak-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 14px; }
 .streak-day { aspect-ratio: 1; border-radius: 10px; background: var(--glass-strong); border: 1px solid var(--glass-border); display: grid; place-items: center; font-size: 12px; font-weight: 800; color: var(--text-muted); transition: all 0.3s var(--ease); }
 .streak-day.done { background: var(--accent-gradient); border-color: transparent; color: #fff; box-shadow: 0 4px 12px rgba(143,174,148,0.35); transform: translateY(-2px); }
@@ -319,13 +319,19 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 .qr-close svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.4; }
 
 /* Стили для питания */
-.food-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; }
+.food-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.food-tabs::-webkit-scrollbar { display: none; }
 .food-tab { padding: 6px 12px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-border); font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; }
 .food-tab.active { background: var(--accent-gradient); color: #fff; border-color: transparent; }
 [data-theme="bento"] .food-tab { border: 2px solid #111; }
 [data-theme="bento"] .food-tab.active { background: var(--accent); color: #fff; }
-.muscle-tab { padding: 6px 12px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-border); font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; }
+
+/* СКРЫТИЕ ПОЛОСЫ ПРОКРУТКИ ДЛЯ ВСЕХ ЭЛЕМЕНТОВ */
+.muscle-tabs-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.muscle-tabs-container::-webkit-scrollbar { display: none; }
+.muscle-tab { flex: 0 0 auto; padding: 6px 12px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-border); font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; }
 .muscle-tab.active { background: var(--accent-gradient); color: #fff; border-color: transparent; }
+
 /* Быстрое добавление еды */
 .recent-food-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--glass); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--glass-border); cursor: pointer; transition: background 0.2s; }
 .recent-food-item:active { background: var(--accent-light); }
@@ -638,7 +644,8 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 <div class="modal-overlay" id="modal-plan">
   <div class="modal">
     <div class="modal-header"><h3>Выбрать тренировку</h3><button class="btn-icon" onclick="closeModal('modal-plan')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-    <div style="display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px;" id="muscleTabs"></div>
+    <!-- ИСПРАВЛЕНО: Обертка для скролла без полоски -->
+    <div class="muscle-tabs-container" id="muscleTabs"></div>
     <div class="modal-scroll" id="workoutOptionsList"></div>
   </div>
 </div>
@@ -750,7 +757,6 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 
 <script>
 // ================= БАЗЫ ДАННЫХ =================
-// ИСПРАВЛЕНО: Возвращены все группы мышц и упражнения
 const EXERCISE_LIBRARY = {
   chest: { name: "Грудь", exercises: [
     { name: "Жим штанги лёжа", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 },
@@ -1072,7 +1078,6 @@ function renderTodayWorkouts() {
 
 function getWorkoutMeta(id) { for (const g of Object.values(WORKOUT_CATALOG)) { const f = g.find(t => t.id === id); if (f) return { name: f.name }; } const c = customWorkouts.find(w => w.id === id); return c ? { name: c.name } : null; }
 
-// ИСПРАВЛЕНО: Рендер стрика через grid
 function renderStreak() {
   document.getElementById('streakContainer').innerHTML = DAYS.map((d, i) => `<div class="streak-day ${streakDone[i] ? 'done' : ''}">${d}</div>`).join('');
 }
@@ -1165,7 +1170,6 @@ function bmiCategory(bmi) {
 }
 function updateBMISection() { const bmi = calcBMI(), cat = bmiCategory(bmi); setText('homeBmiVal', bmi || '—'); const t = document.getElementById('homeBmiTag'); if (t) { t.textContent = cat.label; t.style.background = cat.bg; t.style.color = cat.color; } }
 
-// ДОБАВЛЕНО: Функция отрисовки графика веса
 function renderWeightChart() {
   const container = document.getElementById('weightChartContainer');
   if (!weightHistory || weightHistory.length < 1) {
@@ -1375,7 +1379,14 @@ async function addFriend() {
   try {
     const res = await fetch(`${SERVER_URL}/api/friends/add`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: USER_ID, username: u }) });
     const d = await res.json();
-    if (res.ok) { toast('Друг добавлен!'); document.getElementById('friendUsername').value = ''; loadLeaderboard(); saveAllDebounced(); }
+    if (res.ok) { 
+      toast('Друг добавлен!'); 
+      document.getElementById('friendUsername').value = ''; 
+      // Принудительно перезапрашиваем профиль, чтобы получить обновленный массив друзей с сервера
+      await loadAll(); 
+      loadLeaderboard(); 
+      saveAllDebounced(); 
+    }
     else toast(d.error || 'Ошибка');
   } catch(e) { toast('Ошибка сети'); }
 }
