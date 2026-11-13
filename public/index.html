@@ -362,7 +362,6 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 .leaderboard-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-gradient); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
 .leaderboard-name { flex: 1; font-weight: 700; font-size: 15px; }
 .leaderboard-score { display: flex; align-items: center; gap: 4px; font-weight: 800; color: var(--accent-deep); font-size: 15px; }
-.poke-btn { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 8px; padding: 4px 8px; font-size: 14px; cursor: pointer; }
 
 /* ПЛАШКИ ТРЕНИРОВОК */
 .workout-option-row {
@@ -560,8 +559,11 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
     </div>
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M3 11h18M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>Съедено сегодня</div>
-      <!-- Иконка часов вместо плюса -->
-      <button class="btn-icon" onclick="openRecentFoodsModal()" title="История питания"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button></h2>
+      <!-- Заменил плюс на часы -->
+      <button class="btn-icon" onclick="openRecentFoodsModal()" title="История питания">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      </button>
+    </h2>
       
       <div class="food-tabs" id="foodTabs">
         <div class="food-tab active" data-meal="breakfast" onclick="selectMeal('breakfast')">Завтрак</div>
@@ -1110,6 +1112,7 @@ function renderWaterSleep() {
   document.getElementById('waterBar').style.width = Math.min(100, (waterToday / waterGoal) * 100) + '%';
   const sleepToday = sleepHistory[todayKey()] || 0;
   setText('sleepText', sleepToday); document.getElementById('sleepBar').style.width = Math.min(100, (sleepToday / 8) * 100) + '%';
+  checkQuests(); // Проверяем квесты при обновлении воды/сна
 }
 
 function renderTodayWorkouts() {
@@ -1492,13 +1495,7 @@ async function loadLeaderboard() {
       <div class="leaderboard-avatar ${f.frame === 'gold' ? 'frame-gold' : ''}">${f.name.charAt(0)}</div>
       <div class="leaderboard-name">${f.name} ${f.is_me ? '(ты)' : ''}</div>
       <div class="leaderboard-score">${f.streak} 🔥</div>
-      ${!f.is_me ? `<button class="poke-btn" onclick="pokeFriend(${f.id}, 'fire')">🔥</button>` : ''}
     </div>`).join('');
-}
-
-async function pokeFriend(id, type) {
-  await fetch(`${SERVER_URL}/api/friends/poke`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: USER_ID, target_id: id, type }) });
-  toast('Подкол отправлен!');
 }
 
 // ---- QR СКАНЕР ----
