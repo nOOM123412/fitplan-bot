@@ -324,6 +324,15 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 /* Быстрое добавление еды */
 .recent-food-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--glass); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--glass-border); cursor: pointer; transition: background 0.2s; }
 .recent-food-item:active { background: var(--accent-light); }
+
+/* ЛИДЕРБОРД */
+.leaderboard-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--glass-border); }
+.leaderboard-row:last-child { border-bottom: none; }
+.leaderboard-rank { font-size: 18px; font-weight: 800; width: 30px; text-align: center; color: var(--text-muted); }
+.leaderboard-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-gradient); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+.leaderboard-name { flex: 1; font-weight: 700; font-size: 15px; }
+.leaderboard-score { display: flex; align-items: center; gap: 4px; font-weight: 800; color: var(--accent-deep); font-size: 15px; }
+.poke-btn { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 8px; padding: 4px 8px; font-size: 14px; cursor: pointer; }
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -1003,6 +1012,7 @@ function renderProfile() {
   document.getElementById('xpBar').style.width = (user.xp / XP_PER_LEVEL * 100) + '%';
   setText('myId', user.uniqueId || '—');
   updateBMISection();
+  renderWeightChart();
   
   const bmi = calcBMI(), cat = bmiCategory(bmi);
   setText('bmiValue', bmi || '—'); 
@@ -1031,6 +1041,39 @@ function bmiCategory(bmi) {
   return { label:'Ожирение', color:'var(--danger)', bg:'var(--danger-light)' };
 }
 function updateBMISection() { const bmi = calcBMI(), cat = bmiCategory(bmi); setText('homeBmiVal', bmi || '—'); const t = document.getElementById('homeBmiTag'); if (t) { t.textContent = cat.label; t.style.background = cat.bg; t.style.color = cat.color; } }
+
+// ДОБАВЛЕНО: Функция отрисовки графика веса
+function renderWeightChart() {
+  const container = document.getElementById('weightChartContainer');
+  if (!weightHistory || weightHistory.length < 1) {
+    container.innerHTML = '<div class="weight-chart-empty">Нет данных. Добавь первый замер ↓</div>';
+    return;
+  }
+  if (weightHistory.length === 1) {
+    container.innerHTML = `<div style="text-align:center;padding:20px 0;color:var(--text-muted);font-weight:600;">Один замер: ${weightHistory[0].weight} кг</div>`;
+    return;
+  }
+  const W = container.clientWidth || 320, H = 140, PAD = 20;
+  const weights = weightHistory.map(x => x.weight);
+  const minW = Math.min(...weights), maxW = Math.max(...weights);
+  const range = maxW - minW || 1;
+  const points = weightHistory.map((x, i) => ({
+    x: PAD + (i / (weightHistory.length - 1)) * (W - PAD * 2),
+    y: H - PAD - ((x.weight - minW) / range) * (H - PAD * 2)
+  }));
+  
+  let pathD = '';
+  points.forEach((p, i) => { pathD += (i === 0 ? `M ${p.x} ${p.y}` : ` L ${p.x} ${p.y}`); });
+  let areaD = pathD + ` L ${points[points.length-1].x} ${H - PAD} L ${points[0].x} ${H - PAD} Z`;
+  
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`;
+  svg += `<defs><linearGradient id="g1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="rgba(143,174,148,0.4)"/><stop offset="100%" stop-color="rgba(143,174,148,0)"/></linearGradient></defs>`;
+  svg += `<path d="${areaD}" fill="url(#g1)"/>`;
+  svg += `<path d="${pathD}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`;
+  points.forEach(p => { svg += `<circle cx="${p.x}" cy="${p.y}" r="4" fill="var(--accent)" stroke="var(--bg)" stroke-width="2"/>`; });
+  svg += `</svg>`;
+  container.innerHTML = `<div class="weight-chart">${svg}</div>`;
+}
 
 // ================= ДЕЙСТВИЯ =================
 async function removeTodayWorkout(i) { todayWorkouts.splice(i, 1); renderHome(); saveAllDebounced(); }
@@ -1214,6 +1257,7 @@ async function addFriend() {
   } catch(e) { toast('Ошибка сети'); }
 }
 
+// ИСПРАВЛЕНО: Лидерборд теперь использует правильные CSS-классы
 async function loadLeaderboard() {
   const res = await fetch(`${SERVER_URL}/api/friends/leaderboard?id=${USER_ID}`);
   const data = await res.json();
@@ -1351,7 +1395,13 @@ function renderProgress() {
 }
 
 function openWeightModal() { document.getElementById('weightInput').value = user.weight || ''; openModal('modal-weight'); }
-async function saveWeight() { user.weight = parseFloat(document.getElementById('weightInput').value); closeModal('modal-weight'); renderHome(); renderProfile(); saveAllDebounced(); }
+async function saveWeight() { 
+  user.weight = parseFloat(document.getElementById('weightInput').value); 
+  weightHistory.push({ date: new Date().toISOString(), weight: user.weight });
+  closeModal('modal-weight'); 
+  renderHome(); renderProfile(); saveAllDebounced(); 
+  toast('Вес записан');
+}
 function openWaterModal() { renderWaterGlasses(); openModal('modal-water'); }
 function renderWaterGlasses() { document.getElementById('waterGlasses').innerHTML = Array.from({length: 8}, (_, i) => `<div style="width:40px;height:48px;border-radius:8px 8px 12px 12px;background:${i*250 < waterToday ? 'var(--accent)' : 'var(--glass-border)'};border:2px solid var(--glass-border);cursor:pointer;" onclick="waterToday=${(i+1)*250};renderWaterSleep();renderWaterGlasses();saveAllDebounced();"></div>`).join(''); }
 function addWater(a) { waterToday += a; renderWaterSleep(); renderWaterGlasses(); saveAllDebounced(); }
@@ -1364,17 +1414,13 @@ function toggleReminder(type, val) { user.reminders[type] = val; saveAllDebounce
 // === ВОЗВРАТ К РЕГИСТРАЦИИ И РЕДАКТИРОВАНИЕ ПРОФИЛЯ ===
 function restartOnboarding() {
   if (confirm('Вернуться к регистрации? Текущие данные профиля останутся в базе, но вы сможете ввести новые.')) {
-    // Сбрасываем только шаг и показываем экран регистрации поверх основного приложения
     obStep = 0;
     document.querySelectorAll('.ob-step').forEach((s, i) => s.style.display = i === 0 ? 'block' : 'none');
     document.getElementById('btnNext').textContent = 'Далее';
-    
-    // Предзаполняем поля текущими данными (чтобы не вводить заново)
     document.getElementById('inpName').value = user.name || '';
     document.getElementById('inpAge').value = user.age || '';
     document.getElementById('inpWeight').value = user.weight || '';
     document.getElementById('inpHeight').value = user.height || '';
-    
     document.getElementById('onboarding').style.display = 'flex';
   }
 }
