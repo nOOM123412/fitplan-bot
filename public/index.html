@@ -329,8 +329,27 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 /* СКРЫТИЕ ПОЛОСЫ ПРОКРУТКИ ДЛЯ ВСЕХ ЭЛЕМЕНТОВ */
 .muscle-tabs-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .muscle-tabs-container::-webkit-scrollbar { display: none; }
-.muscle-tab { flex: 0 0 auto; padding: 6px 12px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-border); font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; }
-.muscle-tab.active { background: var(--accent-gradient); color: #fff; border-color: transparent; }
+.muscle-tab { 
+  flex: 0 0 auto; 
+  padding: 10px 16px; 
+  border-radius: 14px; 
+  background: var(--glass); 
+  border: 1px solid var(--glass-border); 
+  font-size: 13px; 
+  font-weight: 700; 
+  color: var(--text-muted); 
+  cursor: pointer; 
+  white-space: nowrap; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  min-height: 40px;
+}
+.muscle-tab.active { 
+  background: var(--accent-gradient); 
+  color: #fff; 
+  border-color: transparent; 
+}.muscle-tab.active { background: var(--accent-gradient); color: #fff; border-color: transparent; }
 
 /* Быстрое добавление еды */
 .recent-food-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--glass); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--glass-border); cursor: pointer; transition: background 0.2s; }
