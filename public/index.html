@@ -327,7 +327,7 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 [data-theme="bento"] .food-tab.active { background: var(--accent); color: #fff; }
 
 /* СКРЫТИЕ ПОЛОСЫ ПРОКРУТКИ ДЛЯ ВСЕХ ЭЛЕМЕНТОВ */
-.muscle-tabs-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.muscle-tabs-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; touch-action: pan-x; }
 .muscle-tabs-container::-webkit-scrollbar { display: none; }
 .muscle-tab { 
   flex: 0 0 auto; 
@@ -560,7 +560,8 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
     </div>
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M3 11h18M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>Съедено сегодня</div>
-      <button class="btn-icon" onclick="openRecentFoodsModal()" title="Быстрое добавление"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></h2>
+      <!-- Иконка часов вместо плюса -->
+      <button class="btn-icon" onclick="openRecentFoodsModal()" title="История питания"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button></h2>
       
       <div class="food-tabs" id="foodTabs">
         <div class="food-tab active" data-meal="breakfast" onclick="selectMeal('breakfast')">Завтрак</div>
@@ -1202,6 +1203,7 @@ function renderProfile() {
     setText('bmiIdeal', ideal.toFixed(1) + ' кг');
     setText('bmiCurrent', user.weight + ' кг');
   }
+  // Устанавливаем значения тумблеров
   document.getElementById('remWaterToggle').checked = user.reminders.water;
   document.getElementById('remWorkToggle').checked = user.reminders.workout;
   
@@ -1300,7 +1302,21 @@ async function chooseWorkout(templateId) {
 }
 
 function updateDurationLabel(v) { currentDuration = +v; document.getElementById('durationLabel').textContent = v + ' мин'; }
-function renderWeekGrid() { document.getElementById('weekGrid').innerHTML = DAYS.map(d => { const m = weekPlans[d] ? getWorkoutMeta(weekPlans[d]) : null; return `<div class="week-row"><span class="week-day">${d}</span><span class="week-plan ${m?'':'empty'}">${m ? m.name : 'Отдых'}</span><button class="btn-icon" onclick="editDay('${d}')"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></div>`; }).join(''); }
+function renderWeekGrid() { 
+  document.getElementById('weekGrid').innerHTML = DAYS.map(d => { 
+    const tid = weekPlans[d];
+    const m = tid ? getWorkoutMeta(tid) : null; 
+    return `<div class="week-row">
+      <span class="week-day">${d}</span>
+      <span class="week-plan ${m?'':'empty'}">${m ? m.name : 'Отдых'}</span>
+      ${m 
+        ? `<button class="btn-icon" onclick="removeDayPlan('${d}')" style="background:var(--danger-light);color:var(--danger);"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button>` 
+        : `<button class="btn-icon" onclick="editDay('${d}')"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>`
+      }
+    </div>`; 
+  }).join(''); 
+}
+function removeDayPlan(d) { weekPlans[d] = null; renderWeekGrid(); renderHome(); saveAllDebounced(); }
 function editDay(d) { targetDayKey = d; openWorkoutPicker(); }
 
 // ---- ЕДА ----
@@ -1423,7 +1439,9 @@ function handleWorkoutAction() {
 
 async function finishWorkout() {
   document.getElementById('workoutScreen').classList.remove('active');
-  streakDone[(new Date().getDay() + 6) % 7] = true; addXP(50);
+  streakDone[(new Date().getDay() + 6) % 7] = true; 
+  workoutsCompleted++; // Увеличиваем счетчик тренировок
+  addXP(50);
   renderHome(); checkQuests(); saveAllDebounced(); toast('Тренировка завершена! +50 XP');
 }
 
