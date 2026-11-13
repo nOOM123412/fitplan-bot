@@ -184,6 +184,11 @@ svg { display: block; }
 input[type=range] { flex: 1; accent-color: var(--accent); height: 8px; border-radius: 4px; background: var(--glass-border); appearance: none; }
 input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height: 26px; border-radius: 50%; background: var(--bg); border: 3px solid var(--accent); box-shadow: var(--shadow-sm); cursor: pointer; }
 
+/* ИСПРАВЛЕНО: Стрик - grid 7 колонок */
+.streak-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 14px; }
+.streak-day { aspect-ratio: 1; border-radius: 10px; background: var(--glass-strong); border: 1px solid var(--glass-border); display: grid; place-items: center; font-size: 12px; font-weight: 800; color: var(--text-muted); transition: all 0.3s var(--ease); }
+.streak-day.done { background: var(--accent-gradient); border-color: transparent; color: #fff; box-shadow: 0 4px 12px rgba(143,174,148,0.35); transform: translateY(-2px); }
+
 /* КВЕСТЫ */
 .quest-card { background: var(--glass-strong); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid var(--glass-border); display: flex; align-items: center; gap: 12px; transition: all 0.3s; }
 .quest-card.done { opacity: 0.6; background: var(--accent-light); border-color: transparent; }
@@ -745,21 +750,138 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 
 <script>
 // ================= БАЗЫ ДАННЫХ =================
+// ИСПРАВЛЕНО: Возвращены все группы мышц и упражнения
 const EXERCISE_LIBRARY = {
-  chest: { name: "Грудь", exercises: [{ name: "Жим штанги лёжа", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 }, { name: "Жим гантелей на наклонной", type: "dumbbell", ratio: 0.2, minW: 4, step: 2 }, { name: "Разводка гантелей", type: "dumbbell", ratio: 0.1, minW: 4, step: 2 }, { name: "Отжимания от пола", type: "bodyweight", ratio: 0 }] },
-  back: { name: "Спина", exercises: [{ name: "Подтягивания", type: "bodyweight", ratio: 0 }, { name: "Тяга штанги в наклоне", type: "barbell", ratio: 0.4, minW: 20, step: 2.5 }, { name: "Тяга верхнего блока", type: "machine", ratio: 0.35, minW: 15, step: 5 }, { name: "Гиперэкстензия", type: "bodyweight", ratio: 0 }] },
-  legs: { name: "Ноги", exercises: [{ name: "Приседания со штангой", type: "barbell", ratio: 0.6, minW: 20, step: 2.5 }, { name: "Жим ногами", type: "machine", ratio: 1.0, minW: 40, step: 10 }, { name: "Румынская тяга", type: "barbell", ratio: 0.45, minW: 20, step: 2.5 }] },
-  core: { name: "Кор", exercises: [{ name: "Скручивания", type: "bodyweight", ratio: 0 }, { name: "Планка", type: "bodyweight", ratio: 0 }] },
-  fullbody: { name: "Всё тело", exercises: [{ name: "Функционал", type: "barbell", ratio: 0.3, minW: 10, step: 2.5 }] }
+  chest: { name: "Грудь", exercises: [
+    { name: "Жим штанги лёжа", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 },
+    { name: "Жим гантелей на наклонной", type: "dumbbell", ratio: 0.2, minW: 4, step: 2 },
+    { name: "Жим гантелей лёжа", type: "dumbbell", ratio: 0.2, minW: 4, step: 2 },
+    { name: "Разводка гантелей", type: "dumbbell", ratio: 0.1, minW: 4, step: 2 },
+    { name: "Отжимания от пола", type: "bodyweight", ratio: 0 },
+    { name: "Жим в кроссовере", type: "machine", ratio: 0.15, minW: 10, step: 5 },
+    { name: "Жим узким хватом", type: "barbell", ratio: 0.4, minW: 20, step: 2.5 },
+    { name: "Пуловер с гантелью", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
+    { name: "Сведение рук в тренажёре", type: "machine", ratio: 0.1, minW: 10, step: 5 },
+    { name: "Отжимания на брусьях", type: "bodyweight", ratio: 0 }
+  ]},
+  back: { name: "Спина", exercises: [
+    { name: "Подтягивания", type: "bodyweight", ratio: 0 },
+    { name: "Тяга штанги в наклоне", type: "barbell", ratio: 0.4, minW: 20, step: 2.5 },
+    { name: "Тяга верхнего блока", type: "machine", ratio: 0.35, minW: 15, step: 5 },
+    { name: "Тяга гантели одной рукой", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
+    { name: "Гиперэкстензия", type: "bodyweight", ratio: 0 },
+    { name: "Тяга Т-грифа", type: "barbell", ratio: 0.35, minW: 20, step: 2.5 },
+    { name: "Шраги со штангой", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 },
+    { name: "Тяга нижнего блока к поясу", type: "machine", ratio: 0.35, minW: 15, step: 5 },
+    { name: "Становая тяга", type: "barbell", ratio: 0.7, minW: 20, step: 5 },
+    { name: "Пулловер в блочном тренажёре", type: "machine", ratio: 0.2, minW: 10, step: 5 }
+  ]},
+  legs: { name: "Ноги", exercises: [
+    { name: "Приседания со штангой", type: "barbell", ratio: 0.6, minW: 20, step: 2.5 },
+    { name: "Жим ногами", type: "machine", ratio: 1.0, minW: 40, step: 10 },
+    { name: "Румынская тяга", type: "barbell", ratio: 0.45, minW: 20, step: 2.5 },
+    { name: "Выпады с гантелями", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
+    { name: "Сгибания ног лёжа", type: "machine", ratio: 0.25, minW: 10, step: 5 },
+    { name: "Разгибания ног", type: "machine", ratio: 0.2, minW: 10, step: 5 },
+    { name: "Подъём на носки", type: "machine", ratio: 0.6, minW: 20, step: 5 },
+    { name: "Фронтальные приседания", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 },
+    { name: "Болгарские выпады", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
+    { name: "Ягодичный мостик", type: "barbell", ratio: 0.5, minW: 20, step: 5 }
+  ]},
+  shoulders: { name: "Плечи", exercises: [
+    { name: "Жим штанги стоя", type: "barbell", ratio: 0.3, minW: 15, step: 2.5 },
+    { name: "Махи гантелями", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 },
+    { name: "Шраги со штангой", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 },
+    { name: "Обратные разводки", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 },
+    { name: "Тяга к подбородку", type: "barbell", ratio: 0.3, minW: 15, step: 2.5 },
+    { name: "Жим гантелей сидя", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
+    { name: "Махи в кроссовере", type: "machine", ratio: 0.05, minW: 5, step: 2.5 },
+    { name: "Разведение в наклоне", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 },
+    { name: "Жим Арнольда", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
+    { name: "Face pull", type: "machine", ratio: 0.15, minW: 10, step: 5 }
+  ]},
+  arms: { name: "Руки", exercises: [
+    { name: "Подъём штанги на бицепс", type: "barbell", ratio: 0.25, minW: 10, step: 2.5 },
+    { name: "Французский жим", type: "barbell", ratio: 0.2, minW: 10, step: 2.5 },
+    { name: "Молотки", type: "dumbbell", ratio: 0.1, minW: 2, step: 2 },
+    { name: "Разгибание на трицепс", type: "machine", ratio: 0.25, minW: 10, step: 5 },
+    { name: "Концентрированные подъёмы", type: "dumbbell", ratio: 0.1, minW: 2, step: 2 },
+    { name: "Отжимания узким хватом", type: "bodyweight", ratio: 0 },
+    { name: "Подъём на скамье Скотта", type: "barbell", ratio: 0.2, minW: 10, step: 2.5 },
+    { name: "Разгибание из-за головы", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
+    { name: "Обратные сгибания", type: "barbell", ratio: 0.15, minW: 10, step: 2.5 },
+    { name: "Кикбэк на трицепс", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 }
+  ]},
+  core: { name: "Кор", exercises: [
+    { name: "Скручивания", type: "bodyweight", ratio: 0 },
+    { name: "Планка", type: "bodyweight", ratio: 0 },
+    { name: "Подъём ног в висе", type: "bodyweight", ratio: 0 },
+    { name: "Боковые наклоны", type: "bodyweight", ratio: 0 },
+    { name: "Велосипед", type: "bodyweight", ratio: 0 },
+    { name: "Русский твист", type: "bodyweight", ratio: 0 },
+    { name: "Обратные скручивания", type: "bodyweight", ratio: 0 },
+    { name: "Книжка", type: "bodyweight", ratio: 0 },
+    { name: "Боковая планка", type: "bodyweight", ratio: 0 },
+    { name: "Подъёмы ног лёжа", type: "bodyweight", ratio: 0 }
+  ]}
 };
+
 const WORKOUT_CATALOG = {
-  chest: [{ id:"chest_classic", name:"Классический жим", desc:"Жим лёжа и наклонная", ex:["Жим штанги лёжа","Жим гантелей на наклонной","Разводка гантелей"] }],
-  back: [{ id:"back_full", name:"Спина: полная", desc:"И ширина, и толщина", ex:["Подтягивания","Тяга штанги в наклоне","Тяга верхнего блока"] }],
-  legs: [{ id:"legs_full", name:"Ноги: полная", desc:"Все группы", ex:["Приседания со штангой","Румынская тяга","Жим ногами"] }],
-  core: [{ id:"core_strength", name:"Сильный кор", desc:"Планки и статика", ex:["Планка","Скручивания"] }],
-  fullbody: [{ id:"fb_functional", name:"Функционал", desc:"Круговая на всё тело", ex:["Приседания со штангой","Отжимания от пола","Подтягивания"] }]
+  chest: [
+    { id:"chest_classic", name:"Классический жим", desc:"Жим лёжа и наклонная — основа массы груди.", ex:["Жим штанги лёжа","Жим гантелей на наклонной","Разводка гантелей","Жим в кроссовере","Отжимания на брусьях"] },
+    { id:"chest_upper", name:"Верх груди", desc:"Акцент на верхний пучок.", ex:["Жим гантелей на наклонной","Жим штанги лёжа","Сведение рук в тренажёре","Жим в кроссовере","Пуловер с гантелью"] },
+    { id:"chest_mass", name:"Масса: штанги", desc:"Тяжёлые базовые жимы.", ex:["Жим штанги лёжа","Жим узким хватом","Отжимания на брусьях","Жим гантелей лёжа"] },
+    { id:"chest_pump", name:"Памп грудных", desc:"Многоповторка и изоляция.", ex:["Разводка гантелей","Сведение рук в тренажёре","Жим в кроссовере","Отжимания от пола","Пуловер с гантелью"] },
+    { id:"chest_bodyweight", name:"Только свой вес", desc:"Отжимания и брусья.", ex:["Отжимания от пола","Отжимания на брусьях"] },
+    { id:"chest_beginner", name:"Новичку: грудь", desc:"Простые движения.", ex:["Жим гантелей лёжа","Разводка гантелей","Отжимания от пола","Сведение рук в тренажёре"] },
+    { id:"chest_hard", name:"Тяжёлый жим", desc:"Силовой день.", ex:["Жим штанги лёжа","Жим узким хватом","Жим гантелей на наклонной"] }
+  ],
+  back: [
+    { id:"back_width", name:"Спина: ширина", desc:"Вертикальные тяги и подтягивания.", ex:["Подтягивания","Тяга верхнего блока","Пулловер в блочном тренажёре","Тяга гантели одной рукой","Гиперэкстензия"] },
+    { id:"back_thickness", name:"Спина: толщина", desc:"Тяги к поясу для массы.", ex:["Тяга штанги в наклоне","Тяга Т-грифа","Тяга нижнего блока к поясу","Шраги со штангой","Гиперэкстензия"] },
+    { id:"back_full", name:"Спина: полная", desc:"И ширина, и толщина.", ex:["Подтягивания","Тяга штанги в наклоне","Тяга верхнего блока","Тяга нижнего блока к поясу","Шраги со штангой"] },
+    { id:"back_deadlift", name:"Силовая: становая", desc:"Становая тяга и тяга штанги.", ex:["Становая тяга","Тяга штанги в наклоне","Подтягивания","Тяга Т-грифа"] },
+    { id:"back_beginner", name:"Новичку: спина", desc:"Простые тяги.", ex:["Тяга верхнего блока","Тяга нижнего блока к поясу","Гиперэкстензия","Тяга гантели одной рукой"] },
+    { id:"back_pump", name:"Памп спины", desc:"Многоповторка.", ex:["Тяга верхнего блока","Тяга нижнего блока к поясу","Пулловер в блочном тренажёре","Шраги со штангой"] }
+  ],
+  legs: [
+    { id:"legs_quad", name:"Квадрицепс", desc:"Перед бедра.", ex:["Приседания со штангой","Жим ногами","Разгибания ног","Выпады с гантелями","Подъём на носки"] },
+    { id:"legs_ham", name:"Бицепс бедра и ягодицы", desc:"Зад бедра.", ex:["Румынская тяга","Сгибания ног лёжа","Ягодичный мостик","Болгарские выпады","Подъём на носки"] },
+    { id:"legs_full", name:"Ноги: полная", desc:"Все группы.", ex:["Приседания со штангой","Румынская тяга","Жим ногами","Сгибания ног лёжа","Разгибания ног","Подъём на носки"] },
+    { id:"legs_power", name:"Силовые ноги", desc:"Тяжёлые база.", ex:["Приседания со штангой","Румынская тяга","Жим ногами","Фронтальные приседания"] },
+    { id:"legs_glutes", name:"Ягодичный день", desc:"Акцент на ягодицы.", ex:["Ягодичный мостик","Болгарские выпады","Румынская тяга","Выпады с гантелями"] },
+    { id:"legs_beginner", name:"Новичку: ноги", desc:"Приседания и жим.", ex:["Приседания со штангой","Жим ногами","Разгибания ног","Сгибания ног лёжа"] },
+    { id:"legs_pump", name:"Памп ног", desc:"Многоповторка.", ex:["Жим ногами","Разгибания ног","Сгибания ног лёжа","Подъём на носки"] }
+  ],
+  shoulders: [
+    { id:"shoulders_base", name:"База плеч", desc:"Жимы.", ex:["Жим штанги стоя","Жим гантелей сидя","Тяга к подбородку","Махи гантелями","Face pull"] },
+    { id:"shoulders_mid", name:"Средняя дельта", desc:"Махи.", ex:["Махи гантелями","Махи в кроссовере","Жим гантелей сидя","Тяга к подбородку"] },
+    { id:"shoulders_rear", name:"Задняя дельта", desc:"Разводки.", ex:["Обратные разводки","Разведение в наклоне","Face pull","Шраги со штангой"] },
+    { id:"shoulders_full", name:"Плечи: полная", desc:"Все три пучка.", ex:["Жим штанги стоя","Махи гантелями","Обратные разводки","Тяга к подбородку","Face pull"] },
+    { id:"shoulders_power", name:"Силовые плечи", desc:"Тяжёлые жимы.", ex:["Жим штанги стоя","Жим Арнольда","Тяга к подбородку","Шраги со штангой"] },
+    { id:"shoulders_pump", name:"Памп плеч", desc:"Многоповторка.", ex:["Махи гантелями","Махи в кроссовере","Обратные разводки","Face pull"] }
+  ],
+  arms: [
+    { id:"arms_biceps", name:"Бицепс", desc:"Подъёмы штанги и гантелей.", ex:["Подъём штанги на бицепс","Молотки","Подъём на скамье Скотта","Концентрированные подъёмы","Обратные сгибания"] },
+    { id:"arms_triceps", name:"Трицепс", desc:"Жимы и разгибания.", ex:["Французский жим","Разгибание на трицепс","Отжимания узким хватом","Разгибание из-за головы","Кикбэк на трицепс"] },
+    { id:"arms_full", name:"Руки: полная", desc:"Бицепс + трицепс.", ex:["Подъём штанги на бицепс","Французский жим","Молотки","Разгибание на трицепс","Отжимания узким хватом"] },
+    { id:"arms_strength", name:"Силовые руки", desc:"Тяжёлые базовые.", ex:["Подъём штанги на бицепс","Французский жим","Отжимания узким хватом"] },
+    { id:"arms_pump", name:"Памп рук", desc:"Многоповторка.", ex:["Молотки","Концентрированные подъёмы","Кикбэк на трицепс","Разгибание из-за головы"] }
+  ],
+  core: [
+    { id:"core_strength", name:"Сильный кор", desc:"Планки и статика.", ex:["Планка","Боковая планка","Подъём ног в висе","Русский твист"] },
+    { id:"core_upper", name:"Верх пресса", desc:"Скручивания и книжка.", ex:["Скручивания","Велосипед","Книжка","Русский твист"] },
+    { id:"core_lower", name:"Низ пресса", desc:"Подъёмы ног.", ex:["Подъём ног в висе","Обратные скручивания","Подъёмы ног лёжа","Планка"] },
+    { id:"core_obliques", name:"Косые", desc:"Боковые наклоны.", ex:["Боковые наклоны","Велосипед","Русский твист","Боковая планка"] },
+    { id:"core_full", name:"Кор: круговая", desc:"Все зоны пресса.", ex:["Скручивания","Подъём ног в висе","Планка","Велосипед","Русский твист"] }
+  ],
+  fullbody: [
+    { id:"fb_functional", name:"Функционал", desc:"Круговая на всё тело.", ex:["Приседания со штангой","Отжимания от пола","Подтягивания","Планка","Выпады с гантелями"] },
+    { id:"fb_strength", name:"Сила: всё тело", desc:"Тяжёлые база.", ex:["Приседания со штангой","Жим штанги лёжа","Становая тяга","Жим штанги стоя"] },
+    { id:"fb_beginner", name:"Новичку: всё тело", desc:"Простые движения.", ex:["Приседания со штангой","Жим гантелей лёжа","Тяга верхнего блока","Планка"] }
+  ]
 };
-const MUSCLE_LABELS = { chest:"Грудь", back:"Спина", legs:"Ноги", core:"Кор", fullbody:"Всё тело" };
+const MUSCLE_LABELS = { chest:"Грудь", back:"Спина", legs:"Ноги", shoulders:"Плечи", arms:"Руки", core:"Кор", fullbody:"Всё тело" };
 const DAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const XP_PER_LEVEL = 100;
 
@@ -950,6 +1072,7 @@ function renderTodayWorkouts() {
 
 function getWorkoutMeta(id) { for (const g of Object.values(WORKOUT_CATALOG)) { const f = g.find(t => t.id === id); if (f) return { name: f.name }; } const c = customWorkouts.find(w => w.id === id); return c ? { name: c.name } : null; }
 
+// ИСПРАВЛЕНО: Рендер стрика через grid
 function renderStreak() {
   document.getElementById('streakContainer').innerHTML = DAYS.map((d, i) => `<div class="streak-day ${streakDone[i] ? 'done' : ''}">${d}</div>`).join('');
 }
@@ -1257,7 +1380,6 @@ async function addFriend() {
   } catch(e) { toast('Ошибка сети'); }
 }
 
-// ИСПРАВЛЕНО: Лидерборд теперь использует правильные CSS-классы
 async function loadLeaderboard() {
   const res = await fetch(`${SERVER_URL}/api/friends/leaderboard?id=${USER_ID}`);
   const data = await res.json();
