@@ -327,7 +327,7 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 [data-theme="bento"] .food-tab.active { background: var(--accent); color: #fff; }
 
 /* СКРЫТИЕ ПОЛОСЫ ПРОКРУТКИ ДЛЯ ВСЕХ ЭЛЕМЕНТОВ */
-.muscle-tabs-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; touch-action: pan-x; }
+.muscle-tabs-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; touch-action: pan-x; height: 50px; align-items: center; flex-shrink: 0; }
 .muscle-tabs-container::-webkit-scrollbar { display: none; }
 .muscle-tab { 
   flex: 0 0 auto; 
@@ -1112,7 +1112,7 @@ function renderWaterSleep() {
   document.getElementById('waterBar').style.width = Math.min(100, (waterToday / waterGoal) * 100) + '%';
   const sleepToday = sleepHistory[todayKey()] || 0;
   setText('sleepText', sleepToday); document.getElementById('sleepBar').style.width = Math.min(100, (sleepToday / 8) * 100) + '%';
-  checkQuests(); // Проверяем квесты при обновлении воды/сна
+  checkQuests();
 }
 
 function renderTodayWorkouts() {
@@ -1258,6 +1258,7 @@ function renderWeightChart() {
 // ================= ДЕЙСТВИЯ =================
 async function removeTodayWorkout(i) { todayWorkouts.splice(i, 1); renderHome(); saveAllDebounced(); }
 function addExtraWorkout() { targetDayKey = null; openWorkoutPicker(); }
+
 function openWorkoutPicker() {
   let tabsHtml = `<button class="muscle-tab" onclick="openCustomPlanModal()" style="border: 1px dashed var(--accent);">+ Своя</button>`;
   tabsHtml += Object.keys(MUSCLE_LABELS).map(k => `<div class="muscle-tab" onclick="selectMuscle('${k}')" data-key="${k}">${MUSCLE_LABELS[k]}</div>`).join('');
@@ -1265,6 +1266,7 @@ function openWorkoutPicker() {
   selectMuscle('chest');
   openModal('modal-plan');
 }
+
 function selectMuscle(k) {
   currentMuscleGroup = k;
   document.querySelectorAll('#muscleTabs .muscle-tab').forEach(t => t.classList.toggle('active', t.dataset.key === k));
@@ -1305,6 +1307,7 @@ async function chooseWorkout(templateId) {
 }
 
 function updateDurationLabel(v) { currentDuration = +v; document.getElementById('durationLabel').textContent = v + ' мин'; }
+
 function renderWeekGrid() { 
   document.getElementById('weekGrid').innerHTML = DAYS.map(d => { 
     const tid = weekPlans[d];
@@ -1319,6 +1322,7 @@ function renderWeekGrid() {
     </div>`; 
   }).join(''); 
 }
+
 function removeDayPlan(d) { weekPlans[d] = null; renderWeekGrid(); renderHome(); saveAllDebounced(); }
 function editDay(d) { targetDayKey = d; openWorkoutPicker(); }
 
