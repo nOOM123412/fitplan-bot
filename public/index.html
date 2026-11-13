@@ -364,7 +364,7 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 .leaderboard-score { display: flex; align-items: center; gap: 4px; font-weight: 800; color: var(--accent-deep); font-size: 15px; }
 .poke-btn { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 8px; padding: 4px 8px; font-size: 14px; cursor: pointer; }
 
-/* НОВЫЕ КНОПКИ В МОДАЛКЕ ТРЕНИРОВОК */
+/* ПЛАШКИ ТРЕНИРОВОК */
 .workout-option-row {
   display: flex;
   align-items: center;
@@ -374,11 +374,13 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
   margin-bottom: 10px;
   border: 1px solid var(--glass-border);
   padding: 0 8px 0 0;
+  overflow: hidden;
 }
 .workout-option-content {
   flex: 1;
   padding: 16px;
   cursor: pointer;
+  min-width: 0;
 }
 .workout-delete-btn {
   flex: 0 0 36px;
@@ -1252,7 +1254,6 @@ function renderWeightChart() {
 async function removeTodayWorkout(i) { todayWorkouts.splice(i, 1); renderHome(); saveAllDebounced(); }
 function addExtraWorkout() { targetDayKey = null; openWorkoutPicker(); }
 function openWorkoutPicker() {
-  // Добавили кнопку "+ Своя" в начало
   let tabsHtml = `<button class="muscle-tab" onclick="openCustomPlanModal()" style="border: 1px dashed var(--accent);">+ Своя</button>`;
   tabsHtml += Object.keys(MUSCLE_LABELS).map(k => `<div class="muscle-tab" onclick="selectMuscle('${k}')" data-key="${k}">${MUSCLE_LABELS[k]}</div>`).join('');
   document.getElementById('muscleTabs').innerHTML = tabsHtml;
@@ -1263,38 +1264,39 @@ function selectMuscle(k) {
   currentMuscleGroup = k;
   document.querySelectorAll('#muscleTabs .muscle-tab').forEach(t => t.classList.toggle('active', t.dataset.key === k));
   const arr = WORKOUT_CATALOG[k] || [];
-  document.getElementById('workoutOptionsList').innerHTML = arr.map(t => `
-    <div class="workout-option-row">
-      <div class="workout-option-content" onclick="chooseWorkout('${t.id}')">
-        <div style="font-size: 15px; font-weight: 800; margin-bottom: 4px;">${t.name}</div>
-        <div style="font-size: 13px; color: var(--text-muted);">${t.desc}</div>
+  
+  document.getElementById('workoutOptionsList').innerHTML = arr.map(t => {
+    const isCustom = t.id.startsWith('custom_');
+    return `
+      <div class="workout-option-row">
+        <div class="workout-option-content" onclick="chooseWorkout('${t.id}')">
+          <div style="font-size: 15px; font-weight: 800; margin-bottom: 4px;">${t.name}</div>
+          <div style="font-size: 13px; color: var(--text-muted);">${t.desc}</div>
+        </div>
+        ${isCustom ? `<button class="workout-delete-btn" onclick="deleteCustomWorkout('${t.id}')">×</button>` : ''}
       </div>
-      <button class="workout-delete-btn" onclick="deleteCustomWorkout('${t.id}')">×</button>
-    </div>
-  `).join('');
-}
-
-async function chooseWorkout(templateId) {
-  if (targetDayKey) { weekPlans[targetDayKey] = templateId; targetDayKey = null; closeModal('modal-plan'); renderWeekGrid(); renderHome(); }
-  else { todayWorkouts.push({ templateId, done: false }); closeModal('modal-plan'); renderHome(); }
-  toast('Добавлено'); saveAllDebounced();
+    `;
+  }).join('');
 }
 
 async function deleteCustomWorkout(templateId) {
-  if (!templateId.startsWith('custom_')) { toast('Системную тренировку удалить нельзя'); return; }
   if (!confirm('Удалить эту тренировку из своих?')) return;
   
   customWorkouts = customWorkouts.filter(c => c.id !== templateId);
-  
-  // Если тренировка была в плане на сегодня, убираем
   todayWorkouts = todayWorkouts.filter(w => w.templateId !== templateId);
   for (const d of DAYS) { if (weekPlans[d] === templateId) weekPlans[d] = null; }
   
   renderHome();
   renderWeekGrid();
   saveAllDebounced();
-  selectMuscle('chest');
+  selectMuscle(currentMuscleGroup);
   toast('Удалено');
+}
+
+async function chooseWorkout(templateId) {
+  if (targetDayKey) { weekPlans[targetDayKey] = templateId; targetDayKey = null; closeModal('modal-plan'); renderWeekGrid(); renderHome(); }
+  else { todayWorkouts.push({ templateId, done: false }); closeModal('modal-plan'); renderHome(); }
+  toast('Добавлено'); saveAllDebounced();
 }
 
 function updateDurationLabel(v) { currentDuration = +v; document.getElementById('durationLabel').textContent = v + ' мин'; }
