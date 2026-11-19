@@ -75,7 +75,8 @@ async def init_db():
             daily_quests_json TEXT DEFAULT '{}',
             reminders_json TEXT DEFAULT '{"water": true, "workout": true}',
             frame TEXT DEFAULT 'none',
-            food_log_json TEXT DEFAULT '{}'
+            food_log_json TEXT DEFAULT '{}',
+            last_active_date TEXT
         )""")
 
         new_cols = [
@@ -84,7 +85,8 @@ async def init_db():
             ("daily_quests_json", "TEXT DEFAULT '{}'"), 
             ("reminders_json", "TEXT DEFAULT '{\"water\": true, \"workout\": true}'"),
             ("frame", "TEXT DEFAULT 'none'"),
-            ("food_log_json", "TEXT DEFAULT '{}'")
+            ("food_log_json", "TEXT DEFAULT '{}'"),
+            ("last_active_date", "TEXT")
         ]
         for col, col_type in new_cols:
             try: await db.execute(f"ALTER TABLE users ADD COLUMN {col} {col_type}")
@@ -114,6 +116,26 @@ def _parse(val, default):
     if not val: return default
     try: return json.loads(val)
     except Exception: return default
+
+
+async def reset_daily_data():
+    """Сбрасывает дневной прогресс у всех пользователей в 00:00 МСК"""
+    today = datetime.now().strftime("%Y-%m-%d")
+    try:
+        async with aiosqlite.connect(DB_FILE) as db:
+            await db.execute("""
+                UPDATE users SET 
+                foods_json = '[]',
+                water_today = 0,
+                today_workouts_json = '[]',
+                daily_quests_json = '{}',
+                last_active_date = ?
+                WHERE last_active_date != ? OR last_active_date IS NULL
+            """, (today, today))
+            await db.commit()
+        logging.info(f"✅ Ежедневный сброс выполнен. Дата: {today}")
+    except Exception as e:
+        logging.error(f"❌ Ошибка сброса: {e}")
 
 
 async def get_user_full(uid: str):
@@ -151,7 +173,6 @@ async def get_user_full(uid: str):
             return u
 
 
-# ================= НАПОМИНАНИЯ =================
 async def send_reminders():
     now = datetime.now()
     cur_time = now.strftime("%H:%M")
@@ -181,7 +202,6 @@ async def send_reminders():
                     except Exception: pass
 
 
-# ================= API (AIOHTTP) =================
 async def handle_index(request):
     response = web.FileResponse("./public/index.html")
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -191,21 +211,14 @@ async def handle_static(request):
     filepath = os.path.join("./public", request.match_info["filename"])
     return web.FileResponse(filepath) if os.path.exists(filepath) else web.Response(status=404)
 
-# ИСПРАВЛЕНИЕ: Добавлена проверка подписки!
 async def api_get_user(request):
     uid = request.query.get("id")
-    if not uid:
-        return web.json_response({"error": "No ID"}, status=400)
-    
+    if not uid: return web.json_response({"error": "No ID"}, status=400)
     user = await get_user_full(uid)
-    if not user: 
-        return web.json_response({"error": "Not found"}, status=404)
-    
+    if not user: return web.json_response({"error": "Not found"}, status=404)
     now = int(time.time())
-    # Если подписки нет или она истекла - отдаем 403
     if not user.get("sub_until") or user["sub_until"] < now:
         return web.json_response({"error": "Subscription expired"}, status=403)
-        
     return web.json_response(user)
 
 async def api_save_all(request):
@@ -218,10 +231,8 @@ async def api_save_all(request):
         db.row_factory = aiosqlite.Row
         async with db.execute("SELECT sub_until FROM users WHERE user_id = ?", (int(uid),)) as cur:
             row = await cur.fetchone()
-        
         if row and (not row["sub_until"] or row["sub_until"] < now):
             return web.json_response({"error": "Subscription expired"}, status=403)
-        
         if not row:
             await db.execute("INSERT INTO users (user_id, name, sub_until, created_at, trial_used) VALUES (?, ?, ?, ?, ?)",
                 (int(uid), "User", 0, datetime.utcnow().isoformat(), 0))
@@ -264,15 +275,12 @@ async def api_add_friend(request):
         async with db.execute("SELECT user_id, name, streak_count FROM users WHERE username = ?", (target_username,)) as cur:
             target = await cur.fetchone()
         if not target:
-            return web.json_response({"error": "Пользователь не найден. Попроси его зайти в бота."}, status=404)
-        
+            return web.json_response({"error": "Пользователь не найден"}, status=404)
         async with db.execute("SELECT friends_json FROM users WHERE user_id=?", (my_id,)) as cur:
             my_row = await cur.fetchone()
             friends = _parse(my_row["friends_json"], [])
-        
         if target["user_id"] in friends:
             return web.json_response({"error": "Уже в друзьях"}, status=400)
-        
         friends.append(target["user_id"])
         await db.execute("UPDATE users SET friends_json=? WHERE user_id=?", (json.dumps(friends), my_id))
         await db.commit()
@@ -285,39 +293,15 @@ async def api_leaderboard(request):
         async with db.execute("SELECT friends_json FROM users WHERE user_id=?", (my_id,)) as cur:
             row = await cur.fetchone()
             friends = _parse(row["friends_json"], []) if row else []
-        
         all_ids = friends + [my_id]
         placeholders = ','.join('?' * len(all_ids))
         async with db.execute(f"SELECT user_id, name, streak_count, level, frame FROM users WHERE user_id IN ({placeholders})", all_ids) as cur:
             users = await cur.fetchall()
-        
         result = []
         for u in users:
-            result.append({
-                "id": u["user_id"], "name": u["name"], "streak": u["streak_count"], 
-                "level": u["level"], "frame": u["frame"], "is_me": u["user_id"] == my_id
-            })
+            result.append({"id": u["user_id"], "name": u["name"], "streak": u["streak_count"], "level": u["level"], "frame": u["frame"], "is_me": u["user_id"] == my_id})
         result.sort(key=lambda x: x["streak"], reverse=True)
         return web.json_response(result)
-
-async def api_send_poke(request):
-    data = await request.json()
-    my_id = int(data.get("id"))
-    target_id = int(data.get("target_id"))
-    poke_type = data.get("type", "fire")
-    
-    async with aiosqlite.connect(DB_FILE) as db:
-        db.row_factory = aiosqlite.Row
-        async with db.execute("SELECT name FROM users WHERE user_id=?", (my_id,)) as cur:
-            me = await cur.fetchone()
-        
-    emoji = "🔥" if poke_type == "fire" else "🐢"
-    text = f"{emoji} Тебе подкол от друга {me['name']}!" if me else f"{emoji} Тебе подкол от друга!"
-    try:
-        await bot.send_message(target_id, text)
-        return web.json_response({"status": "ok"})
-    except Exception:
-        return web.json_response({"error": "Не удалось отправить"}, status=500)
 
 async def api_exercise_history(request):
     uid = int(request.query.get("id"))
@@ -378,7 +362,6 @@ async def start_web_server():
     app.router.add_post("/api/save", api_save_all)
     app.router.add_post("/api/friends/add", api_add_friend)
     app.router.add_get("/api/friends/leaderboard", api_leaderboard)
-    app.router.add_post("/api/friends/poke", api_send_poke)
     app.router.add_get("/api/exercise/history", api_exercise_history)
     app.router.add_post("/api/exercise/log", api_exercise_log)
     app.router.add_post("/api/weight/add", api_weight_add)
@@ -667,6 +650,7 @@ async def main():
     await init_db()
     await start_web_server()
     scheduler.add_job(send_reminders, "cron", minute="*")
+    scheduler.add_job(reset_daily_data, "cron", hour=0, minute=0, timezone="Europe/Moscow")
     scheduler.start()
     print("🚀 Бот и сервер запущены")
     await dp.start_polling(bot)
