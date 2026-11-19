@@ -7,21 +7,16 @@
 <title>FitPlan</title>
 <script src="https://unpkg.com/html5-qrcode" defer></script>
 <style>
-/* ================= ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ================= */
 :root {
   --font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --safe-top: 20px;
-  --safe-bottom: 20px;
+  --safe-top: 20px; --safe-bottom: 20px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
-
-/* 1. ТЕМА: LIGHT (Светлая) - по умолчанию */
 [data-theme="light"] {
   --bg: #f4f2ee; --bg-gradient: linear-gradient(160deg, #f6f3ee 0%, #ece8e1 55%, #e7ece7 100%);
   --bg-blob1: #cfe3d0; --bg-blob2: #f2dcc8; --bg-blob3: #ddd3e8;
   --glass: rgba(255, 255, 255, 0.55); --glass-strong: rgba(255, 255, 255, 0.86);
-  --glass-border: rgba(255, 255, 255, 0.85);
-  --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.1) 100%);
+  --glass-border: rgba(255, 255, 255, 0.85); --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.1) 100%);
   --text-main: #3a3d3a; --text-muted: #95978f;
   --accent: #8fae94; --accent-gradient: linear-gradient(135deg, #9dbba1 0%, #7c9a82 100%);
   --accent-deep: #6f8c76; --accent-soft: #a9c4ad; --accent-light: rgba(143, 174, 148, 0.16);
@@ -32,14 +27,11 @@
   --shadow: 0 12px 40px rgba(120, 118, 110, 0.10); --shadow-sm: 0 4px 14px rgba(120, 118, 110, 0.07);
   --radius: 26px; --radius-sm: 18px;
 }
-
-/* 2. ТЕМА: DARK (Тёмная) */
 [data-theme="dark"] {
   --bg: #1b1d1b; --bg-gradient: linear-gradient(160deg, #20221f 0%, #252320 55%, #21261f 100%);
   --bg-blob1: #2c3a2e; --bg-blob2: #3a3026; --bg-blob3: #2e2a38;
   --glass: rgba(40, 42, 39, 0.6); --glass-strong: rgba(48, 50, 46, 0.88);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.0) 100%);
+  --glass-border: rgba(255, 255, 255, 0.08); --glass-shine: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.0) 100%);
   --text-main: #ecebe6; --text-muted: #8f918a;
   --accent: #9ec2a4; --accent-gradient: linear-gradient(135deg, #a8ccae 0%, #86a88c 100%);
   --accent-deep: #a8ccae; --accent-soft: #7fa085; --accent-light: rgba(158, 194, 164, 0.16);
@@ -50,8 +42,6 @@
   --shadow: 0 12px 40px rgba(0, 0, 0, 0.35); --shadow-sm: 0 4px 14px rgba(0, 0, 0, 0.25);
   --radius: 26px; --radius-sm: 18px;
 }
-
-/* 3. ТЕМА: BENTO */
 [data-theme="bento"] {
   --bg: #f0f3f8; --bg-gradient: radial-gradient(#d1d8e0 1.5px, transparent 1.5px);
   --bg-blob1: transparent; --bg-blob2: transparent; --bg-blob3: transparent;
@@ -66,8 +56,6 @@
   --radius: 20px; --radius-sm: 12px;
 }
 [data-theme="bento"] body { background-size: 20px 20px; }
-
-/* 4. ТЕМА: LUXURY */
 [data-theme="luxury"] {
   --bg: #e6e9e4; --bg-gradient: radial-gradient(circle at 15% 50%, rgba(45, 74, 62, 0.05) 0%, transparent 50%), radial-gradient(circle at 85% 30%, rgba(198, 168, 124, 0.08) 0%, transparent 50%);
   --bg-blob1: transparent; --bg-blob2: transparent; --bg-blob3: transparent;
@@ -82,12 +70,9 @@
   --shadow: 0 20px 40px rgba(45, 74, 62, 0.08); --shadow-sm: 0 10px 20px rgba(0,0,0,0.05);
   --radius: 28px; --radius-sm: 18px;
 }
-
-/* ================= СБРОС И БАЗА ================= */
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body { font-family: var(--font); background: var(--bg); background-image: var(--bg-gradient); background-attachment: fixed; color: var(--text-main); overflow-x: hidden; transition: background 0.5s, color 0.4s; -webkit-font-smoothing: antialiased; min-height: 100vh; }
 svg { display: block; }
-
 .bg-blobs { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; display: none; }
 [data-theme="light"] .bg-blobs, [data-theme="dark"] .bg-blobs { display: block; }
 .blob { position: absolute; border-radius: 50%; filter: blur(110px); opacity: 0.55; animation: float 28s infinite ease-in-out; transition: background 0.5s; }
@@ -95,15 +80,12 @@ svg { display: block; }
 .blob.b2 { width: 320px; height: 320px; background: var(--bg-blob2); bottom: -110px; right: -110px; animation-delay: -9s; }
 .blob.b3 { width: 260px; height: 260px; background: var(--bg-blob3); top: 42%; right: -150px; animation-delay: -16s; }
 @keyframes float { 0%,100%{transform:translate(0,0) scale(1);} 33%{transform:translate(40px,-50px) scale(1.08);} 66%{transform:translate(-30px,40px) scale(0.94);} }
-
 .app-container { max-width: 480px; margin: 0 auto; min-height: 100vh; padding: 0 16px calc(100px + var(--safe-bottom)); position: relative; }
-
 .header { display: flex; justify-content: space-between; align-items: center; padding: calc(20px + var(--safe-top)) 0 20px; }
 .header h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.8px; color: var(--text-main); }
 .header .sub { font-size: 15px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
 .avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--accent-gradient); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 20px; cursor: pointer; box-shadow: var(--shadow-sm); transition: transform 0.25s var(--ease); border: var(--glass-border); }
 .avatar:active { transform: scale(0.9); }
-
 .card { background: var(--glass); backdrop-filter: blur(30px) saturate(160%); -webkit-backdrop-filter: blur(30px) saturate(160%); border-radius: var(--radius); padding: 22px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid var(--glass-border); transition: transform 0.25s var(--ease); position: relative; overflow: hidden; }
 [data-theme="bento"] .card { border: 3px solid var(--glass-border); }
 [data-theme="bento"] .card:active { transform: translate(4px, 4px); box-shadow: 2px 2px 0 var(--glass-border); }
@@ -113,7 +95,6 @@ svg { display: block; }
 .card h2 { font-size: 17px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; letter-spacing: -0.2px; }
 .card h2 .title { display: flex; align-items: center; gap: 10px; }
 .card h2 svg { width: 21px; height: 21px; stroke: var(--accent-deep); stroke-width: 2.2; fill: none; }
-
 .btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 16px; border-radius: var(--radius-sm); border: none; font-size: 16px; font-weight: 700; font-family: var(--font); cursor: pointer; transition: all 0.3s var(--ease); letter-spacing: -0.2px; }
 .btn.primary { background: var(--accent-gradient); color: #fff; box-shadow: 0 8px 22px rgba(143,174,148,0.35); }
 [data-theme="bento"] .btn.primary { border: 3px solid #111; color: var(--text-main); }
@@ -125,7 +106,6 @@ svg { display: block; }
 .btn-icon { width: 36px; height: 36px; border-radius: 12px; background: var(--accent-light); color: var(--accent-deep); border: none; display: grid; place-items: center; cursor: pointer; transition: all 0.25s var(--ease); }
 .btn-icon:active { transform: scale(0.88); }
 .btn-icon svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2.4; fill: none; }
-
 .kcal-row { display: flex; align-items: center; gap: 22px; }
 .ring { width: 108px; height: 108px; border-radius: 50%; background: conic-gradient(var(--accent) 0 var(--p,0%), var(--glass-border) var(--p,0%) 100%); display: grid; place-items: center; position: relative; box-shadow: var(--shadow-sm); transition: background 0.6s var(--ease); }
 .ring-inner { width: 88px; height: 88px; border-radius: 50%; background: var(--glass-strong); backdrop-filter: blur(10px); display: grid; place-items: center; text-align: center; }
@@ -135,19 +115,16 @@ svg { display: block; }
 .kcal-info .label { font-size: 14px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
 .kcal-info .value { font-size: 30px; font-weight: 800; letter-spacing: -0.8px; }
 .kcal-info .value small { font-size: 17px; color: var(--text-muted); font-weight: 600; }
-
 .macros-mini { display: flex; gap: 10px; margin-top: 18px; }
 .macro-mini { flex: 1; background: var(--glass-strong); border-radius: 14px; padding: 12px 8px; text-align: center; border: 1px solid var(--glass-border); box-shadow: var(--shadow-sm); min-width: 0; }
 .macro-mini .ml { font-size: 10px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
 .macro-mini .mv { font-size: 15px; font-weight: 800; white-space: nowrap; }
 .macro-mini .mv small { font-size: 12px; color: var(--text-muted); font-weight: 700; }
-
 .bmi-strip { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; background: var(--glass-strong); border-radius: 14px; padding: 10px 14px; border: 1px solid var(--glass-border); box-shadow: var(--shadow-sm); cursor: pointer; }
 .bmi-strip:active { transform: scale(0.98); }
 .bmi-strip .lbl { font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
 .bmi-strip .val { font-size: 16px; font-weight: 800; }
 .bmi-strip .tag { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 8px; white-space: nowrap; }
-
 .quick-stats { display: flex; gap: 12px; margin-top: 14px; }
 .quick-stat { flex: 1; background: var(--glass-strong); border-radius: 14px; padding: 12px; border: 1px solid var(--glass-border); box-shadow: var(--shadow-sm); cursor: pointer; }
 .quick-stat:active { transform: scale(0.97); }
@@ -158,7 +135,6 @@ svg { display: block; }
 .quick-stat .qs-bar { height: 4px; background: var(--glass-border); border-radius: 2px; margin-top: 6px; overflow: hidden; }
 .quick-stat .qs-bar-fill { height: 100%; background: var(--accent-gradient); border-radius: 2px; transition: width 0.4s var(--ease); }
 .quick-stat .qs-bar-fill.sleep { background: linear-gradient(90deg, var(--purple), #a18bb8); }
-
 .workout-day-card { background: var(--glass-strong); border-radius: var(--radius-sm); padding: 16px; border: 1px solid var(--glass-border); margin-bottom: 12px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow-sm); transition: transform 0.25s var(--ease); }
 .workout-day-card:active { transform: scale(0.98); }
 .workout-day-card.done { opacity: 0.6; }
@@ -174,7 +150,6 @@ svg { display: block; }
 [data-theme="bento"] .workout-day-btn.start { border: 2px solid #111; color: var(--text-main); }
 .workout-day-btn.delete { flex: 0 0 46px; background: var(--danger-light); border: 1px solid rgba(217,154,146,0.3); display: grid; place-items: center; color: var(--danger); }
 .workout-day-btn.delete svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.4; fill: none; }
-
 .week-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--glass-border); gap: 10px; }
 .week-row:last-child { border-bottom: none; }
 .week-day { font-size: 15px; font-weight: 800; width: 40px; color: var(--text-muted); flex-shrink: 0; }
@@ -183,13 +158,9 @@ svg { display: block; }
 .duration-control { display: flex; align-items: center; gap: 16px; margin-top: 10px; }
 input[type=range] { flex: 1; accent-color: var(--accent); height: 8px; border-radius: 4px; background: var(--glass-border); appearance: none; }
 input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height: 26px; border-radius: 50%; background: var(--bg); border: 3px solid var(--accent); box-shadow: var(--shadow-sm); cursor: pointer; }
-
-/* СТРИК */
 .streak-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 14px; }
 .streak-day { aspect-ratio: 1; border-radius: 10px; background: var(--glass-strong); border: 1px solid var(--glass-border); display: grid; place-items: center; font-size: 12px; font-weight: 800; color: var(--text-muted); transition: all 0.3s var(--ease); }
 .streak-day.done { background: var(--accent-gradient); border-color: transparent; color: #fff; box-shadow: 0 4px 12px rgba(143,174,148,0.35); transform: translateY(-2px); }
-
-/* КВЕСТЫ */
 .quest-card { background: var(--glass-strong); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; border: 1px solid var(--glass-border); display: flex; align-items: center; gap: 12px; transition: all 0.3s; }
 .quest-card.done { opacity: 0.6; background: var(--accent-light); border-color: transparent; }
 .quest-icon { width: 32px; height: 32px; border-radius: 10px; background: var(--bg); display: grid; place-items: center; flex-shrink: 0; border: 1px solid var(--glass-border); }
@@ -200,28 +171,22 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height:
 .quest-progress-fill { height: 100%; background: var(--accent-gradient); border-radius: 3px; transition: width 0.4s var(--ease); }
 .quest-xp { font-size: 11px; font-weight: 800; color: var(--accent-deep); background: var(--accent-light); padding: 2px 6px; border-radius: 6px; white-space: nowrap; }
 .quest-done-mark svg { width: 20px; height: 20px; stroke: var(--accent-deep); stroke-width: 3; fill: none; }
-
-/* СТАТИСТИКА (ПРОГРЕСС) */
 .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .stat-box { background: var(--glass-strong); border-radius: var(--radius-sm); padding: 18px; border: 1px solid var(--glass-border); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 4px; }
 .stat-box .sv { font-size: 32px; font-weight: 800; color: var(--accent-deep); line-height: 1; letter-spacing: -1px; }
 .stat-box .sl { font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-
 .bar-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 140px; margin-top: 18px; gap: 8px; }
 .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 10px; height: 100%; justify-content: flex-end; }
 .bar-fill { width: 100%; background: var(--accent-gradient); border-radius: 8px 8px 0 0; min-height: 6px; transition: height 0.6s var(--ease); }
 .bar-fill.zero { background: var(--glass-border); min-height: 4px; }
 .bar-fill.sleep { background: linear-gradient(135deg, #c5b6d6, #a18bb8); }
 .bar-label { font-size: 11px; color: var(--text-muted); font-weight: 700; }
-
 .heatmap { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 10px; }
 .heatmap-cell { aspect-ratio: 1; border-radius: 4px; background: var(--glass-border); }
 .heatmap-cell.lvl-1 { background: rgba(143, 174, 148, 0.35); }
 .heatmap-cell.lvl-2 { background: rgba(143, 174, 148, 0.6); }
 .heatmap-cell.lvl-3 { background: var(--accent); }
 .heatmap-cell.lvl-4 { background: var(--accent-deep); }
-
-/* ИМТ И ВЕС */
 .bmi-hero { display: flex; align-items: center; gap: 18px; margin-bottom: 16px; }
 .bmi-hero-val { font-size: 42px; font-weight: 800; letter-spacing: -1.5px; line-height: 1; color: var(--text-main); }
 .bmi-hero-cat { font-size: 13px; font-weight: 700; margin-top: 6px; display: inline-block; padding: 5px 12px; border-radius: 10px; }
@@ -232,11 +197,9 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height:
 .bmi-row:last-child { border-bottom: none; }
 .bmi-row .k { font-size: 14px; color: var(--text-muted); font-weight: 700; }
 .bmi-row .v { font-size: 15px; font-weight: 800; text-align: right; }
-
 .weight-chart { width: 100%; height: 140px; margin-top: 12px; position: relative; }
 .weight-chart svg { width: 100%; height: 100%; overflow: visible; }
 .weight-chart-empty { text-align: center; color: var(--text-muted); font-size: 14px; padding: 20px 0; font-weight: 600; }
-
 .tabbar { position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto; padding: 8px 12px calc(8px + var(--safe-bottom)); background: var(--glass-strong); backdrop-filter: blur(40px) saturate(180%); -webkit-backdrop-filter: blur(40px) saturate(180%); border-top: 1px solid var(--glass-border); display: flex; justify-content: space-between; z-index: 100; border-radius: 28px 28px 0 0; box-shadow: 0 -8px 30px rgba(120,118,110,0.06); }
 [data-theme="bento"] .tabbar { border-top: 4px solid #111; border-radius: 0; }
 .tab { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; color: var(--text-muted); font-size: 9px; font-weight: 700; cursor: pointer; padding: 8px 6px; border-radius: 14px; transition: all 0.3s var(--ease); font-family: var(--font); }
@@ -244,11 +207,9 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height:
 .tab.active { color: var(--accent-deep); background: var(--accent-light); }
 [data-theme="bento"] .tab.active { color: #fff; background: var(--accent); border: 2px solid #111; box-shadow: 2px 2px 0 #111; }
 .tab.active svg { transform: scale(1.08); }
-
 .screen { display: none; padding-bottom: 20px; }
 .screen.active { display: block; animation: fadeSlide 0.4s var(--ease); }
 @keyframes fadeSlide { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-
 .modal-overlay { position: fixed; inset: 0; background: rgba(60, 60, 55, 0.35); backdrop-filter: blur(8px); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
 .modal-overlay.show { display: flex !important; animation: fadeIn 0.3s var(--ease); }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -258,30 +219,23 @@ input[type=range]::-webkit-slider-thumb { appearance: none; width: 26px; height:
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-shrink: 0; }
 .modal-header h3 { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; }
 .modal-scroll { overflow-y: auto; overflow-x: hidden; flex: 1; padding-bottom: 16px; -webkit-overflow-scrolling: touch; }
-
 .input-field { margin-bottom: 16px; }
 .input-field label { display: block; font-size: 13px; font-weight: 700; color: var(--text-muted); margin-bottom: 8px; }
 .input-field input, .input-field textarea, .input-field select { width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--glass-border); background: var(--glass); color: var(--text-main); font-size: 16px; font-family: var(--font); outline: none; transition: border-color 0.2s; font-weight: 500; }
 [data-theme="bento"] .input-field input { border: 2px solid #111; }
 .input-field input:focus, .input-field textarea:focus { border-color: var(--accent); }
 .row-inputs { display: flex; gap: 10px; }
-
-/* ПЕРЕКЛЮЧАТЕЛЬ ТЕМ */
 .theme-switcher { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
 .theme-btn { padding: 12px; border-radius: 12px; border: 2px solid var(--glass-border); background: var(--glass-strong); color: var(--text-main); font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: var(--font); }
 .theme-btn.active { border-color: var(--accent-deep); background: var(--accent-light); }
 [data-theme="bento"] .theme-btn { border: 2px solid #111; }
 [data-theme="bento"] .theme-btn.active { background: var(--accent); color: #fff; }
-
-/* КРАСИВЫЕ ТУМБЛЕРЫ */
 .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
 .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--glass-border); transition: .4s; border-radius: 34px; border: 1px solid var(--glass-border); }
 .toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 input:checked + .toggle-slider { background-color: var(--accent); border-color: var(--accent); }
 input:checked + .toggle-slider:before { transform: translateX(22px); }
-
-/* ЭКРАН ТРЕНИРОВКИ */
 #workoutScreen { position: fixed; inset: 0; z-index: 1000; background: var(--bg); background-image: var(--bg-gradient); background-attachment: fixed; display: none; flex-direction: column; padding: var(--safe-top) 20px calc(20px + var(--safe-bottom)); max-width: 480px; margin: 0 auto; overflow-y: auto; }
 #workoutScreen.active { display: flex; animation: slideUp 0.45s var(--ease); }
 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -301,8 +255,6 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 .ws-weight-val { font-size: 20px; font-weight: 800; min-width: 68px; text-align: center; }
 .ws-buttons { display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
 .ws-history { font-size: 13px; color: var(--info); font-weight: 700; margin-bottom: 10px; min-height: 18px; }
-
-/* ЭКРАН ПОДПИСКИ */
 #expiredScreen { position: fixed; inset: 0; z-index: 5000; background: var(--bg); background-image: var(--bg-gradient); display: none; flex-direction: column; align-items: center; justify-content: center; padding: 40px 24px; text-align: center; max-width: 480px; margin: 0 auto; }
 #expiredScreen.show { display: flex; }
 .expired-icon { width: 96px; height: 96px; border-radius: 50%; background: var(--accent-light); color: var(--accent-deep); display: grid; place-items: center; margin-bottom: 24px; }
@@ -310,90 +262,32 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 .expired-title { font-size: 28px; font-weight: 800; letter-spacing: -0.8px; margin-bottom: 12px; }
 .expired-text { font-size: 15px; color: var(--text-muted); line-height: 1.5; font-weight: 500; margin-bottom: 32px; max-width: 340px; }
 .expired-actions { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 12px; }
-
-/* QR СКАНЕР */
 .fullscreen-overlay { position: fixed; inset: 0; z-index: 4000; background: #000; display: none; flex-direction: column; }
 .fullscreen-overlay.show { display: flex; }
 #qrReader { flex: 1; width: 100%; }
 .qr-close { position: absolute; top: 20px; right: 20px; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.2); color: #fff; border: none; z-index: 10; cursor: pointer; display: grid; place-items: center; }
 .qr-close svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2.4; }
-
-/* Стили для питания */
 .food-tabs { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .food-tabs::-webkit-scrollbar { display: none; }
 .food-tab { padding: 6px 12px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-border); font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; }
 .food-tab.active { background: var(--accent-gradient); color: #fff; border-color: transparent; }
 [data-theme="bento"] .food-tab { border: 2px solid #111; }
 [data-theme="bento"] .food-tab.active { background: var(--accent); color: #fff; }
-
-/* СКРЫТИЕ ПОЛОСЫ ПРОКРУТКИ ДЛЯ ВСЕХ ЭЛЕМЕНТОВ */
-.muscle-tabs-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 10px; -webkit-overflow-scrolling: touch; scrollbar-width: none; touch-action: pan-x; height: 50px; align-items: center; flex-shrink: 0; }
+.muscle-tabs-container { display: flex; flex-wrap: nowrap; gap: 8px; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; touch-action: pan-x; flex-shrink: 0; padding-bottom: 4px; margin-bottom: 10px; align-items: center; }
 .muscle-tabs-container::-webkit-scrollbar { display: none; }
-.muscle-tab { 
-  flex: 0 0 auto; 
-  padding: 10px 16px; 
-  border-radius: 14px; 
-  background: var(--glass); 
-  border: 1px solid var(--glass-border); 
-  font-size: 13px; 
-  font-weight: 700; 
-  color: var(--text-muted); 
-  cursor: pointer; 
-  white-space: nowrap; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  min-height: 40px;
-}
-.muscle-tab.active { 
-  background: var(--accent-gradient); 
-  color: #fff; 
-  border-color: transparent; 
-}
-
-/* Быстрое добавление еды */
+.muscle-tab { flex: 0 0 auto; padding: 10px 16px; border-radius: 14px; background: var(--glass); border: 1px solid var(--glass-border); font-size: 13px; font-weight: 700; color: var(--text-muted); cursor: pointer; white-space: nowrap; display: flex; align-items: center; justify-content: center; min-height: 40px; }
+.muscle-tab.active { background: var(--accent-gradient); color: #fff; border-color: transparent; }
 .recent-food-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--glass); border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--glass-border); cursor: pointer; transition: background 0.2s; }
 .recent-food-item:active { background: var(--accent-light); }
-
-/* ЛИДЕРБОРД */
 .leaderboard-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--glass-border); }
 .leaderboard-row:last-child { border-bottom: none; }
 .leaderboard-rank { font-size: 18px; font-weight: 800; width: 30px; text-align: center; color: var(--text-muted); }
 .leaderboard-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent-gradient); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 14px; flex-shrink: 0; }
 .leaderboard-name { flex: 1; font-weight: 700; font-size: 15px; }
 .leaderboard-score { display: flex; align-items: center; gap: 4px; font-weight: 800; color: var(--accent-deep); font-size: 15px; }
-
-/* ПЛАШКИ ТРЕНИРОВОК */
-.workout-option-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--glass);
-  border-radius: 18px;
-  margin-bottom: 10px;
-  border: 1px solid var(--glass-border);
-  padding: 0 8px 0 0;
-  overflow: hidden;
-}
-.workout-option-content {
-  flex: 1;
-  padding: 16px;
-  cursor: pointer;
-  min-width: 0;
-}
-.workout-delete-btn {
-  flex: 0 0 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: var(--danger-light);
-  border: 1px solid rgba(217,154,146,0.3);
-  color: var(--danger);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  font-size: 18px;
-  font-weight: 700;
-}
+.workout-option-row { display: flex; align-items: center; gap: 8px; background: var(--glass); border-radius: 18px; margin-bottom: 10px; border: 1px solid var(--glass-border); padding: 0 8px 0 0; overflow: hidden; }
+.workout-option-content { flex: 1; padding: 16px; cursor: pointer; min-width: 0; }
+.workout-delete-btn { flex: 0 0 36px; height: 36px; border-radius: 10px; background: var(--danger-light); border: 1px solid rgba(217,154,146,0.3); color: var(--danger); display: grid; place-items: center; cursor: pointer; font-size: 18px; font-weight: 700; }
 </style>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
@@ -491,7 +385,6 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
       <div><h1 id="greetName">Привет</h1><div class="sub" id="todaySub">Сегодня — отдых</div></div>
       <div class="avatar" id="avatarInitial" onclick="switchTab('profile')">A</div>
     </div>
-    
     <div class="card clickable" onclick="switchTab('food')">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>Калории</div><span style="font-size: 13px; color: var(--accent-deep); font-weight: 700;">Добавить →</span></h2>
       <div class="kcal-row">
@@ -523,12 +416,10 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
         <div class="tag" id="homeBmiTag" style="background: var(--accent-light); color: var(--accent-deep);">—</div>
       </div>
     </div>
-
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M6 4v16M18 4v16M4 7h4M16 7h4M4 17h4M16 17h4M8 12h8"/></svg>Тренировки</div><button class="btn-icon" onclick="addExtraWorkout()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></h2>
       <div id="todayPlanContent"></div>
     </div>
-
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>Стрик и Квесты</div></h2>
       <div class="streak-days" id="streakContainer"></div>
@@ -559,21 +450,14 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
     </div>
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M3 11h18M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4M5 11v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8"/></svg>Съедено сегодня</div>
-      <!-- Заменил плюс на часы -->
-      <button class="btn-icon" onclick="openRecentFoodsModal()" title="История питания">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-      </button>
-    </h2>
-      
+      <button class="btn-icon" onclick="openRecentFoodsModal()" title="История питания"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button></h2>
       <div class="food-tabs" id="foodTabs">
         <div class="food-tab active" data-meal="breakfast" onclick="selectMeal('breakfast')">Завтрак</div>
         <div class="food-tab" data-meal="lunch" onclick="selectMeal('lunch')">Обед</div>
         <div class="food-tab" data-meal="dinner" onclick="selectMeal('dinner')">Ужин</div>
         <div class="food-tab" data-meal="snack" onclick="selectMeal('snack')">Перекус</div>
       </div>
-
       <div id="foodItems"></div>
-      
       <div style="display: flex; gap: 8px; margin-top: 14px;">
         <button class="btn secondary" style="flex: 1; font-size: 14px; padding: 12px;" onclick="openFoodModal()">+ Вручную</button>
         <button class="btn purple" style="flex: 1; font-size: 14px; padding: 12px;" onclick="openFoodSearch()">Поиск</button>
@@ -584,13 +468,11 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 
   <section id="screen-friends" class="screen">
     <div class="header"><div><h1>Друзья</h1><div class="sub">Твой ID: <span id="myId" style="font-weight:700;color:var(--accent-deep)"></span></div></div></div>
-    
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Добавить друга</div></h2>
       <div class="input-field"><input type="text" id="friendUsername" placeholder="@username друга"></div>
       <button class="btn primary" onclick="addFriend()">Найти и добавить</button>
     </div>
-
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Лидерборд недели</div></h2>
       <div id="leaderboard"></div>
@@ -618,7 +500,6 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 
   <section id="screen-profile" class="screen">
     <div class="header"><div><h1>Профиль</h1><div class="sub">Настройки</div></div></div>
-
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2"/></svg>Настройки дизайна</div></h2>
       <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">Выбери оформление по вкусу</p>
@@ -629,7 +510,6 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
         <button class="theme-btn" onclick="setTheme('luxury', this)">Luxury</button>
       </div>
     </div>
-
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>Индекс массы тела</div></h2>
       <div class="bmi-hero"><div><div class="bmi-hero-val" id="bmiValue">—</div><div class="bmi-hero-cat" id="bmiCat" style="background: var(--accent-light); color: var(--accent-deep);">—</div></div></div>
@@ -642,13 +522,11 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
         <div class="bmi-row"><span class="k">Текущий вес</span><span class="v" id="bmiCurrent">—</span></div>
       </div>
     </div>
-
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M18 9l-5 5-2-2-4 4"/></svg>Динамика веса</div><button class="btn-icon" onclick="openWeightModal()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button></h2>
       <div id="weightChartContainer"><div class="weight-chart-empty">Нет данных. Добавь первый замер ↓</div></div>
       <button class="btn primary" style="margin-top: 14px;" onclick="openWeightModal()">+ Записать вес</button>
     </div>
-
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Личные данные</div></h2>
       <div class="week-row"><span class="week-day" style="width: 120px; color: var(--text-muted);">Имя</span><span class="week-plan" style="text-align: right;" id="profName">—</span></div>
@@ -658,7 +536,6 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
       <div class="week-row"><span class="week-day" style="width: 120px; color: var(--text-muted);">Норма ккал</span><span class="week-plan" style="text-align: right;" id="profKcal">—</span></div>
       <button class="btn secondary" style="margin-top: 18px;" onclick="openEditProfile()">Редактировать</button>
     </div>
-
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20"/></svg>Напоминания</div></h2>
       <div class="week-row" style="border-bottom: none; padding-bottom: 4px;">
@@ -676,7 +553,6 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
         </label>
       </div>
     </div>
-
     <div class="card">
       <h2><div class="title"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Аккаунт</div></h2>
       <button class="btn secondary" style="margin-bottom: 10px;" onclick="restartOnboarding()">Вернуться к регистрации</button>
@@ -694,7 +570,6 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
   </nav>
 </div>
 
-<!-- МОДАЛЬНЫЕ ОКНА -->
 <div class="modal-overlay" id="modal-plan">
   <div class="modal">
     <div class="modal-header"><h3>Выбрать тренировку</h3><button class="btn-icon" onclick="closeModal('modal-plan')"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
@@ -808,142 +683,40 @@ input:checked + .toggle-slider:before { transform: translateX(22px); }
 <div class="toast" id="toast"></div>
 
 <script>
-// ================= БАЗЫ ДАННЫХ =================
 const EXERCISE_LIBRARY = {
   chest: { name: "Грудь", exercises: [
-    { name: "Жим штанги лёжа", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 },
-    { name: "Жим гантелей на наклонной", type: "dumbbell", ratio: 0.2, minW: 4, step: 2 },
-    { name: "Жим гантелей лёжа", type: "dumbbell", ratio: 0.2, minW: 4, step: 2 },
-    { name: "Разводка гантелей", type: "dumbbell", ratio: 0.1, minW: 4, step: 2 },
-    { name: "Отжимания от пола", type: "bodyweight", ratio: 0 },
-    { name: "Жим в кроссовере", type: "machine", ratio: 0.15, minW: 10, step: 5 },
-    { name: "Жим узким хватом", type: "barbell", ratio: 0.4, minW: 20, step: 2.5 },
-    { name: "Пуловер с гантелью", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
-    { name: "Сведение рук в тренажёре", type: "machine", ratio: 0.1, minW: 10, step: 5 },
-    { name: "Отжимания на брусьях", type: "bodyweight", ratio: 0 }
+    { name: "Жим штанги лёжа", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 }, { name: "Жим гантелей на наклонной", type: "dumbbell", ratio: 0.2, minW: 4, step: 2 }, { name: "Жим гантелей лёжа", type: "dumbbell", ratio: 0.2, minW: 4, step: 2 }, { name: "Разводка гантелей", type: "dumbbell", ratio: 0.1, minW: 4, step: 2 }, { name: "Отжимания от пола", type: "bodyweight", ratio: 0 }, { name: "Жим в кроссовере", type: "machine", ratio: 0.15, minW: 10, step: 5 }, { name: "Жим узким хватом", type: "barbell", ratio: 0.4, minW: 20, step: 2.5 }, { name: "Пуловер с гантелью", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 }, { name: "Сведение рук в тренажёре", type: "machine", ratio: 0.1, minW: 10, step: 5 }, { name: "Отжимания на брусьях", type: "bodyweight", ratio: 0 }
   ]},
   back: { name: "Спина", exercises: [
-    { name: "Подтягивания", type: "bodyweight", ratio: 0 },
-    { name: "Тяга штанги в наклоне", type: "barbell", ratio: 0.4, minW: 20, step: 2.5 },
-    { name: "Тяга верхнего блока", type: "machine", ratio: 0.35, minW: 15, step: 5 },
-    { name: "Тяга гантели одной рукой", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
-    { name: "Гиперэкстензия", type: "bodyweight", ratio: 0 },
-    { name: "Тяга Т-грифа", type: "barbell", ratio: 0.35, minW: 20, step: 2.5 },
-    { name: "Шраги со штангой", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 },
-    { name: "Тяга нижнего блока к поясу", type: "machine", ratio: 0.35, minW: 15, step: 5 },
-    { name: "Становая тяга", type: "barbell", ratio: 0.7, minW: 20, step: 5 },
-    { name: "Пулловер в блочном тренажёре", type: "machine", ratio: 0.2, minW: 10, step: 5 }
+    { name: "Подтягивания", type: "bodyweight", ratio: 0 }, { name: "Тяга штанги в наклоне", type: "barbell", ratio: 0.4, minW: 20, step: 2.5 }, { name: "Тяга верхнего блока", type: "machine", ratio: 0.35, minW: 15, step: 5 }, { name: "Тяга гантели одной рукой", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 }, { name: "Гиперэкстензия", type: "bodyweight", ratio: 0 }, { name: "Тяга Т-грифа", type: "barbell", ratio: 0.35, minW: 20, step: 2.5 }, { name: "Шраги со штангой", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 }, { name: "Тяга нижнего блока к поясу", type: "machine", ratio: 0.35, minW: 15, step: 5 }, { name: "Становая тяга", type: "barbell", ratio: 0.7, minW: 20, step: 5 }, { name: "Пулловер в блочном тренажёре", type: "machine", ratio: 0.2, minW: 10, step: 5 }
   ]},
   legs: { name: "Ноги", exercises: [
-    { name: "Приседания со штангой", type: "barbell", ratio: 0.6, minW: 20, step: 2.5 },
-    { name: "Жим ногами", type: "machine", ratio: 1.0, minW: 40, step: 10 },
-    { name: "Румынская тяга", type: "barbell", ratio: 0.45, minW: 20, step: 2.5 },
-    { name: "Выпады с гантелями", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
-    { name: "Сгибания ног лёжа", type: "machine", ratio: 0.25, minW: 10, step: 5 },
-    { name: "Разгибания ног", type: "machine", ratio: 0.2, minW: 10, step: 5 },
-    { name: "Подъём на носки", type: "machine", ratio: 0.6, minW: 20, step: 5 },
-    { name: "Фронтальные приседания", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 },
-    { name: "Болгарские выпады", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
-    { name: "Ягодичный мостик", type: "barbell", ratio: 0.5, minW: 20, step: 5 }
+    { name: "Приседания со штангой", type: "barbell", ratio: 0.6, minW: 20, step: 2.5 }, { name: "Жим ногами", type: "machine", ratio: 1.0, minW: 40, step: 10 }, { name: "Румынская тяга", type: "barbell", ratio: 0.45, minW: 20, step: 2.5 }, { name: "Выпады с гантелями", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 }, { name: "Сгибания ног лёжа", type: "machine", ratio: 0.25, minW: 10, step: 5 }, { name: "Разгибания ног", type: "machine", ratio: 0.2, minW: 10, step: 5 }, { name: "Подъём на носки", type: "machine", ratio: 0.6, minW: 20, step: 5 }, { name: "Фронтальные приседания", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 }, { name: "Болгарские выпады", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 }, { name: "Ягодичный мостик", type: "barbell", ratio: 0.5, minW: 20, step: 5 }
   ]},
   shoulders: { name: "Плечи", exercises: [
-    { name: "Жим штанги стоя", type: "barbell", ratio: 0.3, minW: 15, step: 2.5 },
-    { name: "Махи гантелями", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 },
-    { name: "Шраги со штангой", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 },
-    { name: "Обратные разводки", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 },
-    { name: "Тяга к подбородку", type: "barbell", ratio: 0.3, minW: 15, step: 2.5 },
-    { name: "Жим гантелей сидя", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
-    { name: "Махи в кроссовере", type: "machine", ratio: 0.05, minW: 5, step: 2.5 },
-    { name: "Разведение в наклоне", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 },
-    { name: "Жим Арнольда", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
-    { name: "Face pull", type: "machine", ratio: 0.15, minW: 10, step: 5 }
+    { name: "Жим штанги стоя", type: "barbell", ratio: 0.3, minW: 15, step: 2.5 }, { name: "Махи гантелями", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 }, { name: "Шраги со штангой", type: "barbell", ratio: 0.5, minW: 20, step: 2.5 }, { name: "Обратные разводки", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 }, { name: "Тяга к подбородку", type: "barbell", ratio: 0.3, minW: 15, step: 2.5 }, { name: "Жим гантелей сидя", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 }, { name: "Махи в кроссовере", type: "machine", ratio: 0.05, minW: 5, step: 2.5 }, { name: "Разведение в наклоне", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 }, { name: "Жим Арнольда", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 }, { name: "Face pull", type: "machine", ratio: 0.15, minW: 10, step: 5 }
   ]},
   arms: { name: "Руки", exercises: [
-    { name: "Подъём штанги на бицепс", type: "barbell", ratio: 0.25, minW: 10, step: 2.5 },
-    { name: "Французский жим", type: "barbell", ratio: 0.2, minW: 10, step: 2.5 },
-    { name: "Молотки", type: "dumbbell", ratio: 0.1, minW: 2, step: 2 },
-    { name: "Разгибание на трицепс", type: "machine", ratio: 0.25, minW: 10, step: 5 },
-    { name: "Концентрированные подъёмы", type: "dumbbell", ratio: 0.1, minW: 2, step: 2 },
-    { name: "Отжимания узким хватом", type: "bodyweight", ratio: 0 },
-    { name: "Подъём на скамье Скотта", type: "barbell", ratio: 0.2, minW: 10, step: 2.5 },
-    { name: "Разгибание из-за головы", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 },
-    { name: "Обратные сгибания", type: "barbell", ratio: 0.15, minW: 10, step: 2.5 },
-    { name: "Кикбэк на трицепс", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 }
+    { name: "Подъём штанги на бицепс", type: "barbell", ratio: 0.25, minW: 10, step: 2.5 }, { name: "Французский жим", type: "barbell", ratio: 0.2, minW: 10, step: 2.5 }, { name: "Молотки", type: "dumbbell", ratio: 0.1, minW: 2, step: 2 }, { name: "Разгибание на трицепс", type: "machine", ratio: 0.25, minW: 10, step: 5 }, { name: "Концентрированные подъёмы", type: "dumbbell", ratio: 0.1, minW: 2, step: 2 }, { name: "Отжимания узким хватом", type: "bodyweight", ratio: 0 }, { name: "Подъём на скамье Скотта", type: "barbell", ratio: 0.2, minW: 10, step: 2.5 }, { name: "Разгибание из-за головы", type: "dumbbell", ratio: 0.15, minW: 4, step: 2 }, { name: "Обратные сгибания", type: "barbell", ratio: 0.15, minW: 10, step: 2.5 }, { name: "Кикбэк на трицепс", type: "dumbbell", ratio: 0.05, minW: 2, step: 2 }
   ]},
   core: { name: "Кор", exercises: [
-    { name: "Скручивания", type: "bodyweight", ratio: 0 },
-    { name: "Планка", type: "bodyweight", ratio: 0 },
-    { name: "Подъём ног в висе", type: "bodyweight", ratio: 0 },
-    { name: "Боковые наклоны", type: "bodyweight", ratio: 0 },
-    { name: "Велосипед", type: "bodyweight", ratio: 0 },
-    { name: "Русский твист", type: "bodyweight", ratio: 0 },
-    { name: "Обратные скручивания", type: "bodyweight", ratio: 0 },
-    { name: "Книжка", type: "bodyweight", ratio: 0 },
-    { name: "Боковая планка", type: "bodyweight", ratio: 0 },
-    { name: "Подъёмы ног лёжа", type: "bodyweight", ratio: 0 }
+    { name: "Скручивания", type: "bodyweight", ratio: 0 }, { name: "Планка", type: "bodyweight", ratio: 0 }, { name: "Подъём ног в висе", type: "bodyweight", ratio: 0 }, { name: "Боковые наклоны", type: "bodyweight", ratio: 0 }, { name: "Велосипед", type: "bodyweight", ratio: 0 }, { name: "Русский твист", type: "bodyweight", ratio: 0 }, { name: "Обратные скручивания", type: "bodyweight", ratio: 0 }, { name: "Книжка", type: "bodyweight", ratio: 0 }, { name: "Боковая планка", type: "bodyweight", ratio: 0 }, { name: "Подъёмы ног лёжа", type: "bodyweight", ratio: 0 }
   ]}
 };
 
 const WORKOUT_CATALOG = {
-  chest: [
-    { id:"chest_classic", name:"Классический жим", desc:"Жим лёжа и наклонная — основа массы груди.", ex:["Жим штанги лёжа","Жим гантелей на наклонной","Разводка гантелей","Жим в кроссовере","Отжимания на брусьях"] },
-    { id:"chest_upper", name:"Верх груди", desc:"Акцент на верхний пучок.", ex:["Жим гантелей на наклонной","Жим штанги лёжа","Сведение рук в тренажёре","Жим в кроссовере","Пуловер с гантелью"] },
-    { id:"chest_mass", name:"Масса: штанги", desc:"Тяжёлые базовые жимы.", ex:["Жим штанги лёжа","Жим узким хватом","Отжимания на брусьях","Жим гантелей лёжа"] },
-    { id:"chest_pump", name:"Памп грудных", desc:"Многоповторка и изоляция.", ex:["Разводка гантелей","Сведение рук в тренажёре","Жим в кроссовере","Отжимания от пола","Пуловер с гантелью"] },
-    { id:"chest_bodyweight", name:"Только свой вес", desc:"Отжимания и брусья.", ex:["Отжимания от пола","Отжимания на брусьях"] },
-    { id:"chest_beginner", name:"Новичку: грудь", desc:"Простые движения.", ex:["Жим гантелей лёжа","Разводка гантелей","Отжимания от пола","Сведение рук в тренажёре"] },
-    { id:"chest_hard", name:"Тяжёлый жим", desc:"Силовой день.", ex:["Жим штанги лёжа","Жим узким хватом","Жим гантелей на наклонной"] }
-  ],
-  back: [
-    { id:"back_width", name:"Спина: ширина", desc:"Вертикальные тяги и подтягивания.", ex:["Подтягивания","Тяга верхнего блока","Пулловер в блочном тренажёре","Тяга гантели одной рукой","Гиперэкстензия"] },
-    { id:"back_thickness", name:"Спина: толщина", desc:"Тяги к поясу для массы.", ex:["Тяга штанги в наклоне","Тяга Т-грифа","Тяга нижнего блока к поясу","Шраги со штангой","Гиперэкстензия"] },
-    { id:"back_full", name:"Спина: полная", desc:"И ширина, и толщина.", ex:["Подтягивания","Тяга штанги в наклоне","Тяга верхнего блока","Тяга нижнего блока к поясу","Шраги со штангой"] },
-    { id:"back_deadlift", name:"Силовая: становая", desc:"Становая тяга и тяга штанги.", ex:["Становая тяга","Тяга штанги в наклоне","Подтягивания","Тяга Т-грифа"] },
-    { id:"back_beginner", name:"Новичку: спина", desc:"Простые тяги.", ex:["Тяга верхнего блока","Тяга нижнего блока к поясу","Гиперэкстензия","Тяга гантели одной рукой"] },
-    { id:"back_pump", name:"Памп спины", desc:"Многоповторка.", ex:["Тяга верхнего блока","Тяга нижнего блока к поясу","Пулловер в блочном тренажёре","Шраги со штангой"] }
-  ],
-  legs: [
-    { id:"legs_quad", name:"Квадрицепс", desc:"Перед бедра.", ex:["Приседания со штангой","Жим ногами","Разгибания ног","Выпады с гантелями","Подъём на носки"] },
-    { id:"legs_ham", name:"Бицепс бедра и ягодицы", desc:"Зад бедра.", ex:["Румынская тяга","Сгибания ног лёжа","Ягодичный мостик","Болгарские выпады","Подъём на носки"] },
-    { id:"legs_full", name:"Ноги: полная", desc:"Все группы.", ex:["Приседания со штангой","Румынская тяга","Жим ногами","Сгибания ног лёжа","Разгибания ног","Подъём на носки"] },
-    { id:"legs_power", name:"Силовые ноги", desc:"Тяжёлые база.", ex:["Приседания со штангой","Румынская тяга","Жим ногами","Фронтальные приседания"] },
-    { id:"legs_glutes", name:"Ягодичный день", desc:"Акцент на ягодицы.", ex:["Ягодичный мостик","Болгарские выпады","Румынская тяга","Выпады с гантелями"] },
-    { id:"legs_beginner", name:"Новичку: ноги", desc:"Приседания и жим.", ex:["Приседания со штангой","Жим ногами","Разгибания ног","Сгибания ног лёжа"] },
-    { id:"legs_pump", name:"Памп ног", desc:"Многоповторка.", ex:["Жим ногами","Разгибания ног","Сгибания ног лёжа","Подъём на носки"] }
-  ],
-  shoulders: [
-    { id:"shoulders_base", name:"База плеч", desc:"Жимы.", ex:["Жим штанги стоя","Жим гантелей сидя","Тяга к подбородку","Махи гантелями","Face pull"] },
-    { id:"shoulders_mid", name:"Средняя дельта", desc:"Махи.", ex:["Махи гантелями","Махи в кроссовере","Жим гантелей сидя","Тяга к подбородку"] },
-    { id:"shoulders_rear", name:"Задняя дельта", desc:"Разводки.", ex:["Обратные разводки","Разведение в наклоне","Face pull","Шраги со штангой"] },
-    { id:"shoulders_full", name:"Плечи: полная", desc:"Все три пучка.", ex:["Жим штанги стоя","Махи гантелями","Обратные разводки","Тяга к подбородку","Face pull"] },
-    { id:"shoulders_power", name:"Силовые плечи", desc:"Тяжёлые жимы.", ex:["Жим штанги стоя","Жим Арнольда","Тяга к подбородку","Шраги со штангой"] },
-    { id:"shoulders_pump", name:"Памп плеч", desc:"Многоповторка.", ex:["Махи гантелями","Махи в кроссовере","Обратные разводки","Face pull"] }
-  ],
-  arms: [
-    { id:"arms_biceps", name:"Бицепс", desc:"Подъёмы штанги и гантелей.", ex:["Подъём штанги на бицепс","Молотки","Подъём на скамье Скотта","Концентрированные подъёмы","Обратные сгибания"] },
-    { id:"arms_triceps", name:"Трицепс", desc:"Жимы и разгибания.", ex:["Французский жим","Разгибание на трицепс","Отжимания узким хватом","Разгибание из-за головы","Кикбэк на трицепс"] },
-    { id:"arms_full", name:"Руки: полная", desc:"Бицепс + трицепс.", ex:["Подъём штанги на бицепс","Французский жим","Молотки","Разгибание на трицепс","Отжимания узким хватом"] },
-    { id:"arms_strength", name:"Силовые руки", desc:"Тяжёлые базовые.", ex:["Подъём штанги на бицепс","Французский жим","Отжимания узким хватом"] },
-    { id:"arms_pump", name:"Памп рук", desc:"Многоповторка.", ex:["Молотки","Концентрированные подъёмы","Кикбэк на трицепс","Разгибание из-за головы"] }
-  ],
-  core: [
-    { id:"core_strength", name:"Сильный кор", desc:"Планки и статика.", ex:["Планка","Боковая планка","Подъём ног в висе","Русский твист"] },
-    { id:"core_upper", name:"Верх пресса", desc:"Скручивания и книжка.", ex:["Скручивания","Велосипед","Книжка","Русский твист"] },
-    { id:"core_lower", name:"Низ пресса", desc:"Подъёмы ног.", ex:["Подъём ног в висе","Обратные скручивания","Подъёмы ног лёжа","Планка"] },
-    { id:"core_obliques", name:"Косые", desc:"Боковые наклоны.", ex:["Боковые наклоны","Велосипед","Русский твист","Боковая планка"] },
-    { id:"core_full", name:"Кор: круговая", desc:"Все зоны пресса.", ex:["Скручивания","Подъём ног в висе","Планка","Велосипед","Русский твист"] }
-  ],
-  fullbody: [
-    { id:"fb_functional", name:"Функционал", desc:"Круговая на всё тело.", ex:["Приседания со штангой","Отжимания от пола","Подтягивания","Планка","Выпады с гантелями"] },
-    { id:"fb_strength", name:"Сила: всё тело", desc:"Тяжёлые база.", ex:["Приседания со штангой","Жим штанги лёжа","Становая тяга","Жим штанги стоя"] },
-    { id:"fb_beginner", name:"Новичку: всё тело", desc:"Простые движения.", ex:["Приседания со штангой","Жим гантелей лёжа","Тяга верхнего блока","Планка"] }
-  ]
+  chest: [ { id:"chest_classic", name:"Классический жим", desc:"Жим лёжа и наклонная — основа массы груди.", ex:["Жим штанги лёжа","Жим гантелей на наклонной","Разводка гантелей","Жим в кроссовере","Отжимания на брусьях"] }, { id:"chest_upper", name:"Верх груди", desc:"Акцент на верхний пучок.", ex:["Жим гантелей на наклонной","Жим штанги лёжа","Сведение рук в тренажёре","Жим в кроссовере","Пуловер с гантелью"] }, { id:"chest_mass", name:"Масса: штанги", desc:"Тяжёлые базовые жимы.", ex:["Жим штанги лёжа","Жим узким хватом","Отжимания на брусьях","Жим гантелей лёжа"] }, { id:"chest_pump", name:"Памп грудных", desc:"Многоповторка и изоляция.", ex:["Разводка гантелей","Сведение рук в тренажёре","Жим в кроссовере","Отжимания от пола","Пуловер с гантелью"] }, { id:"chest_bodyweight", name:"Только свой вес", desc:"Отжимания и брусья.", ex:["Отжимания от пола","Отжимания на брусьях"] }, { id:"chest_beginner", name:"Новичку: грудь", desc:"Простые движения.", ex:["Жим гантелей лёжа","Разводка гантелей","Отжимания от пола","Сведение рук в тренажёре"] }, { id:"chest_hard", name:"Тяжёлый жим", desc:"Силовой день.", ex:["Жим штанги лёжа","Жим узким хватом","Жим гантелей на наклонной"] } ],
+  back: [ { id:"back_width", name:"Спина: ширина", desc:"Вертикальные тяги и подтягивания.", ex:["Подтягивания","Тяга верхнего блока","Пулловер в блочном тренажёре","Тяга гантели одной рукой","Гиперэкстензия"] }, { id:"back_thickness", name:"Спина: толщина", desc:"Тяги к поясу для массы.", ex:["Тяга штанги в наклоне","Тяга Т-грифа","Тяга нижнего блока к поясу","Шраги со штангой","Гиперэкстензия"] }, { id:"back_full", name:"Спина: полная", desc:"И ширина, и толщина.", ex:["Подтягивания","Тяга штанги в наклоне","Тяга верхнего блока","Тяга нижнего блока к поясу","Шраги со штангой"] }, { id:"back_deadlift", name:"Силовая: становая", desc:"Становая тяга и тяга штанги.", ex:["Становая тяга","Тяга штанги в наклоне","Подтягивания","Тяга Т-грифа"] }, { id:"back_beginner", name:"Новичку: спина", desc:"Простые тяги.", ex:["Тяга верхнего блока","Тяга нижнего блока к поясу","Гиперэкстензия","Тяга гантели одной рукой"] }, { id:"back_pump", name:"Памп спины", desc:"Многоповторка.", ex:["Тяга верхнего блока","Тяга нижнего блока к поясу","Пулловер в блочном тренажёре","Шраги со штангой"] } ],
+  legs: [ { id:"legs_quad", name:"Квадрицепс", desc:"Перед бедра.", ex:["Приседания со штангой","Жим ногами","Разгибания ног","Выпады с гантелями","Подъём на носки"] }, { id:"legs_ham", name:"Бицепс бедра и ягодицы", desc:"Зад бедра.", ex:["Румынская тяга","Сгибания ног лёжа","Ягодичный мостик","Болгарские выпады","Подъём на носки"] }, { id:"legs_full", name:"Ноги: полная", desc:"Все группы.", ex:["Приседания со штангой","Румынская тяга","Жим ногами","Сгибания ног лёжа","Разгибания ног","Подъём на носки"] }, { id:"legs_power", name:"Силовые ноги", desc:"Тяжёлые база.", ex:["Приседания со штангой","Румынская тяга","Жим ногами","Фронтальные приседания"] }, { id:"legs_glutes", name:"Ягодичный день", desc:"Акцент на ягодицы.", ex:["Ягодичный мостик","Болгарские выпады","Румынская тяга","Выпады с гантелями"] }, { id:"legs_beginner", name:"Новичку: ноги", desc:"Приседания и жим.", ex:["Приседания со штангой","Жим ногами","Разгибания ног","Сгибания ног лёжа"] }, { id:"legs_pump", name:"Памп ног", desc:"Многоповторка.", ex:["Жим ногами","Разгибания ног","Сгибания ног лёжа","Подъём на носки"] } ],
+  shoulders: [ { id:"shoulders_base", name:"База плеч", desc:"Жимы.", ex:["Жим штанги стоя","Жим гантелей сидя","Тяга к подбородку","Махи гантелями","Face pull"] }, { id:"shoulders_mid", name:"Средняя дельта", desc:"Махи.", ex:["Махи гантелями","Махи в кроссовере","Жим гантелей сидя","Тяга к подбородку"] }, { id:"shoulders_rear", name:"Задняя дельта", desc:"Разводки.", ex:["Обратные разводки","Разведение в наклоне","Face pull","Шраги со штангой"] }, { id:"shoulders_full", name:"Плечи: полная", desc:"Все три пучка.", ex:["Жим штанги стоя","Махи гантелями","Обратные разводки","Тяга к подбородку","Face pull"] }, { id:"shoulders_power", name:"Силовые плечи", desc:"Тяжёлые жимы.", ex:["Жим штанги стоя","Жим Арнольда","Тяга к подбородку","Шраги со штангой"] }, { id:"shoulders_pump", name:"Памп плеч", desc:"Многоповторка.", ex:["Махи гантелями","Махи в кроссовере","Обратные разводки","Face pull"] } ],
+  arms: [ { id:"arms_biceps", name:"Бицепс", desc:"Подъёмы штанги и гантелей.", ex:["Подъём штанги на бицепс","Молотки","Подъём на скамье Скотта","Концентрированные подъёмы","Обратные сгибания"] }, { id:"arms_triceps", name:"Трицепс", desc:"Жимы и разгибания.", ex:["Французский жим","Разгибание на трицепс","Отжимания узким хватом","Разгибание из-за головы","Кикбэк на трицепс"] }, { id:"arms_full", name:"Руки: полная", desc:"Бицепс + трицепс.", ex:["Подъём штанги на бицепс","Французский жим","Молотки","Разгибание на трицепс","Отжимания узким хватом"] }, { id:"arms_strength", name:"Силовые руки", desc:"Тяжёлые базовые.", ex:["Подъём штанги на бицепс","Французский жим","Отжимания узким хватом"] }, { id:"arms_pump", name:"Памп рук", desc:"Многоповторка.", ex:["Молотки","Концентрированные подъёмы","Кикбэк на трицепс","Разгибание из-за головы"] } ],
+  core: [ { id:"core_strength", name:"Сильный кор", desc:"Планки и статика.", ex:["Планка","Боковая планка","Подъём ног в висе","Русский твист"] }, { id:"core_upper", name:"Верх пресса", desc:"Скручивания и книжка.", ex:["Скручивания","Велосипед","Книжка","Русский твист"] }, { id:"core_lower", name:"Низ пресса", desc:"Подъёмы ног.", ex:["Подъём ног в висе","Обратные скручивания","Подъёмы ног лёжа","Планка"] }, { id:"core_obliques", name:"Косые", desc:"Боковые наклоны.", ex:["Боковые наклоны","Велосипед","Русский твист","Боковая планка"] }, { id:"core_full", name:"Кор: круговая", desc:"Все зоны пресса.", ex:["Скручивания","Подъём ног в висе","Планка","Велосипед","Русский твист"] } ],
+  fullbody: [ { id:"fb_functional", name:"Функционал", desc:"Круговая на всё тело.", ex:["Приседания со штангой","Отжимания от пола","Подтягивания","Планка","Выпады с гантелями"] }, { id:"fb_strength", name:"Сила: всё тело", desc:"Тяжёлые база.", ex:["Приседания со штангой","Жим штанги лёжа","Становая тяга","Жим штанги стоя"] }, { id:"fb_beginner", name:"Новичку: всё тело", desc:"Простые движения.", ex:["Приседания со штангой","Жим гантелей лёжа","Тяга верхнего блока","Планка"] } ]
 };
 const MUSCLE_LABELS = { chest:"Грудь", back:"Спина", legs:"Ноги", shoulders:"Плечи", arms:"Руки", core:"Кор", fullbody:"Всё тело" };
 const DAYS = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const XP_PER_LEVEL = 100;
 
-// ================= СОСТОЯНИЕ =================
 let user = { name:'', age:16, gender:'male', weight:65, height:175, activity:1.375, goal:'gain', kcal:0, protein:0, fat:0, carbs:0, uniqueId:'', sub_until:0, xp:0, level:1, frame:'none', reminders:{water:true, workout:true} };
 let todayFoods = [];
 let weekPlans = { 'Пн':null,'Вт':null,'Ср':null,'Чт':null,'Пт':null,'Сб':null,'Вс':null };
@@ -966,7 +739,6 @@ let dailyQuests = {};
 let foodLog = {}; 
 let selectedMeal = 'breakfast';
 let qrScanner = null;
-
 let wsExercises = [];
 let wsCurrentExIdx = 0;
 let wsCurrentSetIdx = 0;
@@ -976,7 +748,6 @@ let saveTimeout = null;
 const USER_ID = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || Math.floor(100000 + Math.random() * 900000).toString();
 const SERVER_URL = window.location.origin;
 
-// ================= УТИЛИТЫ =================
 function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._tid); t._tid = setTimeout(() => t.classList.remove('show'), 2200); }
 function setText(id, v) { const el = document.getElementById(id); if (el) el.textContent = v; }
 function openModal(id) { document.getElementById(id).classList.add('show'); }
@@ -984,7 +755,6 @@ function closeModal(id) { document.getElementById(id).classList.remove('show'); 
 function haptic(type = 'light') { if (window.Telegram?.WebApp?.HapticFeedback) { try { window.Telegram.WebApp.HapticFeedback.impactOccurred(type); } catch(e) {} } }
 function todayKey() { return DAYS[(new Date().getDay() + 6) % 7]; }
 
-// ================= СЕТЬ =================
 function saveAllDebounced() {
   if (saveTimeout) clearTimeout(saveTimeout);
   saveTimeout = setTimeout(saveAll, 1000);
@@ -1008,13 +778,11 @@ async function saveAll() {
 async function loadAll() {
   try {
     const res = await fetch(`${SERVER_URL}/api/user?id=${USER_ID}`);
-    
     if (res.status === 403) {
       document.getElementById('mainApp').style.display = 'none';
       document.getElementById('expiredScreen').classList.add('show');
       return; 
     }
-
     if (!res.ok) return;
     const d = await res.json();
     if (d.profile) user = { ...user, ...d.profile };
@@ -1036,26 +804,19 @@ async function loadAll() {
 
 function openBotForPayment() {
   const botUrl = "https://t.me/FitPlan_Robot";
-  if (window.Telegram?.WebApp?.openTelegramLink) {
-    window.Telegram.WebApp.openTelegramLink(botUrl);
-  } else {
-    window.open(botUrl, '_blank');
-  }
+  if (window.Telegram?.WebApp?.openTelegramLink) window.Telegram.WebApp.openTelegramLink(botUrl);
+  else window.open(botUrl, '_blank');
 }
 
-// === ТЕМЫ ===
 function setTheme(themeName, btn) {
   document.documentElement.setAttribute('data-theme', themeName);
   localStorage.setItem('fitplan_theme', themeName);
-  
   document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  
   renderHome();
   if(document.getElementById('screen-profile').classList.contains('active')) renderProfile();
 }
 
-// ================= ЛОГИКА =================
 function calcKbzhu() {
   const w = +user.weight || 65, h = +user.height || 175, a = +user.age || 16;
   let bmr = 10*w + 6.25*h - 5*a + (user.gender === 'male' ? 5 : -161);
@@ -1078,11 +839,8 @@ function addXP(amount) {
   renderProfile(); renderHome();
 }
 
-function getLevelName(lvl) {
-  if (lvl < 3) return 'Новичок'; if (lvl < 7) return 'Любитель'; if (lvl < 12) return 'Атлет'; if (lvl < 20) return 'Спортсмен'; return 'Терминатор';
-}
+function getLevelName(lvl) { if (lvl < 3) return 'Новичок'; if (lvl < 7) return 'Любитель'; if (lvl < 12) return 'Атлет'; if (lvl < 20) return 'Спортсмен'; return 'Терминатор'; }
 
-// ================= РЕНДЕР =================
 function renderHome() {
   const name = user.name || 'Спортсмен';
   setText('greetName', 'Привет, ' + name);
@@ -1131,9 +889,7 @@ function renderTodayWorkouts() {
 
 function getWorkoutMeta(id) { for (const g of Object.values(WORKOUT_CATALOG)) { const f = g.find(t => t.id === id); if (f) return { name: f.name }; } const c = customWorkouts.find(w => w.id === id); return c ? { name: c.name } : null; }
 
-function renderStreak() {
-  document.getElementById('streakContainer').innerHTML = DAYS.map((d, i) => `<div class="streak-day ${streakDone[i] ? 'done' : ''}">${d}</div>`).join('');
-}
+function renderStreak() { document.getElementById('streakContainer').innerHTML = DAYS.map((d, i) => `<div class="streak-day ${streakDone[i] ? 'done' : ''}">${d}</div>`).join(''); }
 
 function renderQuests() {
   const today = todayKey();
@@ -1148,10 +904,7 @@ function renderQuests() {
   container.innerHTML = dailyQuests[today].map(q => `
     <div class="quest-card ${q.done ? 'done' : ''}">
       <div class="quest-icon"><svg viewBox="0 0 24 24">${q.icon}</svg></div>
-      <div class="quest-content">
-        <div class="quest-title">${q.name}</div>
-        <div class="quest-progress-bg"><div class="quest-progress-fill" style="width: ${Math.min(100, (q.current/q.target)*100)}%"></div></div>
-      </div>
+      <div class="quest-content"><div class="quest-title">${q.name}</div><div class="quest-progress-bg"><div class="quest-progress-fill" style="width: ${Math.min(100, (q.current/q.target)*100)}%"></div></div></div>
       ${q.done ? `<div class="quest-done-mark"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg></div>` : `<div class="quest-xp">+${q.xp} XP</div>`}
     </div>
   `).join('');
@@ -1192,13 +945,13 @@ function renderProfile() {
   setText('levelBadge', user.level); setText('levelName', getLevelName(user.level)); setText('xpText', `${user.xp} / ${XP_PER_LEVEL} XP`);
   document.getElementById('xpBar').style.width = (user.xp / XP_PER_LEVEL * 100) + '%';
   setText('myId', user.uniqueId || '—');
-  updateBMISection();
-  renderWeightChart();
   
   const bmi = calcBMI(), cat = bmiCategory(bmi);
-  setText('bmiValue', bmi || '—'); 
+  setText('bmiValue', bmi || '—');
   const tag = document.getElementById('bmiCat');
   if (tag) { tag.textContent = cat.label; tag.style.background = cat.bg; tag.style.color = cat.color; }
+  const ptr = document.getElementById('bmiPointer');
+  if (ptr && bmi != null) { ptr.style.left = Math.max(0, Math.min(100, ((bmi - 16) / (40 - 16)) * 100)) + '%'; }
   if (user.height && user.weight) {
     const h = +user.height / 100; const min = Math.round(18.5 * h * h), max = Math.round(24.9 * h * h);
     setText('bmiNormRange', min + '–' + max + ' кг');
@@ -1206,10 +959,10 @@ function renderProfile() {
     setText('bmiIdeal', ideal.toFixed(1) + ' кг');
     setText('bmiCurrent', user.weight + ' кг');
   }
-  // Устанавливаем значения тумблеров
+  
+  renderWeightChart();
   document.getElementById('remWaterToggle').checked = user.reminders.water;
   document.getElementById('remWorkToggle').checked = user.reminders.workout;
-  
   loadLeaderboard();
 }
 
@@ -1225,27 +978,15 @@ function updateBMISection() { const bmi = calcBMI(), cat = bmiCategory(bmi); set
 
 function renderWeightChart() {
   const container = document.getElementById('weightChartContainer');
-  if (!weightHistory || weightHistory.length < 1) {
-    container.innerHTML = '<div class="weight-chart-empty">Нет данных. Добавь первый замер ↓</div>';
-    return;
-  }
-  if (weightHistory.length === 1) {
-    container.innerHTML = `<div style="text-align:center;padding:20px 0;color:var(--text-muted);font-weight:600;">Один замер: ${weightHistory[0].weight} кг</div>`;
-    return;
-  }
+  if (!weightHistory || weightHistory.length < 1) { container.innerHTML = '<div class="weight-chart-empty">Нет данных. Добавь первый замер ↓</div>'; return; }
+  if (weightHistory.length === 1) { container.innerHTML = `<div style="text-align:center;padding:20px 0;color:var(--text-muted);font-weight:600;">Один замер: ${weightHistory[0].weight} кг</div>`; return; }
   const W = container.clientWidth || 320, H = 140, PAD = 20;
   const weights = weightHistory.map(x => x.weight);
   const minW = Math.min(...weights), maxW = Math.max(...weights);
   const range = maxW - minW || 1;
-  const points = weightHistory.map((x, i) => ({
-    x: PAD + (i / (weightHistory.length - 1)) * (W - PAD * 2),
-    y: H - PAD - ((x.weight - minW) / range) * (H - PAD * 2)
-  }));
-  
-  let pathD = '';
-  points.forEach((p, i) => { pathD += (i === 0 ? `M ${p.x} ${p.y}` : ` L ${p.x} ${p.y}`); });
+  const points = weightHistory.map((x, i) => ({ x: PAD + (i / (weightHistory.length - 1)) * (W - PAD * 2), y: H - PAD - ((x.weight - minW) / range) * (H - PAD * 2) }));
+  let pathD = ''; points.forEach((p, i) => { pathD += (i === 0 ? `M ${p.x} ${p.y}` : ` L ${p.x} ${p.y}`); });
   let areaD = pathD + ` L ${points[points.length-1].x} ${H - PAD} L ${points[0].x} ${H - PAD} Z`;
-  
   let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">`;
   svg += `<defs><linearGradient id="g1" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stop-color="rgba(143,174,148,0.4)"/><stop offset="100%" stop-color="rgba(143,174,148,0)"/></linearGradient></defs>`;
   svg += `<path d="${areaD}" fill="url(#g1)"/>`;
@@ -1255,7 +996,6 @@ function renderWeightChart() {
   container.innerHTML = `<div class="weight-chart">${svg}</div>`;
 }
 
-// ================= ДЕЙСТВИЯ =================
 async function removeTodayWorkout(i) { todayWorkouts.splice(i, 1); renderHome(); saveAllDebounced(); }
 function addExtraWorkout() { targetDayKey = null; openWorkoutPicker(); }
 
@@ -1271,7 +1011,6 @@ function selectMuscle(k) {
   currentMuscleGroup = k;
   document.querySelectorAll('#muscleTabs .muscle-tab').forEach(t => t.classList.toggle('active', t.dataset.key === k));
   const arr = WORKOUT_CATALOG[k] || [];
-  
   document.getElementById('workoutOptionsList').innerHTML = arr.map(t => {
     const isCustom = t.id.startsWith('custom_');
     return `
@@ -1288,16 +1027,27 @@ function selectMuscle(k) {
 
 async function deleteCustomWorkout(templateId) {
   if (!confirm('Удалить эту тренировку из своих?')) return;
-  
   customWorkouts = customWorkouts.filter(c => c.id !== templateId);
   todayWorkouts = todayWorkouts.filter(w => w.templateId !== templateId);
   for (const d of DAYS) { if (weekPlans[d] === templateId) weekPlans[d] = null; }
-  
-  renderHome();
-  renderWeekGrid();
+  renderHome(); renderWeekGrid(); saveAllDebounced(); selectMuscle(currentMuscleGroup); toast('Удалено');
+}
+
+function openCustomPlanModal() {
+  ['customName','customDesc','customEx'].forEach(id => document.getElementById(id).value = '');
+  openModal('modal-custom-plan');
+}
+
+async function saveCustomPlan() {
+  const name = document.getElementById('customName').value.trim();
+  const desc = document.getElementById('customDesc').value.trim();
+  const ex = document.getElementById('customEx').value.trim();
+  if (!name || !ex) { toast('Заполни название и упражнения'); return; }
+  const id = 'custom_' + Date.now();
+  customWorkouts.push({ id, name, desc, exercises: ex });
+  closeModal('modal-custom-plan');
   saveAllDebounced();
-  selectMuscle(currentMuscleGroup);
-  toast('Удалено');
+  chooseWorkout(id);
 }
 
 async function chooseWorkout(templateId) {
@@ -1326,7 +1076,6 @@ function renderWeekGrid() {
 function removeDayPlan(d) { weekPlans[d] = null; renderWeekGrid(); renderHome(); saveAllDebounced(); }
 function editDay(d) { targetDayKey = d; openWorkoutPicker(); }
 
-// ---- ЕДА ----
 function selectMeal(meal) { selectedMeal = meal; document.querySelectorAll('.food-tab').forEach(t => t.classList.toggle('active', t.dataset.meal === meal)); renderFood(); }
 function openFoodModal() { ['foodName','foodKcal','foodP','foodF','foodC','foodWeight'].forEach(id => document.getElementById(id).value = ''); openModal('modal-food'); }
 
@@ -1349,39 +1098,31 @@ async function addFood() {
 
 function openRecentFoodsModal() {
   const list = document.getElementById('recentFoodsList');
-  if (!recentFoods.length) {
-    list.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:14px;padding:20px;">Пока ничего не добавлено</p>';
-  } else {
+  if (!recentFoods.length) { list.innerHTML = '<p style="text-align:center;color:var(--text-muted);font-size:14px;padding:20px;">Пока ничего не добавлено</p>'; }
+  else {
     list.innerHTML = recentFoods.map(f => `
       <div class="recent-food-item" onclick="quickAddRecent('${f.name}', ${f.kcal}, ${f.protein}, ${f.fat}, ${f.carbs})">
-        <div>
-          <div style="font-weight:700;font-size:15px;">${f.name}</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${f.protein}Б · ${f.fat}Ж · ${f.carbs}У</div>
-        </div>
+        <div><div style="font-weight:700;font-size:15px;">${f.name}</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${f.protein}Б · ${f.fat}Ж · ${f.carbs}У</div></div>
         <div style="font-weight:800;color:var(--accent-deep);">${f.kcal} ккал</div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
   openModal('modal-recent');
 }
 
 function quickAddRecent(name, kcal, p, f, c) {
   todayFoods.push({ name, weight: 100, meal: selectedMeal, kcal, protein: p, fat: f, carbs: c });
-  closeModal('modal-recent');
-  renderFood(); renderHome(); checkQuests(); saveAllDebounced(); toast('Добавлено');
+  closeModal('modal-recent'); renderFood(); renderHome(); checkQuests(); saveAllDebounced(); toast('Добавлено');
 }
 
 async function removeFood(i) { todayFoods.splice(i, 1); renderFood(); renderHome(); saveAllDebounced(); }
 
-// ---- ТРЕНИРОВКИ ----
 function openWorkoutByIndex(idx) {
   const w = todayWorkouts[idx] || { templateId: weekPlans[todayKey()], done: false };
   startWorkoutSession(w.templateId);
 }
 
 async function startWorkoutSession(templateId) {
-  wsExercises = generateWorkout(templateId); wsCurrentExIdx = 0; wsCurrentSetIdx = 0; 
-  wsIsSetActive = false; 
+  wsExercises = generateWorkout(templateId); wsCurrentExIdx = 0; wsCurrentSetIdx = 0; wsIsSetActive = false; 
   document.getElementById('wsTitle').textContent = (getWorkoutMeta(templateId)?.name || 'Тренировка');
   document.getElementById('workoutScreen').classList.add('active');
   await renderWorkoutScreen();
@@ -1390,17 +1131,14 @@ async function startWorkoutSession(templateId) {
 async function renderWorkoutScreen() {
   const ex = wsExercises[wsCurrentExIdx];
   if (!ex) { finishWorkout(); return; }
-  
   setText('wsExName', ex.name); setText('wsExMeta', `${ex.sets} подходов × ${ex.reps}`);
   setText('wsWeightVal', (ex.currentWeight || 0) + ' кг');
-  
   try {
     const res = await fetch(`${SERVER_URL}/api/exercise/history?id=${USER_ID}&name=${encodeURIComponent(ex.name)}`);
     const d = await res.json();
     if (d.weight) document.getElementById('wsHistory').textContent = `В прошлый раз: ${d.weight} кг × ${d.reps}`;
     else document.getElementById('wsHistory').textContent = '';
   } catch(e) {}
-
   const tracker = document.getElementById('wsSetTracker'); tracker.innerHTML = '';
   for (let i = 0; i < ex.sets; i++) {
     const d = document.createElement('div'); d.className = 'ws-set-dot';
@@ -1408,33 +1146,21 @@ async function renderWorkoutScreen() {
     else if (i === wsCurrentSetIdx && !wsIsSetActive) d.classList.add('current');
     d.textContent = i + 1; tracker.appendChild(d);
   }
-  
   document.getElementById('wsWeightControl').style.opacity = wsIsSetActive ? '0.5' : '1';
   document.getElementById('wsWeightControl').style.pointerEvents = wsIsSetActive ? 'none' : 'auto';
-
   const btn = document.getElementById('wsActionBtn');
-  if (wsIsSetActive) {
-    btn.textContent = 'Завершить подход';
-    btn.style.background = 'var(--accent-deep)'; 
-  } else {
-    btn.textContent = 'Начать подход';
-    btn.style.background = 'var(--accent-gradient)';
-  }
+  if (wsIsSetActive) { btn.textContent = 'Завершить подход'; btn.style.background = 'var(--accent-deep)'; }
+  else { btn.textContent = 'Начать подход'; btn.style.background = 'var(--accent-gradient)'; }
 }
 
 function handleWorkoutAction() {
   haptic();
-  if (!wsIsSetActive) {
-    wsIsSetActive = true;
-    renderWorkoutScreen();
-  } else {
+  if (!wsIsSetActive) { wsIsSetActive = true; renderWorkoutScreen(); }
+  else {
     wsIsSetActive = false;
     const ex = wsExercises[wsCurrentExIdx]; 
-    
     fetch(`${SERVER_URL}/api/exercise/log`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: USER_ID, name: ex.name, weight: ex.currentWeight, reps: ex.reps }) });
-    
     wsCurrentSetIdx++;
-    
     if (wsCurrentSetIdx >= ex.sets) {
       wsCurrentSetIdx = 0; wsCurrentExIdx++;
       if (wsCurrentExIdx >= wsExercises.length) { finishWorkout(); return; }
@@ -1447,21 +1173,35 @@ function handleWorkoutAction() {
 async function finishWorkout() {
   document.getElementById('workoutScreen').classList.remove('active');
   streakDone[(new Date().getDay() + 6) % 7] = true; 
-  workoutsCompleted++; // Увеличиваем счетчик тренировок
+  workoutsCompleted++;
   addXP(50);
   renderHome(); checkQuests(); saveAllDebounced(); toast('Тренировка завершена! +50 XP');
 }
 
 function skipExercise() { 
   wsIsSetActive = false; wsCurrentSetIdx = 0; wsCurrentExIdx++; 
-  if (wsCurrentExIdx >= wsExercises.length) finishWorkout(); 
-  else renderWorkoutScreen(); 
+  if (wsCurrentExIdx >= wsExercises.length) finishWorkout(); else renderWorkoutScreen(); 
 }
 function changeWorkoutWeight(dir) { const ex = wsExercises[wsCurrentExIdx]; ex.currentWeight = Math.max(0, (ex.currentWeight || 0) + dir * (ex.step || 2.5)); setText('wsWeightVal', ex.currentWeight + ' кг'); }
 function exitWorkout() { wsIsSetActive = false; document.getElementById('workoutScreen').classList.remove('active'); }
 
 function generateWorkout(tid) {
   let plan = null;
+  // Проверяем кастомные тренировки
+  const custom = customWorkouts.find(c => c.id === tid);
+  if (custom) {
+    const arr = custom.exercises.split(',').map(s => s.trim()).filter(Boolean);
+    return arr.map(str => {
+      const m = str.match(/(.+?)(?:\s+(\d+)[xх](\d+))?$/);
+      let name = m ? m[1].trim() : str;
+      const found = findExerciseByName(name);
+      if (found) name = found.name;
+      const base = found || { type:'dumbbell', ratio:0.2, minW:4, step:2 };
+      const w = base.type === 'bodyweight' ? 0 : Math.max(base.minW || 10, Math.round(user.weight * base.ratio / (base.step||2.5)) * (base.step||2.5));
+      return { name, sets: 3, reps: 10, currentWeight: w, step: base.step || 2.5 };
+    });
+  }
+  // Иначе ищем в каталоге
   for (const g of Object.values(WORKOUT_CATALOG)) { const f = g.find(t => t.id === tid); if (f) { plan = f; break; } }
   if (!plan) plan = WORKOUT_CATALOG.fullbody[0];
   return plan.ex.map(name => {
@@ -1472,20 +1212,21 @@ function generateWorkout(tid) {
   });
 }
 
-// ---- ДРУЗЬЯ ----
+function findExerciseByName(name) {
+  for (const grp of Object.values(EXERCISE_LIBRARY)) {
+    const f = grp.exercises.find(e => e.name.toLowerCase() === name.toLowerCase());
+    if (f) return f;
+  }
+  return null;
+}
+
 async function addFriend() {
   const u = document.getElementById('friendUsername').value.trim();
   if (!u) return;
   try {
     const res = await fetch(`${SERVER_URL}/api/friends/add`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: USER_ID, username: u }) });
     const d = await res.json();
-    if (res.ok) { 
-      toast('Друг добавлен!'); 
-      document.getElementById('friendUsername').value = ''; 
-      await loadAll(); 
-      loadLeaderboard(); 
-      saveAllDebounced(); 
-    }
+    if (res.ok) { toast('Друг добавлен!'); document.getElementById('friendUsername').value = ''; await loadAll(); loadLeaderboard(); saveAllDebounced(); }
     else toast(d.error || 'Ошибка');
   } catch(e) { toast('Ошибка сети'); }
 }
@@ -1502,7 +1243,6 @@ async function loadLeaderboard() {
     </div>`).join('');
 }
 
-// ---- QR СКАНЕР ----
 let qrScannerObj = null;
 function openQRScanner() {
   document.getElementById('qrModal').classList.add('show');
@@ -1511,11 +1251,8 @@ function openQRScanner() {
     try {
       if (qrScannerObj) qrScannerObj.clear();
       qrScannerObj = new Html5Qrcode("qrReader");
-      qrScannerObj.start(
-        { facingMode: "environment" }, 
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        (decodedText) => { closeQRScanner(); searchByBarcode(decodedText); },
-        () => {}
+      qrScannerObj.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => { closeQRScanner(); searchByBarcode(decodedText); }, () => {}
       ).catch(err => { toast('Нет доступа к камере'); closeQRScanner(); });
     } catch(e) { toast('Ошибка запуска'); closeQRScanner(); }
   }, 300);
@@ -1583,7 +1320,6 @@ function chooseFoodFromDB(name, kcal, p, f, c) {
   openModal('modal-food');
 }
 
-// ---- СЛУЖЕБНОЕ ----
 function switchTab(t) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + t).classList.add('active');
@@ -1599,7 +1335,6 @@ function switchTab(t) {
 function renderProgress() {
   setText('statStreak', streakDone.filter(Boolean).length);
   setText('statWorkouts', workoutsCompleted);
-  
   const chartKcal = document.getElementById('chartKcal');
   const maxKcal = Math.max(user.kcal || 2000, ...Object.values(foodHistory), 1);
   chartKcal.innerHTML = DAYS.map(d => {
@@ -1607,7 +1342,6 @@ function renderProgress() {
     const h = Math.min(100, Math.round(v / maxKcal * 100));
     return `<div class="bar-col"><div class="bar-fill ${h===0?'zero':''}" style="height:${Math.max(h,4)}%"></div><div class="bar-label">${d}</div></div>`;
   }).join('');
-
   const heatmap = document.getElementById('activityHeatmap');
   const cells = [];
   for (let i = 29; i >= 0; i--) {
@@ -1636,7 +1370,6 @@ function saveSleep() { sleepHistory[todayKey()] = parseFloat(document.getElement
 
 function toggleReminder(type, val) { user.reminders[type] = val; saveAllDebounced(); }
 
-// === ВОЗВРАТ К РЕГИСТРАЦИИ И РЕДАКТИРОВАНИЕ ПРОФИЛЯ ===
 function restartOnboarding() {
   if (confirm('Вернуться к регистрации? Текущие данные профиля останутся в базе, но вы сможете ввести новые.')) {
     obStep = 0;
@@ -1677,17 +1410,11 @@ function resetAll() {
 window.addEventListener('DOMContentLoaded', async () => {
   const savedTheme = localStorage.getItem('fitplan_theme') || 'light';
   document.documentElement.setAttribute('data-theme', savedTheme);
-  
   const btns = document.querySelectorAll('.theme-btn');
   const themeMap = { 'light': 0, 'dark': 1, 'bento': 2, 'luxury': 3 };
-  if(themeMap[savedTheme] !== undefined && btns[themeMap[savedTheme]]) {
-    btns[themeMap[savedTheme]].classList.add('active');
-  }
-
+  if(themeMap[savedTheme] !== undefined && btns[themeMap[savedTheme]]) { btns[themeMap[savedTheme]].classList.add('active'); }
   await loadAll();
-  
   if (document.getElementById('expiredScreen').classList.contains('show')) return;
-
   if (user.name && user.kcal) { 
     document.getElementById('onboarding').style.display = 'none'; 
     document.getElementById('mainApp').style.display = 'block'; 
